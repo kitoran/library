@@ -1,89 +1,95 @@
-#ifndef CHANNEL_H
+﻿#ifndef CHANNEL_H
 #define CHANNEL_H
-#include <mutex>
-#include <condition_variable>
+#define _GNU_SOURCE
+#include <pthread.h>
 //#include <queue>
 #include <sys/syscall.h>
 //#include <signal.h>
-#include <QDebug>
 #include <unistd.h>
-inline thread_local char thread_name[30];
+#include <stdio.h>
+#include <stdbool.h>
+#include <assert.h>
+extern _Thread_local char thread_name[30];
 
-template<typename T>
-class Channel {
-//    using T;
-public:
-    T thing;
-    bool full{false};
-    std::condition_variable cv;
-    std::mutex mutex;
-//    QString waitingName;
-    pid_t waitingTid{-1};
-//    ~Channel() {
+inline static pid_t gettid() {
+    return syscall(SYS_gettid);
+}
+#define CHANNEL_MAX_SIZE 127
+struct Channel {
+    char thing[CHANNEL_MAX_SIZE  ];
+    _Bool full;
+    pthread_cond_t cv;
+    pthread_mutex_t mutex;
+    pid_t waitingTid;
+};
+int pthread_setname_np(pthread_t thread, const char *name);
+       int pthread_getname_np(pthread_t thread,
+                              char *name, size_t len);
 
-//    }
-    void blockAndPut(const T& thing_) {
-        {
-            pthread_t cur = pthread_self();
-            pthread_getname_np(cur,
-                                   thread_name, 30);
-            qDebug() << "obtaining" << gettid() << thread_name << Q_FUNC_INFO;
-            std::lock_guard<std::mutex> g(mutex);
-            thing = thing_;
-            full = true;
-            qDebug() << "releasing" << gettid() << thread_name << Q_FUNC_INFO;
+inline static void blockAndPut(struct Channel* channel, const void* thing_, size_t size) {
+    assert(size < CHANNEL_MAX_SIZE );
+    pthread_t cur = pthread_self();
+    pthread_getname_np(cur,
+                           thread_name, 30);
+    fprintf(stderr, "obtaining %d %s %s", gettid(), thread_name, __func__);
+    pthread_mutex_lock(&(channel->mutex));
+    memcpy(channel->thing, thing_, size);
+    channel->full = true;
+    fprintf(stderr, "releasing %d %s %s", gettid(), thread_name, __func__);
+    pthread_mutex_unlock(&(channel->mutex));
+    pthread_cond_signal(&(channel->cv));
+}
 
-        }
-        cv.notify_one();
-    }
-    T take() {
-
-        pthread_t cur = pthread_self();
-        pthread_getname_np(cur,
-                               thread_name, 30);
-        qDebug() << "obtaining" << gettid() << thread_name << Q_FUNC_INFO;
-        std::lock_guard<std::mutex> lck(mutex);
+inline static void takeC(struct Channel* channel, void* buffer, size_t size) {
+    assert(size < CHANNEL_MAX_SIZE );
+    pthread_t cur = pthread_self();
+    pthread_getname_np(cur,
+                           thread_name, 30);
+    fprintf(stderr, "obtaining %d %s %s", gettid(), thread_name, __func__);
+    pthread_mutex_lock(&(channel->mutex));
 //        cv.wait(lck, [this]{ return full; });
-        full = false;
-        qDebug() << "releasing" << gettid() << thread_name << Q_FUNC_INFO;
-        return thing;
+    channel->full = false;
+    fprintf(stderr, "releasing %d %s %s", gettid(), thread_name, __func__);
+    memcpy(buffer, channel->thing, size);
+    pthread_mutex_unlock(&(channel->mutex));
+}
+
+inline bool noBlockAndCheck(struct Channel* channel) {
+    if(pthread_mutex_trylock(&channel->mutex)) {
+        bool res = channel->full;
+        pthread_mutex_unlock(&(channel->mutex));
+        return res;
     }
-    bool noBlockAndCheck() {
-        if(mutex.try_lock()) {
-            bool res = full;
-            mutex.unlock();
-            return res;
-        }
-        return false;
-    }
+    return false;
+}
 //    void wake() {
 //        raise(SIGALRM);
 //    }
-    void wait() {
-        waitingTid = gettid();
+inline static   void wait(struct Channel* channel) {
+    channel->waitingTid = gettid();
 //        char name[40];
 //        waitingName = pthread_getname_np(pthread_self(), name, 40);
 //        pause();
-        qDebug() << "obtaining first" << gettid() << thread_name << Q_FUNC_INFO;
+    fprintf(stderr, "obtaining first %d %s %s", gettid(), thread_name, __func__);
 
-        std::unique_lock<std::mutex> lck(mutex);
-        if(full) {
-            waitingTid = -1;
-            return;
-        }
-        qDebug() << "waiting on cv" << gettid() << thread_name << Q_FUNC_INFO;
-        cv.wait(lck, [this]{ return full; });
-        qDebug() << "after waiting on cv" << gettid() << thread_name << Q_FUNC_INFO;
-
-        waitingTid = -1;
-        qDebug() << "releasing" << gettid() << thread_name << Q_FUNC_INFO;
+    pthread_mutex_lock(&channel->mutex);
+    if(channel->full) {
+        channel->waitingTid = -1;
+        pthread_mutex_unlock(&channel->mutex);
         return;
     }
-    static inline pid_t gettid() {
-        return syscall(SYS_gettid);
-    }
+    fprintf(stderr, "waiting on cv %d %s %s", gettid(), thread_name, __func__);
+    pthread_cond_wait(&channel->cv, &channel->mutex);//, cv.wait(lck, [this]{ return full; });
+    fprintf(stderr, "after waiting on cv %d %s %s", gettid(), thread_name, __func__);
 
-};
+    channel->waitingTid = -1;
+    fprintf(stderr, "releasing %d %s %s", gettid(), thread_name, __func__);
+
+    pthread_mutex_unlock(&channel->mutex);
+    return;
+}
+
+
 
 
 #endif // CHANNEL_H

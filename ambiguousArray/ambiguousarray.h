@@ -2,16 +2,15 @@
 #define AMBIGUOUSARRAY_H
 
 #include <stdlib.h>
-#include <complex>
 
-class AmbiguousArray
+struct AmbiguousArray
 {
-public:
-    double* data{0};
-    int sized{0};
-    int sizec() {
-        return sized/2;
-    }
+    double* data;
+    int sized;
+}
+inline int sizec() {
+    return sized/2;
+}
     double d(int pos) {
         if(pos >= 0 && pos < sized) {
             return data[pos];

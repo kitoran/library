@@ -1,13 +1,14 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2021-07-01T16:10:19
+# Project created by QtCreator 2021-07-31T12:24:18
 #
 #-------------------------------------------------
 
-QT       -= gui core
-CONFIG += c++17
-TARGET = newFile
+QT       -= core gui
+
+TARGET = gui
 TEMPLATE = lib
+CONFIG += staticlib
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -21,11 +22,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    newfile.c
+    gui.c
 
 HEADERS += \
-        newfile.h
-
+        gui.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
