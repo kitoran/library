@@ -10,50 +10,27 @@
 
 int main()
 {
+    guiStartDrawing();
 
-    Display *display = XOpenDisplay(NIL);
-    assert(display);
-
-    int screen = DefaultScreen(display);
-    int blackColor = BlackPixel(display, screen );
-    int whiteColor = WhitePixel(display, screen );
-    int depth = DefaultDepth(display, screen);
-    printf("%d\n", depth);
-    int*r, c;
-    r = XListDepths(display, screen, &c);
-//    return 0;
-    // Create the window
-    Window window = XCreateSimpleWindow(display, DefaultRootWindow(display), 0, 0,
-                300, 300, 0, blackColor, blackColor);
-
-    // We want to get MapNotify events
-    XSelectInput(display, window, StructureNotifyMask | ButtonPressMask);
-
-    XStoreName(display, window, "Hello, World!");
-    // "Map" the window (that is, make it appear on the screen)
-    XMapWindow(display, window);
-
-
-    // Wait for the MapNotify event
-    for(;;) {
-      XEvent e;
-      XNextEvent(display, &e);
-      if (e.type == MapNotify)
-        break;
-    }
-    Pixmap p = XCreatePixmap(display, window, 300, 200, depth );
+    Pixmap p = XCreatePixmap(xdisplay, rootWindow, 300, 200, xDepth );
     // Create a "Graphics Context"
-    GC gc = XCreateGC(display, p, 0, NIL);
-    GC gc2 = XCreateGC(display, window, 0, NIL);
+    GC gc = XCreateGC(xdisplay, p, 0, NIL);
+    GC gc2 = XCreateGC(xdisplay, rootWindow, 0, NIL);
     // Tell the GC we draw using the white color
-    XSetForeground(display, gc, 0xff040404);
-    XFillRectangle(display, p, gc, 0,0,300,200);
-    XSetForeground(display, gc, whiteColor);
-    XDrawLine(display, p, gc, 10, 60, 180, 20);
-
+    XSetForeground(xdisplay, gc, 0xffa4a4a4);
+    XFillRectangle(xdisplay, p, gc, 0,0,300,200);
+    XSetForeground(xdisplay, gc, 0xffffffff);
+    XDrawLine(xdisplay, p, gc, 10, 60, 180, 20);
+    XTextItem ti = {
+        "hello i am a text",
+        strlen(ti.chars),
+        0,
+        None
+    };
+    XDrawText(xdisplay, p, gc, 30, 30, &ti, 1);
     // Draw the line
 
-    Visual *visual = DefaultVisual(display, screen); 
+//    Visual *visual = DefaultVisual(display, Defascreen);
     char data[300*200*4];
 //    struct funcs funcs;
 //    XPointer xp = 0;
@@ -78,37 +55,67 @@ int main()
     for(int i = 0; i < 300*200*4; i++) {
         data[i]=i%253;
     }
-    XDrawLine(display,p,gc,0,10,290,180);
+    XDrawLine(xdisplay,p,gc,0,10,290,180);
 //    drawVerticalLine(&rr, 50, 10, 150, 0x00ff0000);
 //    drawHorizontalLine(&rr, 50, 150, 50, 0x0000ff00);
-    XCopyArea(display, p, window, gc2, 0,0, 300, 200, 0,0);
+    XCopyArea(xdisplay, p, rootWindow, gc2, 0,0, 300, 200, 0,0);
 //    XImage* image = XCreateImage(display, visual, 24, ZPixmap, 0, data,
 //                                 300, 200, 32, 0);
-    XImage* image = XGetImage(display, p, 0,0,
+    XImage* image = XGetImage(xdisplay, p, 0,0,
                                  300, 200,  ~0,ZPixmap);
 //    XInitImage(image);
 //    XDrawRectangle(display, (Drawable)image, gc, 20, 20, 100, 100);
 
+    GuiWindow www = {rootWindow};
+    int xx = 10, yy = 10;
+    int ww, hh, hhmax;
+//    guiCreateLabelTextWithLen(&www, xx, yy, "hello", 5, &ww, &hh);
+//    xx += ww + 10;
+//    guiCreateLabelTextWithLen(&www, xx, yy, "yes", 3, &ww, &hh);
+//    xx += ww + 10;
+//    guiCreateLabelTextWithLen(&www, xx, yy, "i", 1, &ww, &hh);
+//    xx += ww + 10;
+//    guiCreateLabelTextWithLen(&www, xx, yy, "am", 2, &ww, &hh);
+//    xx += ww + 10;
+//    guiCreateLabelTextWithLen(&www, xx, yy, "an", 2, &ww, &hh);
+//    xx += ww + 10;
+//    GuiLabel l = guiCreateLabelTextWithLen(&www, xx, yy, "label", 5, &ww, &hh);
+
 
 //    XPutImage(display, window, gc, image, 0, 0, 0, 0, 300, 300);
 
-
     // Send the "DrawLine" request to the server
-    XFlush(display);
-
+    XFlush(xdisplay);
     while(true) {
+        Layout l = {10, 10, 0, rootWindow, gc2};
+        guiLabel(&l, "hello", 5);
+        guiLabel(&l, "yes", 3);
+        guiLabel(&l, "i", 1);
+        guiLabel(&l, "am", 2);
+        guiLabel(&l, "an", 2);
+        guiLabel(&l, "label", 5);
+
+        XFlush(xdisplay);
         XEvent e;
-        XNextEvent(display, &e);
+        XNextEvent(xdisplay, &e);
         switch(e.type)
         {
+
         case DestroyNotify: {
-            return 0;
+            goto exit;
+        } break;
+        case Expose: {
+            fprintf(stderr, "expose %d %d %d\n", e.xexpose.window,
+                   www.window, l.window);
+//            XPutImage(xdisplay, rootWindow, gc, image, 0, 0, 0, 0, 300, 200);
         } break;
         case ButtonPress: {
-            XPutImage(display, window, gc, image, 0, 0, 0, 0, 300, 200);
+            guiSetSize(&www, 400, 500);
+//            XPutImage(xdisplay, rootWindow, gc, image, 0, 0, 0, 0, 300, 200);
         } break;
         }
     }
-    XCloseDisplay(display);
+    exit:
+    XCloseDisplay(xdisplay);
     return 0;
 }
