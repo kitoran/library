@@ -15,3 +15,4 @@ INCLUDEPATH += $$PWD/../gui
 DEPENDPATH += $$PWD/../gui
 
 unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../gui/libgui.a
+

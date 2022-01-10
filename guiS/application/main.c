@@ -14,9 +14,14 @@ int main()
     Display *display = XOpenDisplay(NIL);
     assert(display);
 
-    int blackColor = BlackPixel(display, DefaultScreen(display));
-    int whiteColor = WhitePixel(display, DefaultScreen(display));
-
+    int screen = DefaultScreen(display);
+    int blackColor = BlackPixel(display, screen );
+    int whiteColor = WhitePixel(display, screen );
+    int depth = DefaultDepth(display, screen);
+    printf("%d\n", depth);
+    int*r, c;
+    r = XListDepths(display, screen, &c);
+//    return 0;
     // Create the window
     Window window = XCreateSimpleWindow(display, DefaultRootWindow(display), 0, 0,
                 300, 300, 0, blackColor, blackColor);
@@ -28,11 +33,7 @@ int main()
     // "Map" the window (that is, make it appear on the screen)
     XMapWindow(display, window);
 
-    // Create a "Graphics Context"
-    GC gc = XCreateGC(display, window, 0, NIL);
 
-    // Tell the GC we draw using the white color
-    XSetForeground(display, gc, whiteColor);
     // Wait for the MapNotify event
     for(;;) {
       XEvent e;
@@ -40,10 +41,18 @@ int main()
       if (e.type == MapNotify)
         break;
     }
+    Pixmap p = XCreatePixmap(display, window, 300, 200, depth );
+    // Create a "Graphics Context"
+    GC gc = XCreateGC(display, p, 0, NIL);
+    GC gc2 = XCreateGC(display, window, 0, NIL);
+    // Tell the GC we draw using the white color
+    XSetForeground(display, gc, 0xff040404);
+    XFillRectangle(display, p, gc, 0,0,300,200);
+    XSetForeground(display, gc, whiteColor);
+    XDrawLine(display, p, gc, 10, 60, 180, 20);
 
     // Draw the line
-    XDrawLine(display, window, gc, 10, 60, 180, 20);
-    int screen = XDefaultScreen(display);
+
     Visual *visual = DefaultVisual(display, screen); 
     char data[300*200*4];
 //    struct funcs funcs;
@@ -64,20 +73,22 @@ int main()
 //        &image,
 //        funcs,
 //    };
-
-    GuiImage rr = {300, 200, data};
+    
+//    GuiImage rr = {300, 200, data};
     for(int i = 0; i < 300*200*4; i++) {
         data[i]=i%253;
     }
-    drawVerticalLine(&rr, 50, 10, 150, 0x00ff0000);
-    drawHorizontalLine(&rr, 50, 150, 50, 0x0000ff00);
+    XDrawLine(display,p,gc,0,10,290,180);
+//    drawVerticalLine(&rr, 50, 10, 150, 0x00ff0000);
+//    drawHorizontalLine(&rr, 50, 150, 50, 0x0000ff00);
+    XCopyArea(display, p, window, gc2, 0,0, 300, 200, 0,0);
     XImage* image = XCreateImage(display, visual, 24, ZPixmap, 0, data,
                                  300, 200, 32, 0);
     XInitImage(image);
 //    XDrawRectangle(display, (Drawable)image, gc, 20, 20, 100, 100);
 
 
-    XPutImage(display, window, gc, image, 0, 0, 0, 0, 300, 300);
+//    XPutImage(display, window, gc, image, 0, 0, 0, 0, 300, 300);
 
 
     // Send the "DrawLine" request to the server
@@ -93,6 +104,6 @@ int main()
         } break;
         }
     }
-
+    XCloseDisplay(display);
     return 0;
 }

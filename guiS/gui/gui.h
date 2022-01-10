@@ -2,18 +2,11 @@
 #define GUI_H
 #include <X11/Xlib.h>
 #include <assert.h>
+//enum mode {
 
-//typedef struct GuiImageRef {
-//    GC *gc;
-//    XImage *i;
-//} GuiImageRef;
+//};
 
-typedef struct GuiImage {
-    int width, height;
-    char* data;
-} GuiImage;
-void drawVerticalLine(GuiImage* i, int x, int y1, int y2, unsigned int color);
-void drawHorizontalLine(GuiImage *i, int x1, int x2, int y, unsigned int color);
+
 extern Display * xdisplay;
 static const unsigned int GuiDarkMagenta = 0x880088;
 inline unsigned int rgb(int r, int g, int b) {
@@ -22,6 +15,9 @@ inline unsigned int rgb(int r, int g, int b) {
 inline unsigned int rgbf(double r, double g, double b) {
     return rgb(r*255, g*255, b*255);
 }
+
+
+
 static void startDrawing() {
 
     xdisplay = XOpenDisplay(NULL);
