@@ -27,7 +27,7 @@ int main()
                 300, 300, 0, blackColor, blackColor);
 
     // We want to get MapNotify events
-    XSelectInput(display, window, StructureNotifyMask);
+    XSelectInput(display, window, StructureNotifyMask | ButtonPressMask);
 
     XStoreName(display, window, "Hello, World!");
     // "Map" the window (that is, make it appear on the screen)
@@ -82,9 +82,11 @@ int main()
 //    drawVerticalLine(&rr, 50, 10, 150, 0x00ff0000);
 //    drawHorizontalLine(&rr, 50, 150, 50, 0x0000ff00);
     XCopyArea(display, p, window, gc2, 0,0, 300, 200, 0,0);
-    XImage* image = XCreateImage(display, visual, 24, ZPixmap, 0, data,
-                                 300, 200, 32, 0);
-    XInitImage(image);
+//    XImage* image = XCreateImage(display, visual, 24, ZPixmap, 0, data,
+//                                 300, 200, 32, 0);
+    XImage* image = XGetImage(display, p, 0,0,
+                                 300, 200,  ~0,ZPixmap);
+//    XInitImage(image);
 //    XDrawRectangle(display, (Drawable)image, gc, 20, 20, 100, 100);
 
 
@@ -101,6 +103,9 @@ int main()
         {
         case DestroyNotify: {
             return 0;
+        } break;
+        case ButtonPress: {
+            XPutImage(display, window, gc, image, 0, 0, 0, 0, 300, 200);
         } break;
         }
     }
