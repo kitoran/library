@@ -6,11 +6,27 @@
 #include <stdio.h>
 
 #include <stdbool.h>
+#include <locale.h>
 #include "gui.h"
-
+//#include <X11/Xft/Xft.h>
+//XftFont* font;
+//XftDraw* xftDraw;
+XEvent xEvent;
 int main()
 {
+
+    char* l = setlocale(LC_ALL, "C.UTF-8");
+    l = setlocale(LC_ALL, "C.UTF-8");
     guiStartDrawing();
+//    font = XftFontOpen (xdisplay, XDefaultScreen(xdisplay),
+//                            XFT_FAMILY, XftTypeString, "FreeSerif",
+//                            XFT_SIZE, XftTypeDouble, 12.0,
+//                            NULL);
+    int s = DefaultScreen(xdisplay);
+//    xftDraw = XftDrawCreate(xdisplay, rootWindow,
+//                            XDefaultVisual(xdisplay, s),
+//                            DefaultColormap(xdisplay, s));
+
 
     Pixmap p = XCreatePixmap(xdisplay, rootWindow, 300, 200, xDepth );
     // Create a "Graphics Context"
@@ -86,7 +102,9 @@ int main()
 
     // Send the "DrawLine" request to the server
     XFlush(xdisplay);
+    char hi[] = "привет→";
     while(true) {
+        XNextEvent(xdisplay, &xEvent);
         Layout l = {10, 10, 0, rootWindow, gc2};
         guiLabel(&l, "hello", 5);
         guiLabel(&l, "yes", 3);
@@ -94,26 +112,37 @@ int main()
         guiLabel(&l, "am", 2);
         guiLabel(&l, "an", 2);
         guiLabel(&l, "label", 5);
-
-        XFlush(xdisplay);
-        XEvent e;
-        XNextEvent(xdisplay, &e);
-        switch(e.type)
-        {
-
-        case DestroyNotify: {
-            goto exit;
-        } break;
-        case Expose: {
-            fprintf(stderr, "expose %d %d %d\n", e.xexpose.window,
-                   www.window, l.window);
-//            XPutImage(xdisplay, rootWindow, gc, image, 0, 0, 0, 0, 300, 200);
-        } break;
-        case ButtonPress: {
-            guiSetSize(&www, 400, 500);
-//            XPutImage(xdisplay, rootWindow, gc, image, 0, 0, 0, 0, 300, 200);
-        } break;
+        if(guiButton(&l, "button", 6)) {
+            fprintf(stderr, "button was pressed");
         }
+        if(guiButton(&l, hi, sizeof(hi)-1)) {
+            fprintf(stderr, "button2 was pressed");
+        }
+
+//        XRenderColor r = {16000, 16000, 16000, 16000};
+//        XftDrawStringUtf8 (xftDraw,
+//                        &r,
+//                        font,
+//                        100,
+//                        100,
+//                        hi, sizeof(hi)-1);
+        XFlush(xdisplay);
+//        XEvent e;
+//        switch(e.type)
+//        {
+        if(xEvent.type == DestroyNotify) {
+            goto exit;
+        };
+//        case Expose: {
+//            fprintf(stderr, "expose %d %d %d\n", e.xexpose.window,
+//                   www.window, l.window);
+////            XPutImage(xdisplay, rootWindow, gc, image, 0, 0, 0, 0, 300, 200);
+//        } break;
+//        case ButtonPress: {
+//            guiSetSize(&www, 400, 500);
+////            XPutImage(xdisplay, rootWindow, gc, image, 0, 0, 0, 0, 300, 200);
+//        } break;
+//        }
     }
     exit:
     XCloseDisplay(xdisplay);

@@ -1,10 +1,19 @@
 ﻿#ifndef GUI_H
 #define GUI_H
 #include <X11/Xlib.h>
-#include <assert.h>
+//#include <assert.h>
+
+#include <stdbool.h>
 //enum mode {
 
 //};
+//typedef struct State {
+//    bool press;
+//    int x;
+//    int y;
+//} State;
+extern XEvent xEvent;
+//extern State state;
 extern Display * xdisplay;
 extern XFontStruct *xFontStruct;
 extern Window rootWindow;
@@ -28,6 +37,8 @@ typedef struct Layout {
 //}
 
 void guiLabel(Layout* l, char *text, int len);
+bool guiToolButton(Layout* l, XImage i);
+
 //
 typedef struct GuiLabel {
     Window window;

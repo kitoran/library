@@ -1,4 +1,4 @@
-#ifndef AMBIGUOUSARRAY_H
+﻿#ifndef AMBIGUOUSARRAY_H
 #define AMBIGUOUSARRAY_H
 
 #include <stdlib.h>
@@ -7,7 +7,7 @@ struct AmbiguousArray
 {
     double* data;
     int sized;
-}
+//};
 inline int sizec() {
     return sized/2;
 }

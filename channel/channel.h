@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
+#ifdef __cplusplus
+#define _Thread_local thread_local
+#endif
 extern _Thread_local char thread_name[30];
 
 inline static pid_t gettid() {
