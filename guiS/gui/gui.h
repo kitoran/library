@@ -18,6 +18,7 @@ extern Display * xdisplay;
 extern XFontStruct *xFontStruct;
 extern Window rootWindow;
 extern int xDepth;
+extern bool timeout;
 struct XY {
     int x;
     int y;
@@ -27,7 +28,6 @@ typedef struct XY Size;
 extern Point (*getPos)();
 extern void (*feedbackSize)(Size);
 
-
 typedef struct Painter {
     Window window;
     GC gc;
@@ -35,6 +35,8 @@ typedef struct Painter {
 
 void guiLabel(Painter* p, char *text, int len);
 bool guiToolButton(Painter* p, XImage i);
+int guiComboBoxZT(Painter* p, char** elements, int current);
+void guiNumberEdit(Painter*p, int digits, int* number);
 
 typedef struct GuiWindow {
     Window window;
@@ -53,9 +55,6 @@ static inline unsigned int rgb(int r, int g, int b) {
 static inline unsigned int rgbf(double r, double g, double b) {
     return rgb(r*255, g*255, b*255);
 }
-
-
-
 void guiStartDrawing();
-
+void XNextEventTimeout(Display *display, XEvent *event, double seconds);
 #endif // GUI_H

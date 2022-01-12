@@ -26,7 +26,7 @@ void gridFeedbackSize(Size s) {
     }
 }
 
-void setCurrentGridPos(int x, int y) {
-    currentX = x;
-    currentY = y;
+void setCurrentGridPos(int row, int column) {
+    currentX = column;
+    currentY = row;
 }

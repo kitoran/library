@@ -12,7 +12,7 @@
 //#include <X11/Xft/Xft.h>
 //XftFont* font;
 //XftDraw* xftDraw;
-
+int fe;
 void loop(Painter* p) {
 //
 //    XFlush(xdisplay);
@@ -40,7 +40,8 @@ void loop(Painter* p) {
     if(guiButton(p, hi, sizeof(hi)-1)) {
         fprintf(stderr, "button2 was pressed");
     }
-
+    setCurrentGridPos(2,0);
+    guiNumberEdit(p, 9, &fe);
 }
 
 
@@ -145,8 +146,9 @@ int main()
 //    loop(&pa);
 //    XNextEvent(xdisplay, &xEvent);
     while(true) {
-        XNextEvent(xdisplay, &xEvent);
+        XNextEventTimeout(xdisplay, &xEvent, 0.530);
         loop(&pa);
+        timeout = false;
 //        XRenderColor r = {16000, 16000, 16000, 16000};
 //        XftDrawStringUtf8 (xftDraw,
 //                        &r,
