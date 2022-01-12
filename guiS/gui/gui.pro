@@ -23,11 +23,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     $$PWD/gui.c \
-    stb.c
+    stb.c \
+    gridlayout.c
 
 HEADERS += \
     $$PWD/gui.h \
-    stb_ds.h
+    stb_ds.h \
+    gridlayout.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

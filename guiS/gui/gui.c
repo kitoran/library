@@ -72,23 +72,16 @@ void guiLabel(Painter* p, char *text, int len)
     Size size = {overallLog.width + 10,
                 overallLog.height + 10};
 
-//    XDrawRect
-//    Window label = XCreateSimpleWindow(xdisplay, w->window, x, y, *width, *height, 0, 0, 0x00);
-//    XSelectInput(xdisplay, label, ExposureMask);
-//    XMapWindow(xdisplay, label);
-//    GC gc = XCreateGC(xdisplay , label, 0, NULL);
-//    XTextItem ti = {
-//        text,
-//        len,
-//        0,
-//        None
-//    };
-    XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
-                                               DefaultScreen(xdisplay)));
-    fprintf(stderr, "printing label %s %d %d\n",
-            text, pos.x+5 + overallLog.x, pos.y+5 - overallLog.y);
-    Xutf8DrawString(xdisplay, p->window, xFontSet, p->gc,
-                pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
+//    XDrawRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
+//                   size.x, size.y);
+    if(xEvent.type == Expose) {
+        XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
+                                                   DefaultScreen(xdisplay)));
+        fprintf(stderr, "printing label %s %d %d\n",
+                text, pos.x+5 + overallLog.x, pos.y+5 - overallLog.y);
+        Xutf8DrawString(xdisplay, p->window, xFontSet, p->gc,
+                    pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
+    }
 //    p->x += width+5;
 //    p->maxHeight = MAX(p->maxHeight, height);
     feedbackSize(size);

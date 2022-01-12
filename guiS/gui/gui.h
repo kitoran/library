@@ -33,48 +33,9 @@ typedef struct Painter {
     GC gc;
 } Painter;
 
-typedef struct Layout {
-    int x;
-    int y;
-    int maxHeight;
-    Window window;
-    GC gc;
-} Layout;
-
-//Layout createLayout() {
-//    Layout res = {5, 5, 0};
-//    return res;
-//}
-
 void guiLabel(Painter* p, char *text, int len);
 bool guiToolButton(Painter* p, XImage i);
 
-//
-typedef struct GuiLabel {
-    Window window;
-
-} GuiLabel;
-typedef struct GuiToolButton {
-
-
-} GuiToolButton;
-typedef struct GuiComboBox {
-
-
-} GuiComboBox;
-typedef struct GuiEntry {
-
-
-} GuiEntry;
-typedef struct GuiSpinButton {
-
-
-} GuiSpinButton;
-
-typedef struct GuiButton {
-
-
-} GuiButton ;
 typedef struct GuiWindow {
     Window window;
 } GuiWindow ;

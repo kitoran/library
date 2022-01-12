@@ -8,60 +8,33 @@
 #include <stdbool.h>
 #include <locale.h>
 #include "gui.h"
+#include "gridlayout.h"
 //#include <X11/Xft/Xft.h>
 //XftFont* font;
 //XftDraw* xftDraw;
 
-int gridWidths[10];
-int gridHeights[3];
-int currentX = 0;
-int currentY = 0;
-Point start;
-Point myGetPos() {
-    int x = start.x, y = start.y;
-    for(int i = 0; i < currentX; i++) {
-        x += gridWidths[i];
-    }
-    for(int i = 0; i < currentY; i++) {
-        y += gridWidths[i];
-    }
-    Point res = {x, y};
-    return res;
-}
-void myFeedbackSize(Size s) {
-    if(gridWidths[currentX] < s.x) {
-        gridWidths[currentX] = s.x;
-    }
-    if(gridWidths[currentY] < s.y) {
-        gridWidths[currentY] = s.y;
-    }
-}
-void setCurrentPos(int x, int y) {
-    currentX = x;
-    currentY = y;
-}
-
-
 void loop(Painter* p) {
-    setCurrentPos(0,0);
+//
+//    XFlush(xdisplay);
+    setCurrentGridPos(0,0);
     guiLabel(p, "hello", 5);
-    setCurrentPos(0,1);
+    setCurrentGridPos(0,1);
     guiLabel(p, "yes", 3);
-    setCurrentPos(1,0);
+    setCurrentGridPos(1,0);
     guiLabel(p, "i", 1);
-    setCurrentPos(1,1);
+    setCurrentGridPos(1,1);
     guiLabel(p, "am", 2);
-    setCurrentPos(0,2);
+    setCurrentGridPos(0,2);
     guiLabel(p, "an", 2);
-    setCurrentPos(1,2);
+    setCurrentGridPos(1,2);
     guiLabel(p, "label", 5);
 
-    setCurrentPos(2,2);
+    setCurrentGridPos(2,2);
     if(guiButton(p, "button", 6)) {
         fprintf(stderr, "button was pressed");
     }
 
-    setCurrentPos(2,1);
+    setCurrentGridPos(2,1);
 
     char hi[] = "привет→";
     if(guiButton(p, hi, sizeof(hi)-1)) {
@@ -87,11 +60,18 @@ int main()
 //                            XDefaultVisual(xdisplay, s),
 //                            DefaultColormap(xdisplay, s));
 
+    getPos = gridGetPos;
+    feedbackSize = gridFeedbackSize;
+    gridStart.x = 5;
+    gridStart.y = 5;
 
+    GC gc2 = XCreateGC(xdisplay, rootWindow, 0, NIL);
+    Painter pa = {rootWindow, gc2};
+    loop(&pa);
+    XClearWindow(xdisplay, rootWindow);
     Pixmap p = XCreatePixmap(xdisplay, rootWindow, 300, 200, xDepth );
     // Create a "Graphics Context"
     GC gc = XCreateGC(xdisplay, p, 0, NIL);
-    GC gc2 = XCreateGC(xdisplay, rootWindow, 0, NIL);
     // Tell the GC we draw using the white color
     XSetForeground(xdisplay, gc, 0xffa4a4a4);
     XFillRectangle(xdisplay, p, gc, 0,0,300,200);
@@ -162,10 +142,8 @@ int main()
 
     // Send the "DrawLine" request to the server
     XFlush(xdisplay);
-    Painter pa = {rootWindow, gc2};
-    getPos = myGetPos;
-    feedbackSize = myFeedbackSize;
-    loop(&pa);
+//    loop(&pa);
+//    XNextEvent(xdisplay, &xEvent);
     while(true) {
         XNextEvent(xdisplay, &xEvent);
         loop(&pa);
