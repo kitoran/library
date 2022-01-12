@@ -11,6 +11,66 @@
 //#include <X11/Xft/Xft.h>
 //XftFont* font;
 //XftDraw* xftDraw;
+
+int gridWidths[10];
+int gridHeights[3];
+int currentX = 0;
+int currentY = 0;
+Point start;
+Point myGetPos() {
+    int x = start.x, y = start.y;
+    for(int i = 0; i < currentX; i++) {
+        x += gridWidths[i];
+    }
+    for(int i = 0; i < currentY; i++) {
+        y += gridWidths[i];
+    }
+    Point res = {x, y};
+    return res;
+}
+void myFeedbackSize(Size s) {
+    if(gridWidths[currentX] < s.x) {
+        gridWidths[currentX] = s.x;
+    }
+    if(gridWidths[currentY] < s.y) {
+        gridWidths[currentY] = s.y;
+    }
+}
+void setCurrentPos(int x, int y) {
+    currentX = x;
+    currentY = y;
+}
+
+
+void loop(Painter* p) {
+    setCurrentPos(0,0);
+    guiLabel(p, "hello", 5);
+    setCurrentPos(0,1);
+    guiLabel(p, "yes", 3);
+    setCurrentPos(1,0);
+    guiLabel(p, "i", 1);
+    setCurrentPos(1,1);
+    guiLabel(p, "am", 2);
+    setCurrentPos(0,2);
+    guiLabel(p, "an", 2);
+    setCurrentPos(1,2);
+    guiLabel(p, "label", 5);
+
+    setCurrentPos(2,2);
+    if(guiButton(p, "button", 6)) {
+        fprintf(stderr, "button was pressed");
+    }
+
+    setCurrentPos(2,1);
+
+    char hi[] = "привет→";
+    if(guiButton(p, hi, sizeof(hi)-1)) {
+        fprintf(stderr, "button2 was pressed");
+    }
+
+}
+
+
 XEvent xEvent;
 int main()
 {
@@ -43,7 +103,7 @@ int main()
         0,
         None
     };
-    XDrawText(xdisplay, p, gc, 30, 30, &ti, 1);
+//    XDrawText(xdisplay, p, gc, 30, 30, &ti, 1);
     // Draw the line
 
 //    Visual *visual = DefaultVisual(display, Defascreen);
@@ -102,23 +162,13 @@ int main()
 
     // Send the "DrawLine" request to the server
     XFlush(xdisplay);
-    char hi[] = "привет→";
+    Painter pa = {rootWindow, gc2};
+    getPos = myGetPos;
+    feedbackSize = myFeedbackSize;
+    loop(&pa);
     while(true) {
         XNextEvent(xdisplay, &xEvent);
-        Layout l = {10, 10, 0, rootWindow, gc2};
-        guiLabel(&l, "hello", 5);
-        guiLabel(&l, "yes", 3);
-        guiLabel(&l, "i", 1);
-        guiLabel(&l, "am", 2);
-        guiLabel(&l, "an", 2);
-        guiLabel(&l, "label", 5);
-        if(guiButton(&l, "button", 6)) {
-            fprintf(stderr, "button was pressed");
-        }
-        if(guiButton(&l, hi, sizeof(hi)-1)) {
-            fprintf(stderr, "button2 was pressed");
-        }
-
+        loop(&pa);
 //        XRenderColor r = {16000, 16000, 16000, 16000};
 //        XftDrawStringUtf8 (xftDraw,
 //                        &r,

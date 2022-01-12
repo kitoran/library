@@ -18,9 +18,19 @@ extern Display * xdisplay;
 extern XFontStruct *xFontStruct;
 extern Window rootWindow;
 extern int xDepth;
+struct XY {
+    int x;
+    int y;
+};
+typedef struct XY Point;
+typedef struct XY Size;
+extern Point (*getPos)();
+extern void (*feedbackSize)(Size);
+
 
 typedef struct Painter {
-
+    Window window;
+    GC gc;
 } Painter;
 
 typedef struct Layout {
@@ -36,8 +46,8 @@ typedef struct Layout {
 //    return res;
 //}
 
-void guiLabel(Layout* l, char *text, int len);
-bool guiToolButton(Layout* l, XImage i);
+void guiLabel(Painter* p, char *text, int len);
+bool guiToolButton(Painter* p, XImage i);
 
 //
 typedef struct GuiLabel {

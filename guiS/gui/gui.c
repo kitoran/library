@@ -10,6 +10,17 @@ Display * xdisplay = 0;
 XFontSet xFontSet;
 Window rootWindow;
 int xDepth;
+
+Point defaultGetPos() {
+    fprintf(stderr, "getPos not set");
+    abort();
+}
+void defaultFeedbackSize(Size s) {
+
+}
+
+Point (*getPos)() = defaultGetPos;
+void (*feedbackSize)(Size) = defaultFeedbackSize;
 //struct Mapping {
 //    Window window;
 //    void* widget;
@@ -51,14 +62,15 @@ void guiSetSize(GuiWindow *win, uint w, uint h)
     XResizeWindow(xdisplay, win->window, w, h);
 }
 
-void guiLabel(Layout* l, char *text, int len)
+void guiLabel(Painter* p, char *text, int len)
 {
+    Point pos = getPos();
     XRectangle overallInk;
     XRectangle overallLog;
 
     Xutf8TextExtents(xFontSet, text, len, &overallInk, &overallLog);
-    int width = overallLog.width + 10;
-    int height = overallLog.height + 10;
+    Size size = {overallLog.width + 10,
+                overallLog.height + 10};
 
 //    XDrawRect
 //    Window label = XCreateSimpleWindow(xdisplay, w->window, x, y, *width, *height, 0, 0, 0x00);
@@ -71,44 +83,51 @@ void guiLabel(Layout* l, char *text, int len)
 //        0,
 //        None
 //    };
-    XSetForeground(xdisplay, l->gc, 0xffffffff);
-    XDrawString(xdisplay, l->window, l->gc,
-                l->x+5 + overallLog.x, l->y+5 - overallLog.y, text, len);
-    l->x += width+5;
-    l->maxHeight = MAX(l->maxHeight, height);
+    XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
+                                               DefaultScreen(xdisplay)));
+    fprintf(stderr, "printing label %s %d %d\n",
+            text, pos.x+5 + overallLog.x, pos.y+5 - overallLog.y);
+    Xutf8DrawString(xdisplay, p->window, xFontSet, p->gc,
+                pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
+//    p->x += width+5;
+//    p->maxHeight = MAX(p->maxHeight, height);
+    feedbackSize(size);
     //    XFlush(xdisplay);
 //    GuiLabel res = {label};
 //    return res;
 }
 
-bool guiButton(Layout *l, char* text, int len)
+bool guiButton(Painter *p, char* text, int len)
 {
+    Point pos = getPos();
     XRectangle overallInk;
     XRectangle overallLog;
 
     Xutf8TextExtents(xFontSet, text, len, &overallInk, &overallLog);
-    int width = overallLog.width + 10;
-    int height = overallLog.height + 10;
+    Size size = {overallLog.width + 10,
+                overallLog.height + 10};
     if(xEvent.type == Expose) {
-        XSetForeground(xdisplay, l->gc, 0xff555555);
+        XSetForeground(xdisplay, p->gc, 0xff555555);
 //        XSetBackground(xdisplay, l->gc, 0xffff5555);
-        XFillRectangle(xdisplay, l->window, l->gc, l->x, l->y, width, height);
-        XSetForeground(xdisplay, l->gc, 0xffffffff);
-        Xutf8DrawString(xdisplay, l->window, xFontSet, l->gc,
-                    l->x+5 + overallLog.x, l->y+5 - overallLog.y, text, len);
+        XFillRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
+                       size.x, size.y);
+        XSetForeground(xdisplay, p->gc, 0xffffffff);
+        Xutf8DrawString(xdisplay, p->window, xFontSet, p->gc,
+                    pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
     }
 //    XPutImage(xdisplay, l->window, l->gc, l->x+5, l->y+5, width, height);
     bool res = false;
     if(xEvent.type == ButtonPress) {
-        int x = xEvent.xbutton.x;
-        int y = xEvent.xbutton.y;
-        if(x >= l->x && x <= l->x +width &&
-            y >= l->y && y <= l->y +height) {
+        int mx = xEvent.xbutton.x;
+        int my = xEvent.xbutton.y;
+        if(mx >= pos.x && mx <= pos.x + size.x &&
+            my >= pos.y && my <= pos.y + size.y) {
             res = true;
         }
     }
-    l->x += width+5;
-    l->maxHeight = MAX(l->maxHeight, height);
+//    p->x += width+5;
+//    p->maxHeight = MAX(p->maxHeight, height);
+    feedbackSize(size);
     return res;
 }
 
