@@ -150,6 +150,7 @@ int main()
     while(true) {
         XFreeGC(xdisplay, pa.gc);
         pa.gc = XCreateGC(xdisplay, rootWindow, 0, 0);
+
         guiNextEvent();
         loop(&pa);
 //        XRenderColor r = {16000, 16000, 16000, 16000};
@@ -178,6 +179,9 @@ int main()
 //        }
     }
     exit:
+    XDestroyWindow(xdisplay,
+                   rootWindow);
+
     XCloseDisplay(xdisplay);
     return 0;
 }

@@ -67,7 +67,7 @@ void guiDrawRectangle(Painter *a, int b, int c, int d, int e)
 }
 void guiFillRectangle(Painter *a, int b, int c, int d, int e)
 {
-    fprintf(stderr, "filling rect (%d, %d) %dx%d\n", b, c, d,e);
+//    fprintf(stderr, "filling rect (%d, %d) %dx%d\n", b, c, d,e);
     XFillRectangle(xdisplay, a->drawable, a->gc, b, c, d, e);
 }
 
@@ -98,20 +98,15 @@ void guiLabel(Painter* p, char *text, int len)
 
 //    XDrawRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
 //                   size.width, size.height);
-//    if(xEvent.type == Expose) {
+    if(xEvent.type != MotionNotify) {
         XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
                                                    DefaultScreen(xdisplay)));
-        fprintf(stderr, "printing label %s %d %d\n",
-                text, pos.x+5 + overallLog.x, pos.y+5 - overallLog.y);
+//        fprintf(stderr, "printing label %s %d %d\n",
+//                text, pos.x+5 + overallLog.x, pos.y+5 - overallLog.y);
         Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
                     pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
-//    }
-//    p->x += width+5;
-//    p->maxHeight = MAX(p->maxHeight, height);
+    }
     feedbackSize(size);
-    //    XFlush(xdisplay);
-//    GuiLabel res = {label};
-//    return res;
 }
 void guiLabelZT(Painter* p, char *text) {
     guiLabel(p, text, strlen(text));
@@ -125,17 +120,17 @@ bool guiButton(Painter *p, char* text, int len)
     Xutf8TextExtents(xFontSet, text, len, &overallInk, &overallLog);
     Size size = {overallLog.width + 10,
                 overallLog.height + 10};
-//    if(xEvent.type == Expose) {
+    if(xEvent.type != MotionNotify) {
         XSetForeground(xdisplay, p->gc, 0xff555555);
 //        XSetBackground(xdisplay, l->gc, 0xffff5555);
-        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
-                size.width, size.height);
+//        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
+//                size.width, size.height);
         XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
                        size.width, size.height);
         XSetForeground(xdisplay, p->gc, 0xffffffff);
         Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
                     pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
-//    }
+    }
 //    XPutImage(xdisplay, l->window, l->gc, l->x+5, l->y+5, width, height);
     bool res = false;
     if(xEvent.type == ButtonPress) {
@@ -241,10 +236,10 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
             context.active = 0;
         }
     }
-//    if(xEvent.type == Expose || ) {
+    if(xEvent.type != MotionNotify) {
         XSetForeground(xdisplay, p->gc, 0xff333333);
-        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
-                size.width, size.height);
+//        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
+//                size.width, size.height);
         XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
                        size.width, size.height);
         if(context.active == number) {
@@ -273,7 +268,7 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
         if(timeout) {
             cursor = !cursor;
         }
-//  }
+  }
     feedbackSize(size);
 }
 
@@ -321,7 +316,7 @@ void guiStartDrawing() {
 
     // We want to get MapNotify events
     XSelectInput(xdisplay, rootWindow, StructureNotifyMask | ButtonPressMask
-                 | ExposureMask | KeyPressMask | ResizeRedirectMask
+                 | ExposureMask | KeyPressMask
                  | ButtonMotionMask | ButtonReleaseMask);
 
     XStoreName(xdisplay, rootWindow, "Hello, World!");
@@ -370,18 +365,7 @@ void guiNextEvent()
             fprintf(stderr, "got wrong event %d %d\n", xEvent.type, xEvent.xany.window );
            abort();
        }
-       if(xEvent.type == ResizeRequest) {
-           Size newSize = {
-               xEvent.xresizerequest.width,
-               xEvent.xresizerequest.height};
-//           rootWindowSize = newSize;
-           guiSetSize(rootWindow, newSize.width,
-                      newSize.height);
 
-           fprintf(stderr, "resizeRequest %d x %d\n!!",
-                   newSize.width,
-                                         newSize.height);
-       }
         if(xEvent.type == ConfigureNotify) {
             Size newSize = {
                 xEvent.xconfigure.width,
@@ -450,8 +434,8 @@ int guiComboBoxZT(Painter *p, char **elements, int current)
                 overallLogMax.height + 10};
     if(xEvent.type == Expose) {
         XSetForeground(xdisplay, p->gc, 0xff555555);
-        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
-                size.width, size.height);
+//        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
+//                size.width, size.height);
         XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
                        size.width, size.height);
         XSetForeground(xdisplay, p->gc, 0xffffffff);
@@ -498,8 +482,8 @@ void guiDoubleEdit(Painter *p, int digits, double *number)
     }
 //    if(xEvent.type == Expose || ) {
         XSetForeground(xdisplay, p->gc, 0xff333333);
-        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
-                size.width, size.height);
+//        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
+//                size.width, size.height);
         XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
                        size.width, size.height);
         if(context.active == number) {
