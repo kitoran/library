@@ -4,6 +4,9 @@
 //#include <assert.h>
 
 #include <stdbool.h>
+
+#define TimerEvent LASTEvent+1
+
 //enum mode {
 
 //};
@@ -12,24 +15,28 @@
 //    int x;
 //    int y;
 //} State;
+typedef struct GuiImage {
+
+} GuiImage;
 extern XEvent xEvent;
 //extern State state;
 extern Display * xdisplay;
 extern XFontStruct *xFontStruct;
 extern Window rootWindow;
 extern int xDepth;
-extern bool timeout;
-struct XY {
+typedef struct Point {
     int x;
     int y;
-};
-typedef struct XY Point;
-typedef struct XY Size;
+} Point;
+typedef struct Size {
+    uint width;
+    uint height;
+} Size;
 extern Point (*getPos)();
 extern void (*feedbackSize)(Size);
 
 typedef struct Painter {
-    Window window;
+    Drawable drawable;
     GC gc;
 } Painter;
 
@@ -37,15 +44,18 @@ void guiLabel(Painter* p, char *text, int len);
 bool guiToolButton(Painter* p, XImage i);
 int guiComboBoxZT(Painter* p, char** elements, int current);
 void guiNumberEdit(Painter*p, int digits, int* number);
+void guiDoubleEdit(Painter*p, int digits, double* number);
+bool guiButton(Painter *p, char* text, int len);
+void guiLabelZT(Painter* p, char *text);
+bool guiButtonZT(Painter* p, char *text);
 
-typedef struct GuiWindow {
-    Window window;
-} GuiWindow ;
 void guiDrawLine(Painter*, int, int, int, int);
 void guiDrawRectangle(Painter*, int, int, int, int);
+void guiFillRectangle(Painter *a, int b, int c, int d, int e);
 void guiSetForeground(Painter*, unsigned long);
 void guiDrawTextWithLen(Painter*, int, int, char*, unsigned long);
-void guiSetSize(GuiWindow*, uint, uint);
+void guiSetSize(Window, uint, uint);
+Size guiGetSize();
 
 
 static const unsigned int GuiDarkMagenta = 0x880088;
@@ -56,5 +66,6 @@ static inline unsigned int rgbf(double r, double g, double b) {
     return rgb(r*255, g*255, b*255);
 }
 void guiStartDrawing();
-void XNextEventTimeout(Display *display, XEvent *event, double seconds);
+void guiNextEvent();
+void guiRedraw();
 #endif // GUI_H

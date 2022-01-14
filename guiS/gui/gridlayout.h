@@ -8,7 +8,7 @@ extern Point gridStart;
 Point gridGetPos();
 void gridFeedbackSize(Size s);
 void setCurrentGridPos(int row, int column);
-
+int getGridBottom();
 
 
 

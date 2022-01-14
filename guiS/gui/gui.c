@@ -1,23 +1,26 @@
 ﻿#include "gui.h"
 #include <X11/Xlib.h>
+#include <math.h>
 #include <assert.h>
+#include <string.h>
 #include <stdio.h>
 #define XK_LATIN1
 #define XK_MISCELLANY
 #include <X11/keysymdef.h>
 #include <sys/select.h>
+#include <stdlib.h>
 
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define MIN(a,b) ((a)<(b)?(a):(b))
 Display * xdisplay = 0;
 //XFontStruct *xFontStruct;
-XFontSet xFontSet;
-Window rootWindow;
-int xDepth;
-int maxDigitWidth = 0;
-int maxDigitHeight = 0;
-bool timeout = false;
-
+static XFontSet xFontSet;
+Window rootWindow = 0;
+int xDepth = 0;
+static int maxDigitWidth = 0;
+static int maxDigitHeight = 0;
+static bool timeout = false;
+static bool redraw = false;
 struct {
 
 
@@ -31,7 +34,7 @@ Point defaultGetPos() {
     abort();
 }
 void defaultFeedbackSize(Size s) {
-
+    (void)s;
 }
 
 Point (*getPos)() = defaultGetPos;
@@ -54,27 +57,32 @@ void (*feedbackSize)(Size) = defaultFeedbackSize;
 
 void guiDrawLine(Painter *a, int b, int c, int d, int e)
 {
-    abort();
+    XDrawLine(xdisplay, a->drawable, a->gc, b, c, d, e);
 }
 
 void guiDrawRectangle(Painter *a, int b, int c, int d, int e)
 {
-    abort();
+    XDrawRectangle(xdisplay, a->drawable, a->gc, b, c, d, e);
+}
+void guiFillRectangle(Painter *a, int b, int c, int d, int e)
+{
+    fprintf(stderr, "filling rect (%d, %d) %dx%d\n", b, c, d,e);
+    XFillRectangle(xdisplay, a->drawable, a->gc, b, c, d, e);
 }
 
 void guiSetForeground(Painter *a, unsigned long b)
 {
-    abort();
+    XSetForeground(xdisplay, a->gc, b);
 }
 
 void guiDrawTextWithLen(Painter *a, int b, int c, char *d, unsigned long e)
 {
-    abort();
+    Xutf8DrawString(xdisplay, a->drawable, xFontSet, a->gc, b, c, d, e);
 }
 
-void guiSetSize(GuiWindow *win, uint w, uint h)
+void guiSetSize(Window win, uint w, uint h)
 {
-    XResizeWindow(xdisplay, win->window, w, h);
+    XResizeWindow(xdisplay, win, w, h);
 }
 
 void guiLabel(Painter* p, char *text, int len)
@@ -88,13 +96,13 @@ void guiLabel(Painter* p, char *text, int len)
                 overallLog.height + 10};
 
 //    XDrawRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
-//                   size.x, size.y);
+//                   size.width, size.height);
     if(xEvent.type == Expose) {
         XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
                                                    DefaultScreen(xdisplay)));
         fprintf(stderr, "printing label %s %d %d\n",
                 text, pos.x+5 + overallLog.x, pos.y+5 - overallLog.y);
-        Xutf8DrawString(xdisplay, p->window, xFontSet, p->gc,
+        Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
                     pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
     }
 //    p->x += width+5;
@@ -104,7 +112,9 @@ void guiLabel(Painter* p, char *text, int len)
 //    GuiLabel res = {label};
 //    return res;
 }
-
+void guiLabelZT(Painter* p, char *text) {
+    guiLabel(p, text, strlen(text));
+}
 bool guiButton(Painter *p, char* text, int len)
 {
     Point pos = getPos();
@@ -117,10 +127,12 @@ bool guiButton(Painter *p, char* text, int len)
     if(xEvent.type == Expose) {
         XSetForeground(xdisplay, p->gc, 0xff555555);
 //        XSetBackground(xdisplay, l->gc, 0xffff5555);
-        XFillRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
-                       size.x, size.y);
+        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
+                size.width, size.height);
+        XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                       size.width, size.height);
         XSetForeground(xdisplay, p->gc, 0xffffffff);
-        Xutf8DrawString(xdisplay, p->window, xFontSet, p->gc,
+        Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
                     pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
     }
 //    XPutImage(xdisplay, l->window, l->gc, l->x+5, l->y+5, width, height);
@@ -128,8 +140,8 @@ bool guiButton(Painter *p, char* text, int len)
     if(xEvent.type == ButtonPress) {
         int mx = xEvent.xbutton.x;
         int my = xEvent.xbutton.y;
-        if(mx >= pos.x && mx <= pos.x + size.x &&
-            my >= pos.y && my <= pos.y + size.y) {
+        if(mx >= pos.x && mx <= pos.x + (int)size.width &&
+            my >= pos.y && my <= pos.y + (int)size.height) {
             res = true;
         }
     }
@@ -137,6 +149,9 @@ bool guiButton(Painter *p, char* text, int len)
 //    p->maxHeight = MAX(p->maxHeight, height);
     feedbackSize(size);
     return res;
+}
+bool guiButtonZT(Painter* p, char *text) {
+    return guiButton(p, text, strlen(text));
 }
 
 
@@ -162,7 +177,7 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
 
     if(xEvent.type == KeyPress && context.active == number) {
         KeySym sym = XLookupKeysym(&xEvent.xkey, 0);
-        fprintf(stderr, "%c %c! \n", sym, XK_Right);
+        fprintf(stderr, "%c %c! \n", (int)sym, XK_Right);
         if(sym == XK_Right) {
             if(context.pos < numberOfDigits) {
                 context.pos++;
@@ -213,8 +228,8 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
     if(xEvent.type == ButtonPress) {
         int mx = xEvent.xbutton.x;
         int my = xEvent.xbutton.y;
-        if(mx >= pos.x && mx <= pos.x + size.x &&
-            my >= pos.y && my <= pos.y + size.y) {
+        if(mx >= pos.x && mx <= pos.x + (int)size.width &&
+            my >= pos.y && my <= pos.y + (int)size.height) {
             fprintf(stderr, "fwefwefw!\n");
             context.active = number;
             int newPos = (mx - pos.x - 5)/maxDigitWidth;
@@ -227,19 +242,21 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
     }
 //    if(xEvent.type == Expose || ) {
         XSetForeground(xdisplay, p->gc, 0xff333333);
-        XFillRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
-                       size.x, size.y);
+        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
+                size.width, size.height);
+        XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                       size.width, size.height);
         if(context.active == number) {
             XSetForeground(xdisplay, p->gc, 0xff0000ff);
         } else {
             XSetForeground(xdisplay, p->gc, 0xffffffff);
         }
-        XDrawRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
-                       size.x, size.y);
+        XDrawRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                       size.width, size.height);
         XSetForeground(xdisplay, p->gc, 0xffffffff);
         char string[20];
         int len = snprintf(string, 20, "%d", *number);
-        Xutf8DrawString(xdisplay, p->window, xFontSet, p->gc,
+        Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
                     pos.x+5 /*+ maxDigitWidth*digits*/,
                         pos.y+5 + maxDigitHeight, string, len);
         if(cursor && context.active == number) {
@@ -248,17 +265,14 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
 
             Xutf8TextExtents(xFontSet, string, context.pos, &overallInk, &overallLog);
             XSetForeground(xdisplay, p->gc, 0xffffffff);
-            XDrawLine(xdisplay, p->window, p->gc,
+            XDrawLine(xdisplay, p->drawable, p->gc,
                       pos.x + 5 + overallInk.width, pos.y + 5,
                       pos.x + 5 + overallInk.width, pos.y + 5 + maxDigitHeight);
         }
         if(timeout) {
             cursor = !cursor;
         }
-//    }
-//    XPutImage(xdisplay, l->window, l->gc, l->x+5, l->y+5, width, height);
-//    p->x += width+5;
-//    p->maxHeight = MAX(p->maxHeight, height);
+//  }
     feedbackSize(size);
 }
 
@@ -306,7 +320,8 @@ void guiStartDrawing() {
 
     // We want to get MapNotify events
     XSelectInput(xdisplay, rootWindow, StructureNotifyMask | ButtonPressMask
-                 | ExposureMask | KeyPressMask);
+                 | ExposureMask | KeyPressMask | ResizeRedirectMask
+                 | ButtonMotionMask | ButtonReleaseMask);
 
     XStoreName(xdisplay, rootWindow, "Hello, World!");
     // "Map" the window (that is, make it appear on the screen)
@@ -339,12 +354,156 @@ static int wait_fd(int fd, double seconds)
     tv.tv_usec = (seconds - trunc(seconds))*1000000;
     return select(fd+1, &in_fds, 0, 0, &tv);
 }
-void XNextEventTimeout(Display *display, XEvent *event, double seconds)
+
+void guiNextEvent()
 {
-    if (XPending(display) || wait_fd(ConnectionNumber(display),seconds)) {
-       return XNextEvent(display, event);
-    } else {
-        timeout = true;
-        xEvent.type = GenericEvent;
+    if(redraw) {
+        redraw = false;
+        xEvent.type = Expose;
+        return;
     }
+
+    if (XPending(xdisplay) || wait_fd(ConnectionNumber(xdisplay),1)) {
+       XNextEvent(xdisplay, &xEvent);
+       return;
+    } else {
+        xEvent.type = TimerEvent;
+    }
+}
+
+Size guiGetSize()
+{
+    Window w;
+    int x, y;
+    Size s;
+    uint bw, d;
+    XGetGeometry(xdisplay, rootWindow, &w,
+                 &x, &y,
+                 &s.width, &s.height,
+                 &bw, &d);
+    return s;
+}
+
+
+void guiRedraw()
+{
+    redraw = true;
+}
+
+int guiComboBoxZT(Painter *p, char **elements, int current)
+{
+    Point pos = getPos();
+    int len;
+    char** c = elements;
+    XRectangle overallLogMax = {0, 0, 0, 0};
+
+    while(*c != NULL) {
+        XRectangle overallInk;
+        XRectangle overallLog;
+        Xutf8TextExtents(xFontSet, *c, strlen(*c), &overallInk, &overallLog);
+        int newx = MIN(overallLogMax.x, overallLog.x);
+        int newy = MIN(overallLogMax.y, overallLog.y);
+        int newr = MAX(overallLogMax.x + overallLogMax.width,
+                       overallLog.x + overallLog.width);
+        int newb = MAX(overallLogMax.y + overallLogMax.height,
+                       overallLog.y + overallLog.height);
+        overallLogMax.x = newx;
+        overallLogMax.y = newy;
+        overallLogMax.width = newr - newx;
+        overallLogMax.height = newb - newy;
+        c++;
+    }
+    {
+        XRectangle overallInk;
+        XRectangle overallLog;
+        Xutf8TextExtents(xFontSet, " ▼", 2, &overallInk, &overallLog);
+        overallLogMax.width += overallLog.width;
+    }
+    Size size = {overallLogMax.width + 10,
+                overallLogMax.height + 10};
+    if(xEvent.type == Expose) {
+        XSetForeground(xdisplay, p->gc, 0xff555555);
+        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
+                size.width, size.height);
+        XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                       size.width, size.height);
+        XSetForeground(xdisplay, p->gc, 0xffffffff);
+        XDrawRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                       size.width, size.height);
+
+
+        XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
+                                                   DefaultScreen(xdisplay)));
+        char st[200];
+        int len = snprintf(st, 200, "%s ▼", elements[current]);
+        Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
+                    pos.x+5 + overallLogMax.x, pos.y+5 - overallLogMax.y, st, len);
+    }
+
+    feedbackSize(size);
+    return current;
+}
+
+void guiDoubleEdit(Painter *p, int digits, double *number)
+{
+    Point pos = getPos();
+    static bool cursor = false;
+
+    Size size = {maxDigitWidth*digits + 10,
+                maxDigitHeight + 10};
+
+    int numberOfDigits = 5;
+
+    if(xEvent.type == ButtonPress) {
+        int mx = xEvent.xbutton.x;
+        int my = xEvent.xbutton.y;
+        if(mx >= pos.x && mx <= pos.x + (int)size.width &&
+            my >= pos.y && my <= pos.y + (int)size.height) {
+            fprintf(stderr, "fwefwefw!\n");
+            context.active = number;
+            int newPos = (mx - pos.x - 5)/maxDigitWidth;
+            context.pos = newPos > numberOfDigits? numberOfDigits:
+                          newPos > 0 ? newPos :
+                          0;
+        } else if(context.active == number) {
+            context.active = 0;
+        }
+    }
+//    if(xEvent.type == Expose || ) {
+        XSetForeground(xdisplay, p->gc, 0xff333333);
+        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
+                size.width, size.height);
+        XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                       size.width, size.height);
+        if(context.active == number) {
+            XSetForeground(xdisplay, p->gc, 0xff0000ff);
+        } else {
+            XSetForeground(xdisplay, p->gc, 0xffffffff);
+        }
+        XDrawRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                       size.width, size.height);
+        XSetForeground(xdisplay, p->gc, 0xffffffff);
+        char string[20];
+        char format[20];
+        snprintf(format, 20, "%%%dd", numberOfDigits);
+
+        int len = snprintf(string, 20, format, *number);
+        Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
+                    pos.x+5 /*+ maxDigitWidth*digits*/,
+                        pos.y+5 + maxDigitHeight, string, len);
+        if(cursor && context.active == number) {
+            XRectangle overallInk;
+            XRectangle overallLog;
+
+            Xutf8TextExtents(xFontSet, string, context.pos, &overallInk, &overallLog);
+            XSetForeground(xdisplay, p->gc, 0xffffffff);
+            XDrawLine(xdisplay, p->drawable, p->gc,
+                      pos.x + 5 + overallInk.width, pos.y + 5,
+                      pos.x + 5 + overallInk.width, pos.y + 5 + maxDigitHeight);
+        }
+        if(timeout) {
+            cursor = !cursor;
+        }
+//  }
+    feedbackSize(size);
 }

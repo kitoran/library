@@ -1,4 +1,4 @@
-#include "newfile.h"
+﻿#include "newfile.h"
 
 
 #include <sys/types.h>
@@ -11,7 +11,7 @@
 // this code is BAD and SHOULD NOT BE USED however i CANT BE BOTHERED cause i'm DOING SOMETHING ELSE
 
 // but tbh part of it is that c strings are just bad
-inline bool exists___(const char* path) {
+bool exists___(const char* path) {
     struct stat buffer;
     return (stat (path, &buffer) == 0);
 }

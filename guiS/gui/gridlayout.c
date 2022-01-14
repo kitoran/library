@@ -1,4 +1,5 @@
 ﻿#include "gridlayout.h"
+#include <stdio.h>
 int gridWidths[200] = {};
 int gridHeights[200] = {};
 int currentX = 0;
@@ -18,15 +19,27 @@ Point gridGetPos() {
 }
 
 void gridFeedbackSize(Size s) {
-    if(gridWidths[currentX] < s.x) {
-        gridWidths[currentX] = s.x;
+    if(s.height > 1000) {
+        fprintf(stderr, "deep");
     }
-    if(gridHeights[currentY] < s.y) {
-        gridHeights[currentY] = s.y;
+    if(gridWidths[currentX] < (int)s.width) {
+        gridWidths[currentX] = (int)s.width;
+    }
+    if(gridHeights[currentY] < (int)s.height) {
+        gridHeights[currentY] = (int)s.height;
     }
 }
 
 void setCurrentGridPos(int row, int column) {
     currentX = column;
     currentY = row;
+}
+
+int getGridBottom()
+{
+    int x = gridStart.x;
+    for(int i = 0; i < currentX; i++) {
+        x += gridWidths[i];
+    }
+    return x;
 }

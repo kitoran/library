@@ -2,7 +2,6 @@
 #include <assert.h>   // I include this to test return values the lazy way
 #include <unistd.h>   // So we got the profile for 10 seconds
 
-#define NIL (0)       // A name for the void pointer
 #include <stdio.h>
 
 #include <stdbool.h>
@@ -66,13 +65,13 @@ int main()
     gridStart.x = 5;
     gridStart.y = 5;
 
-    GC gc2 = XCreateGC(xdisplay, rootWindow, 0, NIL);
+    GC gc2 = XCreateGC(xdisplay, rootWindow, 0, NULL);
     Painter pa = {rootWindow, gc2};
     loop(&pa);
     XClearWindow(xdisplay, rootWindow);
     Pixmap p = XCreatePixmap(xdisplay, rootWindow, 300, 200, xDepth );
     // Create a "Graphics Context"
-    GC gc = XCreateGC(xdisplay, p, 0, NIL);
+    GC gc = XCreateGC(xdisplay, p, 0, NULL);
     // Tell the GC we draw using the white color
     XSetForeground(xdisplay, gc, 0xffa4a4a4);
     XFillRectangle(xdisplay, p, gc, 0,0,300,200);
@@ -123,7 +122,7 @@ int main()
 //    XInitImage(image);
 //    XDrawRectangle(display, (Drawable)image, gc, 20, 20, 100, 100);
 
-    GuiWindow www = {rootWindow};
+    Window www = {rootWindow};
     int xx = 10, yy = 10;
     int ww, hh, hhmax;
 //    guiCreateLabelTextWithLen(&www, xx, yy, "hello", 5, &ww, &hh);
