@@ -14,6 +14,7 @@
 int fe;
 void loop(Painter* p) {
 //
+    XClearWindow(xdisplay, rootWindow);
 //    XFlush(xdisplay);
     setCurrentGridPos(0,0);
     guiLabel(p, "hello", 5);
@@ -144,10 +145,13 @@ int main()
     XFlush(xdisplay);
 //    loop(&pa);
 //    XNextEvent(xdisplay, &xEvent);
+
+
     while(true) {
-        XNextEventTimeout(xdisplay, &xEvent, 0.530);
+        XFreeGC(xdisplay, pa.gc);
+        pa.gc = XCreateGC(xdisplay, rootWindow, 0, 0);
+        guiNextEvent();
         loop(&pa);
-        timeout = false;
 //        XRenderColor r = {16000, 16000, 16000, 16000};
 //        XftDrawStringUtf8 (xftDraw,
 //                        &r,

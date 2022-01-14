@@ -9,10 +9,10 @@ Point gridStart ={0,0};
 Point gridGetPos() {
     int x = gridStart.x, y = gridStart.y;
     for(int i = 0; i < currentX; i++) {
-        x += gridWidths[i];
+        x += gridWidths[i]+5;
     }
     for(int i = 0; i < currentY; i++) {
-        y += gridHeights[i];
+        y += gridHeights[i]+5;
     }
     Point res = {x, y};
     return res;
@@ -39,7 +39,7 @@ int getGridBottom()
 {
     int x = gridStart.x;
     for(int i = 0; i < currentX; i++) {
-        x += gridWidths[i];
+        x += gridWidths[i]+5;
     }
     return x;
 }

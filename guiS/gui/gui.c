@@ -27,6 +27,7 @@ struct {
     void* active;
     int pos;
 } context;
+static Size rootWindowSize;
 
 
 Point defaultGetPos() {
@@ -97,14 +98,14 @@ void guiLabel(Painter* p, char *text, int len)
 
 //    XDrawRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
 //                   size.width, size.height);
-    if(xEvent.type == Expose) {
+//    if(xEvent.type == Expose) {
         XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
                                                    DefaultScreen(xdisplay)));
         fprintf(stderr, "printing label %s %d %d\n",
                 text, pos.x+5 + overallLog.x, pos.y+5 - overallLog.y);
         Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
                     pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
-    }
+//    }
 //    p->x += width+5;
 //    p->maxHeight = MAX(p->maxHeight, height);
     feedbackSize(size);
@@ -124,7 +125,7 @@ bool guiButton(Painter *p, char* text, int len)
     Xutf8TextExtents(xFontSet, text, len, &overallInk, &overallLog);
     Size size = {overallLog.width + 10,
                 overallLog.height + 10};
-    if(xEvent.type == Expose) {
+//    if(xEvent.type == Expose) {
         XSetForeground(xdisplay, p->gc, 0xff555555);
 //        XSetBackground(xdisplay, l->gc, 0xffff5555);
         fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
@@ -134,7 +135,7 @@ bool guiButton(Painter *p, char* text, int len)
         XSetForeground(xdisplay, p->gc, 0xffffffff);
         Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
                     pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
-    }
+//    }
 //    XPutImage(xdisplay, l->window, l->gc, l->x+5, l->y+5, width, height);
     bool res = false;
     if(xEvent.type == ButtonPress) {
@@ -316,7 +317,7 @@ void guiStartDrawing() {
     printf("Depth %d\n", xDepth);
     // Create the window
     rootWindow = XCreateSimpleWindow(xdisplay , DefaultRootWindow(xdisplay ), 0, 0,
-                                        600, 300, 0, blackColor, blackColor);
+                                        100, 100, 0, blackColor, blackColor);
 
     // We want to get MapNotify events
     XSelectInput(xdisplay, rootWindow, StructureNotifyMask | ButtonPressMask
@@ -363,8 +364,33 @@ void guiNextEvent()
         return;
     }
 
-    if (XPending(xdisplay) || wait_fd(ConnectionNumber(xdisplay),1)) {
+    if (XPending(xdisplay) || wait_fd(ConnectionNumber(xdisplay),0.530)) {
        XNextEvent(xdisplay, &xEvent);
+       if(xEvent.xany.window != rootWindow) {
+            fprintf(stderr, "got wrong event %d %d\n", xEvent.type, xEvent.xany.window );
+           abort();
+       }
+       if(xEvent.type == ResizeRequest) {
+           Size newSize = {
+               xEvent.xresizerequest.width,
+               xEvent.xresizerequest.height};
+//           rootWindowSize = newSize;
+           guiSetSize(rootWindow, newSize.width,
+                      newSize.height);
+
+           fprintf(stderr, "resizeRequest %d x %d\n!!",
+                   newSize.width,
+                                         newSize.height);
+       }
+        if(xEvent.type == ConfigureNotify) {
+            Size newSize = {
+                xEvent.xconfigure.width,
+                xEvent.xconfigure.height};
+            rootWindowSize = newSize;
+            fprintf(stderr, "reconfigure  %d x %d\n!!",
+                    newSize.width,
+                                          newSize.height);;
+        }
        return;
     } else {
         xEvent.type = TimerEvent;
@@ -373,6 +399,7 @@ void guiNextEvent()
 
 Size guiGetSize()
 {
+    return rootWindowSize;
     Window w;
     int x, y;
     Size s;

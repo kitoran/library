@@ -35,6 +35,7 @@ typedef struct Size {
 extern Point (*getPos)();
 extern void (*feedbackSize)(Size);
 
+
 typedef struct Painter {
     Drawable drawable;
     GC gc;
