@@ -17,17 +17,18 @@ void loop(Painter* p) {
     XClearWindow(xdisplay, rootWindow);
 //    XFlush(xdisplay);
     setCurrentGridPos(0,0);
-    guiLabel(p, "hello", 5);
+    guiLabelZT(p, "йhello ‣");
     setCurrentGridPos(0,1);
-    guiLabel(p, "yes", 3);
+    guiLabelZT(p, "yes   🤔 ");
     setCurrentGridPos(1,0);
     guiLabel(p, "i", 1);
     setCurrentGridPos(1,1);
-    guiLabel(p, "am", 2);
+    guiLabelZT(p, "am   ▼ ‣");
     setCurrentGridPos(0,2);
-    guiLabel(p, "an", 2);
+    char* opts[] = {"awerg", NULL};
+    guiComboBoxZT(p, opts,0);
     setCurrentGridPos(1,2);
-    guiLabel(p, "label", 5);
+    guiLabelZT(p, "ברך אתה");
 
     setCurrentGridPos(2,2);
     if(guiButton(p, "button", 6)) {

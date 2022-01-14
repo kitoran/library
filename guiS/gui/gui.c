@@ -19,7 +19,6 @@ Window rootWindow = 0;
 int xDepth = 0;
 static int maxDigitWidth = 0;
 static int maxDigitHeight = 0;
-static bool timeout = false;
 static bool redraw = false;
 struct {
 
@@ -265,7 +264,7 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
                       pos.x + 5 + overallInk.width, pos.y + 5,
                       pos.x + 5 + overallInk.width, pos.y + 5 + maxDigitHeight);
         }
-        if(timeout) {
+        if(xEvent.type == TimerEvent) {
             cursor = !cursor;
         }
   }
@@ -312,7 +311,7 @@ void guiStartDrawing() {
     printf("Depth %d\n", xDepth);
     // Create the window
     rootWindow = XCreateSimpleWindow(xdisplay , DefaultRootWindow(xdisplay ), 0, 0,
-                                        100, 100, 0, blackColor, blackColor);
+                                        700, 700, 0, blackColor, blackColor);
 
     // We want to get MapNotify events
     XSelectInput(xdisplay, rootWindow, StructureNotifyMask | ButtonPressMask
@@ -404,7 +403,6 @@ void guiRedraw()
 int guiComboBoxZT(Painter *p, char **elements, int current)
 {
     Point pos = getPos();
-    int len;
     char** c = elements;
     XRectangle overallLogMax = {0, 0, 0, 0};
 
@@ -424,15 +422,16 @@ int guiComboBoxZT(Painter *p, char **elements, int current)
         overallLogMax.height = newb - newy;
         c++;
     }
+    char added[] = " ▼";
     {
         XRectangle overallInk;
         XRectangle overallLog;
-        Xutf8TextExtents(xFontSet, " ▼", 2, &overallInk, &overallLog);
+        Xutf8TextExtents(xFontSet, added, sizeof(added)-1, &overallInk, &overallLog);
         overallLogMax.width += overallLog.width;
     }
     Size size = {overallLogMax.width + 10,
                 overallLogMax.height + 10};
-    if(xEvent.type == Expose) {
+    /*if(xEvent.type == Expose)*/ {
         XSetForeground(xdisplay, p->gc, 0xff555555);
 //        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
 //                size.width, size.height);
@@ -446,7 +445,7 @@ int guiComboBoxZT(Painter *p, char **elements, int current)
         XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
                                                    DefaultScreen(xdisplay)));
         char st[200];
-        int len = snprintf(st, 200, "%s ▼", elements[current]);
+        int len = snprintf(st, 200, "%s%s", elements[current], added);
         Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
                     pos.x+5 + overallLogMax.x, pos.y+5 - overallLogMax.y, st, len);
     }
@@ -512,7 +511,7 @@ void guiDoubleEdit(Painter *p, int digits, double *number)
                       pos.x + 5 + overallInk.width, pos.y + 5,
                       pos.x + 5 + overallInk.width, pos.y + 5 + maxDigitHeight);
         }
-        if(timeout) {
+        if(xEvent.type == TimerEvent) {
             cursor = !cursor;
         }
 //  }

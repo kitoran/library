@@ -26,7 +26,7 @@ char* newFile(char* path, char* extension) {
     }
     int i = 1;
     do {
-        snprintf(path+len, sizeof(cat)-len, "%d.%s",
+        snprintf(cat+len, sizeof(cat)-len, "%d.%s",
                  i, extension);
 
         i++;
