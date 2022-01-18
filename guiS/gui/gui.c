@@ -308,10 +308,20 @@ void guiStartDrawing() {
     int whiteColor = WhitePixel(xdisplay, screen );
     xDepth = DefaultDepth(xdisplay, screen);
 
+    int numberOfDepths;
+    int* depths = XListDepths(xdisplay, screen, &numberOfDepths);
     printf("Depth %d\n", xDepth);
     // Create the window
     rootWindow = XCreateSimpleWindow(xdisplay , DefaultRootWindow(xdisplay ), 0, 0,
                                         700, 700, 0, blackColor, blackColor);
+    XSetWindowAttributes ats = {
+     None, blackColor, CopyFromParent, whiteColor,
+        ForgetGravity, NorthWestGravity, NotUseful,
+        -1, 0, False, 0, 0, False, CopyFromParent, None
+    };
+//    rootWindow = XCreateWindow(xdisplay , DefaultRootWindow(xdisplay ), 0, 0,
+//        700, 700, /*border*/ 0, /*depth*/4, InputOutput,
+//            CopyFromParent, 0,0);
 
     // We want to get MapNotify events
     XSelectInput(xdisplay, rootWindow, StructureNotifyMask | ButtonPressMask
@@ -517,3 +527,26 @@ void guiDoubleEdit(Painter *p, int digits, double *number)
 //  }
     feedbackSize(size);
 }
+
+#pragma GCC push_options
+#pragma GCC optimize ("Ofast")
+void guiFillRawRectangle(RawPicture *p, int x, int y, int w, int h, char r, char g, char b)
+{
+    assert(w >= 0);
+    assert(h >= 0);
+    assert(x >= 0);
+    assert(y >= 0);
+    if(x+w >= p->w) {
+        w = p->w - x - 1;
+    }
+    if(y+h+1 >= p->h) {
+        h = p->h - y - 2;
+    }
+    int color = rgb(r,g,b);
+    for(int i = y; i <= y + h+1; i++) {
+        for(int j = x; j <= x+w; j++) {
+            *((int*)(p->data) + i*p->w + j) = color;
+        }
+    }
+}
+#pragma GCC pop_options

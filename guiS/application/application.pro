@@ -3,9 +3,9 @@ CONFIG += console
 CONFIG -= app_bundle
 CONFIG -= qt
 CONFIG += link_pkgconfig
-LIBS += -lSDL2 -lexplain
+LIBS += -lexplain
 #-lXft
-PKGCONFIG += x11
+PKGCONFIG += x11 xrender
 INCLUDEPATH += ../gui
 #LIBS += -L../../bui
 SOURCES += main.c

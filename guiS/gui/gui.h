@@ -24,6 +24,7 @@ extern Display * xdisplay;
 extern XFontStruct *xFontStruct;
 extern Window rootWindow;
 extern int xDepth;
+
 typedef struct Point {
     int x;
     int y;
@@ -40,6 +41,11 @@ typedef struct Painter {
     Drawable drawable;
     GC gc;
 } Painter;
+typedef struct RawPicture {
+    char* data;
+    size_t w;
+    size_t h;
+} RawPicture ;
 
 void guiLabel(Painter* p, char *text, int len);
 bool guiToolButton(Painter* p, XImage i);
@@ -53,6 +59,7 @@ bool guiButtonZT(Painter* p, char *text);
 void guiDrawLine(Painter*, int, int, int, int);
 void guiDrawRectangle(Painter*, int, int, int, int);
 void guiFillRectangle(Painter *a, int b, int c, int d, int e);
+void guiFillRawRectangle(RawPicture *p, int x, int y, int w, int h, char r, char g, char b);
 void guiSetForeground(Painter*, unsigned long);
 void guiDrawTextWithLen(Painter*, int, int, char*, unsigned long);
 void guiSetSize(Window, uint, uint);

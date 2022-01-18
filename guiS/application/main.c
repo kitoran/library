@@ -1,4 +1,5 @@
 ﻿#include <X11/Xlib.h> // Every Xlib program must include this
+#include <X11/extensions/Xrender.h>
 #include <assert.h>   // I include this to test return values the lazy way
 #include <unistd.h>   // So we got the profile for 10 seconds
 
@@ -6,7 +7,7 @@
 
 #include <stdbool.h>
 #include <locale.h>
-#include "gui.h"
+#include "persistent.h"
 #include "gridlayout.h"
 //#include <X11/Xft/Xft.h>
 //XftFont* font;
@@ -42,7 +43,7 @@ void loop(Painter* p) {
         fprintf(stderr, "button2 was pressed");
     }
     setCurrentGridPos(2,0);
-    guiNumberEdit(p, 9, &fe);
+    persistentNumberEdit(p, 9, &fe);
 }
 
 
@@ -119,8 +120,32 @@ int main()
     XCopyArea(xdisplay, p, rootWindow, gc2, 0,0, 300, 200, 0,0);
 //    XImage* image = XCreateImage(display, visual, 24, ZPixmap, 0, data,
 //                                 300, 200, 32, 0);
-    XImage* image = XGetImage(xdisplay, p, 0,0,
-                                 300, 200,  ~0,ZPixmap);
+    XRenderPictFormat * format =
+        XRenderFindStandardFormat (xdisplay,
+                       PictStandardRGB24);
+    Picture picture =
+        XRenderCreatePicture (xdisplay, rootWindow,
+                      format,
+                      0,
+                      NULL);
+    XRenderColor c = {
+        65535,
+        0,
+        0,
+        65535
+    };
+    XRenderFillRectangle(xdisplay, PictOpSrc, picture, &c, 10, 10, 100, 100);
+    XRenderColor c1 = {
+        0,
+        0,
+        65535,
+        65535/4*2
+    };
+
+    XRenderFillRectangle(xdisplay, PictOpAtop, picture, &c1, 20, 20, 100, 100);
+
+//    XImage* image = XGetImage(xdisplay, p, 0,0,
+//                                 300, 200,  ~0,ZPixmap);
 //    XInitImage(image);
 //    XDrawRectangle(display, (Drawable)image, gc, 20, 20, 100, 100);
 
@@ -153,7 +178,9 @@ int main()
         pa.gc = XCreateGC(xdisplay, rootWindow, 0, 0);
 
         guiNextEvent();
-        loop(&pa);
+//        loop(&pa);
+
+
 //        XRenderColor r = {16000, 16000, 16000, 16000};
 //        XftDrawStringUtf8 (xftDraw,
 //                        &r,
