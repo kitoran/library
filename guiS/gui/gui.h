@@ -50,7 +50,7 @@ typedef struct RawPicture {
 void guiLabel(Painter* p, char *text, int len);
 bool guiToolButton(Painter* p, XImage i);
 int guiComboBoxZT(Painter* p, char** elements, int current);
-void guiNumberEdit(Painter*p, int digits, int* number);
+bool guiNumberEdit(Painter*p, int digits, int* number);
 void guiDoubleEdit(Painter*p, int digits, double* number);
 bool guiButton(Painter *p, char* text, int len);
 void guiLabelZT(Painter* p, char *text);

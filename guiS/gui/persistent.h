@@ -3,7 +3,7 @@
 #include <gui.h>
 
 
-void persistentNumberEdit_(Painter*p, int digits, int* number, char* name);
+bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name);
 
 
 //#define STRINGIFY1(x) #x

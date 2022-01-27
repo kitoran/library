@@ -150,7 +150,7 @@ bool guiButtonZT(Painter* p, char *text) {
 }
 
 
-void guiNumberEdit(Painter *p, int digits, int *number) {
+bool guiNumberEdit(Painter *p, int digits, int *number) {
     Point pos = getPos();
     static bool cursor = false;
 
@@ -168,7 +168,7 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
             numberOfDigits++;
         }
     }
-
+    bool res = false;
 
     if(xEvent.type == KeyPress && context.active == number) {
         KeySym sym = XLookupKeysym(&xEvent.xkey, 0);
@@ -197,8 +197,10 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
                     goto keyPressBreak;
                 } else if(context.pos == 1  && *number < 0) {
                     *number = -*number;
+                    res = true;
                 } else {
                     *number = (*number)/value/10*value + (*number)%value;
+                    res = true;
                 }
                 if(context.pos > 0) {
                     context.pos--;
@@ -211,10 +213,12 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
                (sym-'0')*value + (*number)%value;
                 if(neg) *number = -*number;
                 context.pos++;
+                res = true;
             }
         } else if(sym == '-') {
             if(context.pos == 0 && *number > 0) {
                 *number = -*number;
+                res = true;
             }
         }
     }
@@ -269,6 +273,7 @@ void guiNumberEdit(Painter *p, int digits, int *number) {
         }
   }
     feedbackSize(size);
+    return res;
 }
 
 void guiStartDrawing() {
