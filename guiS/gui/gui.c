@@ -333,7 +333,7 @@ void guiStartDrawing() {
                  | ExposureMask | KeyPressMask
                  | ButtonMotionMask | ButtonReleaseMask);
 
-    XStoreName(xdisplay, rootWindow, "Hello, World!");
+    XStoreName(xdisplay, rootWindow, "Additive synthesis!");
     // "Map" the window (that is, make it appear on the screen)
     XMapWindow(xdisplay , rootWindow);
 

@@ -4,23 +4,27 @@
 #include <unistd.h>   // So we got the profile for 10 seconds
 
 #include <stdio.h>
-
+#include <X11/Xft/Xft.h>
 #include <stdbool.h>
 #include <locale.h>
+#include "stb_image.h"
 #include "persistent.h"
 #include "gridlayout.h"
 //#include <X11/Xft/Xft.h>
 //XftFont* font;
 //XftDraw* xftDraw;
+char* appName = "guiExample";
 int fe;
 void loop(Painter* p) {
 //
     XClearWindow(xdisplay, rootWindow);
 //    XFlush(xdisplay);
     setCurrentGridPos(0,0);
-    guiLabelZT(p, "йhello ‣");
+//    guiSetForeground(p, 0xffff0000);
+    guiLabelZT(p, "●");
     setCurrentGridPos(0,1);
-    guiLabelZT(p, "yes   🤔 ");
+    guiLabelZT(p, "⏹□▢▢▢▢				    ◽◽◽◽◼◽ 	◾■□■■▢▣▤▥▦▧▨▩▪▫▬▭▮▯◘◙◺◻◼◽◾◿");
+//    guiLabelZT(p, "yes   🤔 ");
     setCurrentGridPos(1,0);
     guiLabel(p, "i", 1);
     setCurrentGridPos(1,1);
@@ -46,22 +50,23 @@ void loop(Painter* p) {
     persistentNumberEdit(p, 9, &fe);
 }
 
-
+#define stringify2(a) #a
+#define stringify(a) stringify2(a)
 XEvent xEvent;
 int main()
 {
-
+    fprintf(stderr, stringify(MY_PATH));
+    exit(0);
     char* l = setlocale(LC_ALL, "C.UTF-8");
     l = setlocale(LC_ALL, "C.UTF-8");
     guiStartDrawing();
-//    font = XftFontOpen (xdisplay, XDefaultScreen(xdisplay),
-//                            XFT_FAMILY, XftTypeString, "FreeSerif",
-//                            XFT_SIZE, XftTypeDouble, 12.0,
-//                            NULL);
+    XftFont* font = XftFontOpen (xdisplay, XDefaultScreen(xdisplay),
+                            XFT_FAMILY, XftTypeString, "FreeSerif",
+                            XFT_SIZE, XftTypeDouble, 12.0,
+                            NULL);
     int s = DefaultScreen(xdisplay);
-//    xftDraw = XftDrawCreate(xdisplay, rootWindow,
-//                            XDefaultVisual(xdisplay, s),
-//                            DefaultColormap(xdisplay, s));
+
+
 
     getPos = gridGetPos;
     feedbackSize = gridFeedbackSize;
@@ -77,7 +82,7 @@ int main()
     GC gc = XCreateGC(xdisplay, p, 0, NULL);
     // Tell the GC we draw using the white color
     XSetForeground(xdisplay, gc, 0xffa4a4a4);
-    XFillRectangle(xdisplay, p, gc, 0,0,300,200);
+//    XFillRectangle(xdisplay, p, gc, 0,0,300,200);
     XSetForeground(xdisplay, gc, 0xffffffff);
     XDrawLine(xdisplay, p, gc, 10, 60, 180, 20);
     XTextItem ti = {
@@ -110,6 +115,7 @@ int main()
 //        funcs,
 //    };
     
+//    XftDrawCreate
 //    GuiImage rr = {300, 200, data};
     for(int i = 0; i < 300*200*4; i++) {
         data[i]=i%253;
@@ -117,7 +123,7 @@ int main()
     XDrawLine(xdisplay,p,gc,0,10,290,180);
 //    drawVerticalLine(&rr, 50, 10, 150, 0x00ff0000);
 //    drawHorizontalLine(&rr, 50, 150, 50, 0x0000ff00);
-    XCopyArea(xdisplay, p, rootWindow, gc2, 0,0, 300, 200, 0,0);
+//    XCopyArea(xdisplay, p, rootWindow, gc2, 0,0, 300, 200, 0,0);
 //    XImage* image = XCreateImage(display, visual, 24, ZPixmap, 0, data,
 //                                 300, 200, 32, 0);
     XRenderPictFormat * format =
@@ -134,15 +140,31 @@ int main()
         0,
         65535
     };
-    XRenderFillRectangle(xdisplay, PictOpSrc, picture, &c, 10, 10, 100, 100);
+//    XRenderFillRectangle(xdisplay, PictOpSrc, picture, &c, 10, 10, 100, 100);
     XRenderColor c1 = {
         0,
         0,
         65535,
         65535/4*2
     };
-
-    XRenderFillRectangle(xdisplay, PictOpAtop, picture, &c1, 20, 20, 100, 100);
+    XRenderColor whiteOpaque = {
+        65535,
+        65535,
+        65535,
+        65535
+    };
+//    XRenderFillRectangle(xdisplay, PictOpAtop, picture, &c1, 20, 20, 100, 100);
+    XftDraw *xftDraw = XftDrawCreate(xdisplay, rootWindow,
+                            XDefaultVisual(xdisplay, s),
+                            DefaultColormap(xdisplay, s));
+    char strr [] = "hi^)";//⏹□▢▢▢▢				    ◽◽◽◽◼◽ 	◾■□■■▢▣▤▥▦▧▨▩▪▫▬▭▮▯◘◙◺◻◼◽◾◿";
+    XftDrawString8 (xftDraw,
+        &whiteOpaque,
+        font,
+    40,
+    20,
+    strr,
+    sizeof(strr));
 
 //    XImage* image = XGetImage(xdisplay, p, 0,0,
 //                                 300, 200,  ~0,ZPixmap);
@@ -174,8 +196,8 @@ int main()
 
 
     while(true) {
-        XFreeGC(xdisplay, pa.gc);
-        pa.gc = XCreateGC(xdisplay, rootWindow, 0, 0);
+//        XFreeGC(xdisplay, pa.gc);
+//        pa.gc = XCreateGC(xdisplay, rootWindow, 0, 0);
 
         guiNextEvent();
 //        loop(&pa);
@@ -188,7 +210,7 @@ int main()
 //                        100,
 //                        100,
 //                        hi, sizeof(hi)-1);
-        XFlush(xdisplay);
+//        XFlush(xdisplay);
 //        XEvent e;
 //        switch(e.type)
 //        {
