@@ -1,5 +1,6 @@
 ﻿#include "persistent.h"
 #include "settings.h"
+#include "loadImage.h"
 #include "stb_ds.h"
 typedef struct Unit {} Unit;
 static Unit unit;
@@ -7,9 +8,6 @@ bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name) {
     static struct {
         char* key;
         Unit value;
-//        struct {
-//            bool initialized;
-//        } value;
     } *map = NULL;
 
     int index = shgeti(map, name);
@@ -28,3 +26,19 @@ bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name) {
     return false;
 }
 
+bool resourseToolButton(Painter*p, char* name) {
+    static struct {
+        char* key;
+        XImage* value;
+    } *map = NULL;
+
+    XImage* image;
+    int index = shgeti(map, name);
+    if(index == -1) {
+        image = loadLocalImageZT(name);
+        shput(map, name, image);
+    } else {
+        image = map[index].value;
+    }
+    return guiToolButton(p, image);
+}

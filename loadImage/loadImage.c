@@ -3,6 +3,7 @@
 #include <X11/Xlib.h> // Every Xlib program must include this
 #include <linux/limits.h>
 #include <string.h>
+#include <stdlib.h>
 
 #pragma GCC push_options
 #pragma GCC optimize ("Ofast")
@@ -19,6 +20,7 @@ XImage *loadLocalImageZT(char *path) {
     strncat(imagePath, path, PATH_MAX);
     int x,y, n;
     unsigned char *data = stbi_load(imagePath, &x, &y, &n, 4);
+    if(!data) abort();
     for(int i = 0; i < x*y; i++) {
         char temp;
 //        memcpy(temp, rcdata+i*4, 4);

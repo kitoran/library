@@ -4,11 +4,8 @@
 
 
 bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name);
-
-
-//#define STRINGIFY1(x) #x
-//#define STRINGIFY(x) STRINGIFY1(x)
 #define persistentNumberEdit(p, d, n) \
     persistentNumberEdit_(p, d, n, #n)
 
+bool resourseToolButton(Painter*p, char* name);
 #endif // PERSISTENT_H
