@@ -19,4 +19,5 @@ DEPENDPATH += $$PWD/../gui
 
 unix:!macx: PRE_TARGETDEPS += $$OUT_PWD/../gui/libgui.a
 include(../../stb/stb_image.pri)
+include(../../loadImage/loadImage.pri)
 DEFINES += MY_PATH=$$PWD

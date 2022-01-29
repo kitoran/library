@@ -9,10 +9,12 @@
 #include <locale.h>
 #include "stb_image.h"
 #include "persistent.h"
+#include "loadImage.h"
 #include "gridlayout.h"
 //#include <X11/Xft/Xft.h>
 //XftFont* font;
 //XftDraw* xftDraw;
+XImage *ximage;
 char* appName = "guiExample";
 int fe;
 void loop(Painter* p) {
@@ -21,7 +23,9 @@ void loop(Painter* p) {
 //    XFlush(xdisplay);
     setCurrentGridPos(0,0);
 //    guiSetForeground(p, 0xffff0000);
-    guiLabelZT(p, "●");
+    if(guiToolButton(p, ximage)) {
+        fprintf(stderr, "pressed!:)\n");
+    }
     setCurrentGridPos(0,1);
     guiLabelZT(p, "⏹□▢▢▢▢				    ◽◽◽◽◼◽ 	◾■□■■▢▣▤▥▦▧▨▩▪▫▬▭▮▯◘◙◺◻◼◽◾◿");
 //    guiLabelZT(p, "yes   🤔 ");
@@ -50,20 +54,16 @@ void loop(Painter* p) {
     persistentNumberEdit(p, 9, &fe);
 }
 
-#define stringify2(a) #a
-#define stringify(a) stringify2(a)
 XEvent xEvent;
+
 int main()
 {
-    fprintf(stderr, stringify(MY_PATH));
-    exit(0);
+
+//    fprintf(stderr,stbi_failure_reason());
+//    exit(0);
     char* l = setlocale(LC_ALL, "C.UTF-8");
     l = setlocale(LC_ALL, "C.UTF-8");
     guiStartDrawing();
-    XftFont* font = XftFontOpen (xdisplay, XDefaultScreen(xdisplay),
-                            XFT_FAMILY, XftTypeString, "FreeSerif",
-                            XFT_SIZE, XftTypeDouble, 12.0,
-                            NULL);
     int s = DefaultScreen(xdisplay);
 
 
@@ -75,9 +75,11 @@ int main()
 
     GC gc2 = XCreateGC(xdisplay, rootWindow, 0, NULL);
     Painter pa = {rootWindow, gc2};
-    loop(&pa);
+//    loop(&pa);
     XClearWindow(xdisplay, rootWindow);
     Pixmap p = XCreatePixmap(xdisplay, rootWindow, 300, 200, xDepth );
+//                 XCreateImage(display, visual, depth, format, offset, data, width, height, bitmap_pad,
+//                                         bytes_per_line)
     // Create a "Graphics Context"
     GC gc = XCreateGC(xdisplay, p, 0, NULL);
     // Tell the GC we draw using the white color
@@ -149,49 +151,26 @@ int main()
     };
     XRenderColor whiteOpaque = {
         65535,
+        0,
         65535,
-        65535,
-        65535
+        32535
     };
 //    XRenderFillRectangle(xdisplay, PictOpAtop, picture, &c1, 20, 20, 100, 100);
-    XftDraw *xftDraw = XftDrawCreate(xdisplay, rootWindow,
-                            XDefaultVisual(xdisplay, s),
-                            DefaultColormap(xdisplay, s));
-    char strr [] = "hi^)";//⏹□▢▢▢▢				    ◽◽◽◽◼◽ 	◾■□■■▢▣▤▥▦▧▨▩▪▫▬▭▮▯◘◙◺◻◼◽◾◿";
-    XftDrawString8 (xftDraw,
-        &whiteOpaque,
-        font,
-    40,
-    20,
-    strr,
-    sizeof(strr));
-
-//    XImage* image = XGetImage(xdisplay, p, 0,0,
-//                                 300, 200,  ~0,ZPixmap);
-//    XInitImage(image);
-//    XDrawRectangle(display, (Drawable)image, gc, 20, 20, 100, 100);
 
     Window www = {rootWindow};
     int xx = 10, yy = 10;
     int ww, hh, hhmax;
-//    guiCreateLabelTextWithLen(&www, xx, yy, "hello", 5, &ww, &hh);
-//    xx += ww + 10;
-//    guiCreateLabelTextWithLen(&www, xx, yy, "yes", 3, &ww, &hh);
-//    xx += ww + 10;
-//    guiCreateLabelTextWithLen(&www, xx, yy, "i", 1, &ww, &hh);
-//    xx += ww + 10;
-//    guiCreateLabelTextWithLen(&www, xx, yy, "am", 2, &ww, &hh);
-//    xx += ww + 10;
-//    guiCreateLabelTextWithLen(&www, xx, yy, "an", 2, &ww, &hh);
-//    xx += ww + 10;
-//    GuiLabel l = guiCreateLabelTextWithLen(&www, xx, yy, "label", 5, &ww, &hh);
 
+//    GC gcrootwindow = XCreateGC(xdisplay, rootWindow, 0, NULL);
+//    , int*x, int*y
+    ximage = loadLocalImageZT("rec.png");
 
-//    XPutImage(display, window, gc, image, 0, 0, 0, 0, 300, 300);
+//    XPutImage(xdisplay, p, gc, ximage, 0, 0, 0, 0, x, y);
+//    XCopyArea(xdisplay, p, rootWindow, gc2, 0, 0,
+//              x, y, 10, 10);
 
-    // Send the "DrawLine" request to the server
     XFlush(xdisplay);
-//    loop(&pa);
+    loop(&pa);
 //    XNextEvent(xdisplay, &xEvent);
 
 
@@ -200,7 +179,7 @@ int main()
 //        pa.gc = XCreateGC(xdisplay, rootWindow, 0, 0);
 
         guiNextEvent();
-//        loop(&pa);
+        loop(&pa);
 
 
 //        XRenderColor r = {16000, 16000, 16000, 16000};
