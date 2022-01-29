@@ -156,7 +156,6 @@ bool guiToolButton(Painter *p, XImage *i) {
     return res;
 }
 
-
 bool guiNumberEdit(Painter *p, int digits, int *number) {
     Point pos = getPos();
     static bool cursor = false;
