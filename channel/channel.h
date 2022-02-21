@@ -12,8 +12,6 @@
 #ifdef __cplusplus
 #define _Thread_local thread_local
 #endif
-extern _Thread_local char thread_name[30];
-
 inline static pid_t gettid() {
     return syscall(SYS_gettid);
 }
@@ -24,7 +22,9 @@ struct Channel {
     pthread_cond_t cv;
     pthread_mutex_t mutex;
     pid_t waitingTid;
+    const char* threadName;
 };
+
 int pthread_setname_np(pthread_t thread, const char *name);
        int pthread_getname_np(pthread_t thread,
                               char *name, size_t len);
@@ -33,7 +33,7 @@ inline static void blockAndPut(struct Channel* channel, const void* thing_, size
     assert(size < CHANNEL_MAX_SIZE );
     pthread_t cur = pthread_self();
     pthread_getname_np(cur,
-                           thread_name, 30);
+                           channel->threadName, 30);
 //    fprintf(stderr, "obtaining %d %s %s", gettid(), thread_name, __func__);
     pthread_mutex_lock(&(channel->mutex));
     memcpy(channel->thing, thing_, size);
@@ -47,7 +47,7 @@ inline static void takeC(struct Channel* channel, void* buffer, size_t size) {
     assert(size < CHANNEL_MAX_SIZE );
     pthread_t cur = pthread_self();
     pthread_getname_np(cur,
-                           thread_name, 30);
+                           channel->threadName, 30);
 //    fprintf(stderr, "obtaining %d %s %s", gettid(), thread_name, __func__);
     pthread_mutex_lock(&(channel->mutex));
 //        cv.wait(lck, [this]{ return full; });
@@ -81,9 +81,9 @@ inline static   void wait(struct Channel* channel) {
         pthread_mutex_unlock(&channel->mutex);
         return;
     }
-    fprintf(stderr, "waiting on cv %d %s %s", gettid(), thread_name, __func__);
+    fprintf(stderr, "waiting on cv %d %s %s", gettid(), channel->threadName, __func__);
     pthread_cond_wait(&channel->cv, &channel->mutex);//, cv.wait(lck, [this]{ return full; });
-    fprintf(stderr, "after waiting on cv %d %s %s", gettid(), thread_name, __func__);
+    fprintf(stderr, "after waiting on cv %d %s %s", gettid(), channel->threadName, __func__);
 
     channel->waitingTid = -1;
 //    fprintf(stderr, "releasing %d %s %s", gettid(), thread_name, __func__);

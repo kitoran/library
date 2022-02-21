@@ -3,4 +3,5 @@ SOURCES += \
     $$PWD/settings.c
 
 HEADERS += \
-        settings.h
+        $$PWD/settings.h
+INCLUDEPATH += $$PWD
