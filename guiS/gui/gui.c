@@ -117,7 +117,7 @@ bool guiButton(Painter *p, char* text, int len)
     }
 //    XPutImage(xdisplay, l->window, l->gc, l->x+5, l->y+5, width, height);
     bool res = false;
-    if(xEvent.type == ButtonPress) {
+    if(xEvent.type == ButtonRelease) {
         int mx = xEvent.xbutton.x;
         int my = xEvent.xbutton.y;
         if(mx >= pos.x && mx <= pos.x + (int)size.width &&
@@ -133,9 +133,9 @@ bool guiButton(Painter *p, char* text, int len)
 bool guiButtonZT(Painter* p, char *text) {
     return guiButton(p, text, strlen(text));
 }
-bool guiToolButton(Painter *p, XImage *i) {
+bool guiToolButton(Painter *p, XImage *i, bool *consume) {
+//    if(consume) *consume = false;
     Point pos = getPos();
-
     Size size = {i->width,
                  i->height};
     if(xEvent.type != MotionNotify) {
@@ -144,19 +144,25 @@ bool guiToolButton(Painter *p, XImage *i) {
                   i->width, i->height);
     }
     bool res = false;
-    if(xEvent.type == ButtonPress) {
+    if(xEvent.type == ButtonRelease
+            || xEvent.type == ButtonPress) {
         int mx = xEvent.xbutton.x;
         int my = xEvent.xbutton.y;
         if(mx >= pos.x && mx <= pos.x + (int)size.width &&
             my >= pos.y && my <= pos.y + (int)size.height) {
-            res = true;
+            if(xEvent.type == ButtonRelease) {
+                res = true;
+            }
+            if(consume) *consume = true;
         }
     }
     feedbackSize(size);
     return res;
 }
 
-bool guiNumberEdit(Painter *p, int digits, int *number) {
+bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
+//    if(consume) *consume = false;
+    fprintf(stderr, "%d", *consume);
     Point pos = getPos();
     static bool cursor = false;
 
@@ -177,6 +183,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number) {
     bool res = false;
 
     if(xEvent.type == KeyPress && context.active == number) {
+        if(consume) *consume = true;
         KeySym sym = XLookupKeysym(&xEvent.xkey, 0);
         fprintf(stderr, "%c %c! \n", (int)sym, XK_Right);
         if(sym == XK_Right) {
@@ -216,7 +223,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number) {
                 bool neg = *number < 0;
                 if(neg) *number = -*number;
                 *number = (*number)/value*value*10 +
-               (sym-'0')*value + (*number)%value;
+                 (sym-'0')*value + (*number)%value;
                 if(neg) *number = -*number;
                 context.pos++;
                 res = true;
@@ -230,13 +237,16 @@ bool guiNumberEdit(Painter *p, int digits, int *number) {
     }
     keyPressBreak:
 
-    if(xEvent.type == ButtonPress) {
+    if(xEvent.type == ButtonPress || xEvent.type == ButtonRelease) {
         int mx = xEvent.xbutton.x;
         int my = xEvent.xbutton.y;
+        fprintf(stderr, "%d", *consume);
         if(mx >= pos.x && mx <= pos.x + (int)size.width &&
             my >= pos.y && my <= pos.y + (int)size.height) {
+            if(consume) *consume = true;
             fprintf(stderr, "fwefwefw!\n");
             context.active = number;
+            fprintf(stderr, "%d", *consume);
             int newPos = (mx - pos.x - 5)/maxDigitWidth;
             context.pos = newPos > numberOfDigits? numberOfDigits:
                           newPos > 0 ? newPos :
@@ -251,6 +261,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number) {
 //                size.width, size.height);
         XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
                        size.width, size.height);
+        fprintf(stderr, "%d", *consume);
         if(context.active == number) {
             XSetForeground(xdisplay, p->gc, 0xff0000ff);
         } else {
@@ -273,12 +284,16 @@ bool guiNumberEdit(Painter *p, int digits, int *number) {
             XDrawLine(xdisplay, p->drawable, p->gc,
                       pos.x + 5 + overallInk.width, pos.y + 5,
                       pos.x + 5 + overallInk.width, pos.y + 5 + maxDigitHeight);
+            fprintf(stderr, "%d", *consume);
+
         }
         if(xEvent.type == TimerEvent) {
             cursor = !cursor;
         }
   }
     feedbackSize(size);
+    fprintf(stderr, "%d", *consume);
+
     return res;
 }
 

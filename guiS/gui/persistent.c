@@ -4,7 +4,7 @@
 #include "stb_ds.h"
 typedef struct Unit {} Unit;
 static Unit unit;
-bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name) {
+bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name, bool* consume) {
     static struct {
         char* key;
         Unit value;
@@ -19,14 +19,14 @@ bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name) {
         }
         shput(map, name, unit);
     }
-    if(guiNumberEdit(p, digits, number)) {
+    if(guiNumberEdit(p, digits, number, consume)) {
         saveInt(name, *number);
         return true;
     }
     return false;
 }
 
-bool resourseToolButton(Painter*p, char* name) {
+bool resourseToolButton(Painter*p, char* name, bool* consume) {
     static struct {
         char* key;
         XImage* value;
@@ -40,5 +40,5 @@ bool resourseToolButton(Painter*p, char* name) {
     } else {
         image = map[index].value;
     }
-    return guiToolButton(p, image);
+    return guiToolButton(p, image, consume);
 }

@@ -3,9 +3,9 @@
 #include <gui.h>
 
 
-bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name);
+bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name, bool *consume);
 #define persistentNumberEdit(p, d, n) \
     persistentNumberEdit_(p, d, n, #n)
 
-bool resourseToolButton(Painter*p, char* name);
+bool resourseToolButton(Painter*p, char* name, bool *consume);
 #endif // PERSISTENT_H

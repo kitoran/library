@@ -49,10 +49,10 @@ typedef struct RawPicture {
 
 void guiLabel(Painter* p, char *text, int len);
 int guiComboBoxZT(Painter* p, char** elements, int current);
-bool guiNumberEdit(Painter*p, int digits, int* number);
+bool guiNumberEdit(Painter*p, int digits, int* number, bool* consume);
 void guiDoubleEdit(Painter*p, int digits, double* number);
 bool guiButton(Painter *p, char* text, int len);
-bool guiToolButton(Painter* p, XImage* i);
+bool guiToolButton(Painter* p, XImage* i, bool *consume);
 void guiLabelZT(Painter* p, char *text);
 bool guiButtonZT(Painter* p, char *text);
 

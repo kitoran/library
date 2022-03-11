@@ -14,7 +14,8 @@ SOURCES += \
 HEADERS += \
     $$PWD/gui/gui.h \
     $$PWD/gui/stb_ds.h \
-    $$PWD/gui/gridlayout.h
+    $$PWD/gui/gridlayout.h \
+    $$PWD/gui/color.h
 
 INCLUDEPATH += $$PWD/gui/
 
