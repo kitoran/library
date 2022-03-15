@@ -162,7 +162,7 @@ bool guiToolButton(Painter *p, XImage *i, bool *consume) {
 
 bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
 //    if(consume) *consume = false;
-    fprintf(stderr, "%d", *consume);
+//    fprintf(stderr, "%d", *consume);
     Point pos = getPos();
     static bool cursor = false;
 
@@ -240,13 +240,13 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
     if(xEvent.type == ButtonPress || xEvent.type == ButtonRelease) {
         int mx = xEvent.xbutton.x;
         int my = xEvent.xbutton.y;
-        fprintf(stderr, "%d", *consume);
+//        fprintf(stderr, "%d", *consume);
         if(mx >= pos.x && mx <= pos.x + (int)size.width &&
             my >= pos.y && my <= pos.y + (int)size.height) {
             if(consume) *consume = true;
             fprintf(stderr, "fwefwefw!\n");
             context.active = number;
-            fprintf(stderr, "%d", *consume);
+//            fprintf(stderr, "%d", *consume);
             int newPos = (mx - pos.x - 5)/maxDigitWidth;
             context.pos = newPos > numberOfDigits? numberOfDigits:
                           newPos > 0 ? newPos :
@@ -261,7 +261,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
 //                size.width, size.height);
         XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
                        size.width, size.height);
-        fprintf(stderr, "%d", *consume);
+//        fprintf(stderr, "%d", *consume);
         if(context.active == number) {
             XSetForeground(xdisplay, p->gc, 0xff0000ff);
         } else {
@@ -284,7 +284,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
             XDrawLine(xdisplay, p->drawable, p->gc,
                       pos.x + 5 + overallInk.width, pos.y + 5,
                       pos.x + 5 + overallInk.width, pos.y + 5 + maxDigitHeight);
-            fprintf(stderr, "%d", *consume);
+//            fprintf(stderr, "%d", *consume);
 
         }
         if(xEvent.type == TimerEvent) {
@@ -292,7 +292,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
         }
   }
     feedbackSize(size);
-    fprintf(stderr, "%d", *consume);
+//    fprintf(stderr, "%d", *consume);
 
     return res;
 }

@@ -1,5 +1,5 @@
 
-SOURCES += \
+SOURCES *= \
     $$PWD/settings.c
 
 HEADERS += \

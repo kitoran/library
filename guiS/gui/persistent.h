@@ -4,8 +4,8 @@
 
 
 bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name, bool *consume);
-#define persistentNumberEdit(p, d, n) \
-    persistentNumberEdit_(p, d, n, #n)
+#define persistentNumberEdit(p, d, n, c) \
+    persistentNumberEdit_(p, d, n, #n, c)
 
 bool resourseToolButton(Painter*p, char* name, bool *consume);
 #endif // PERSISTENT_H
