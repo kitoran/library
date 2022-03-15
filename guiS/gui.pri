@@ -1,6 +1,7 @@
 #if(guiPers) {
 include($$PWD/../settingsS/settings/settings.pri)
 include($$PWD/../loadImage/loadImage.pri)
+DEFINES += GUI_RESOURCE_PATH=$$PWD
 SOURCES +=  \
     $$PWD/gui/persistent.c
 HEADERS +=  \
@@ -9,7 +10,10 @@ HEADERS +=  \
 SOURCES += \
     $$PWD/gui/gui.c \
     $$PWD/gui/stb.c \
-    $$PWD/gui/gridlayout.c
+    $$PWD/gui/gridlayout.c \
+    $$PWD/gui/combobox.c \
+    $$PWD/gui/guiglobals.c \
+
 
 HEADERS += \
     $$PWD/gui/gui.h \

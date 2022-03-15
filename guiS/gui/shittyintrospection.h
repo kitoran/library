@@ -1,9 +1,4 @@
-﻿/*
-Чтобы не замедлять компиляцию, этот файл не включает qDebug, QComboBox и  <type_traits>, что они не нужны, когда QDEBUG_OP не используется. Поэтому перед использованием QDEBUG_OP нужно включить эти файлы.
-(Их не нужно включать в хедере, в котором объявляется энум, только в сорце, в котором непосредственно используется
-QDEBUG_OP)
-*/
-#ifndef SHITTYINTROSPECTION_H
+﻿#ifndef SHITTYINTROSPECTION_H
 #define SHITTYINTROSPECTION_H
 #ifndef NO_SHITTY_INTROSPECTION
 #define _NUM_ARGS(X50, X49, X48, X47, X46, X45, X44, X43, X42, X41, X40, X39, X38, X37, X36, X35, X34, X33, X32, X31, X30, X29, X28, X27, X26, X25, X24, X23, X22, X21, X20, X19, X18, X17, X16, X15, X14, X13, X12, X11, X10, X9, X8, X7, X6, X5, X4, X3, X2, X1, N, ...)   N

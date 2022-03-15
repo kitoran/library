@@ -12,10 +12,11 @@ extern Display * xdisplay;
 XImage *loadLocalImageZT(char *path) {
 
     char imagePath[PATH_MAX] = {};
-
-#define stringify2(a) #a
-#define stringify(a) stringify2(a)
-    strncat(imagePath, stringify(MY_PATH), PATH_MAX);
+    int r;
+    r+=5;
+//#define stringify2(a) #a
+//#define stringify(a) stringify2(a)
+    strncat(imagePath, MY_PATH, PATH_MAX);
     strncat(imagePath, "/", PATH_MAX);
     strncat(imagePath, path, PATH_MAX);
     int x,y, n;

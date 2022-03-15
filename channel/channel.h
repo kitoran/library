@@ -32,8 +32,7 @@ int pthread_setname_np(pthread_t thread, const char *name);
 inline static void blockAndPut(struct Channel* channel, const void* thing_, size_t size) {
     assert(size < CHANNEL_MAX_SIZE );
     pthread_t cur = pthread_self();
-    pthread_getname_np(cur,
-                           channel->threadName, 30);
+    pthread_getname_np(cur, channel->threadName, 30);
 //    fprintf(stderr, "obtaining %d %s %s", gettid(), thread_name, __func__);
     pthread_mutex_lock(&(channel->mutex));
     memcpy(channel->thing, thing_, size);
@@ -44,10 +43,9 @@ inline static void blockAndPut(struct Channel* channel, const void* thing_, size
 }
 
 inline static void takeC(struct Channel* channel, void* buffer, size_t size) {
-    assert(size < CHANNEL_MAX_SIZE );
+    assert(size < CHANNEL_MAX_SIZE);
     pthread_t cur = pthread_self();
-    pthread_getname_np(cur,
-                           channel->threadName, 30);
+    pthread_getname_np(cur, channel->threadName, 30);
 //    fprintf(stderr, "obtaining %d %s %s", gettid(), thread_name, __func__);
     pthread_mutex_lock(&(channel->mutex));
 //        cv.wait(lck, [this]{ return full; });

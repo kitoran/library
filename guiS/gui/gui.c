@@ -1,4 +1,5 @@
 ﻿#include "gui.h"
+#include "guiglobals.h"
 #include <X11/Xlib.h>
 #include <math.h>
 #include <assert.h>
@@ -12,22 +13,6 @@
 
 #define MAX(a,b) ((a)>(b)?(a):(b))
 #define MIN(a,b) ((a)<(b)?(a):(b))
-Display * xdisplay = 0;
-//XFontStruct *xFontStruct;
-static XFontSet xFontSet;
-Window rootWindow = 0;
-int xDepth = 0;
-static int maxDigitWidth = 0;
-static int maxDigitHeight = 0;
-static bool redraw = false;
-struct {
-
-
-    void* active;
-    int pos;
-} context;
-static Size rootWindowSize;
-
 
 Point defaultGetPos() {
     fprintf(stderr, "getPos not set");
@@ -436,59 +421,6 @@ void guiRedraw()
     redraw = true;
 }
 
-int guiComboBoxZT(Painter *p, char **elements, int current)
-{
-    Point pos = getPos();
-    char** c = elements;
-    XRectangle overallLogMax = {0, 0, 0, 0};
-
-    while(*c != NULL) {
-        XRectangle overallInk;
-        XRectangle overallLog;
-        Xutf8TextExtents(xFontSet, *c, strlen(*c), &overallInk, &overallLog);
-        int newx = MIN(overallLogMax.x, overallLog.x);
-        int newy = MIN(overallLogMax.y, overallLog.y);
-        int newr = MAX(overallLogMax.x + overallLogMax.width,
-                       overallLog.x + overallLog.width);
-        int newb = MAX(overallLogMax.y + overallLogMax.height,
-                       overallLog.y + overallLog.height);
-        overallLogMax.x = newx;
-        overallLogMax.y = newy;
-        overallLogMax.width = newr - newx;
-        overallLogMax.height = newb - newy;
-        c++;
-    }
-    char added[] = " ▼";
-    {
-        XRectangle overallInk;
-        XRectangle overallLog;
-        Xutf8TextExtents(xFontSet, added, sizeof(added)-1, &overallInk, &overallLog);
-        overallLogMax.width += overallLog.width;
-    }
-    Size size = {overallLogMax.width + 10,
-                overallLogMax.height + 10};
-    /*if(xEvent.type == Expose)*/ {
-        XSetForeground(xdisplay, p->gc, 0xff555555);
-//        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
-//                size.width, size.height);
-        XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
-                       size.width, size.height);
-        XSetForeground(xdisplay, p->gc, 0xffffffff);
-        XDrawRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
-                       size.width, size.height);
-
-
-        XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
-                                                   DefaultScreen(xdisplay)));
-        char st[200];
-        int len = snprintf(st, 200, "%s%s", elements[current], added);
-        Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
-                    pos.x+5 + overallLogMax.x, pos.y+5 - overallLogMax.y, st, len);
-    }
-
-    feedbackSize(size);
-    return current;
-}
 
 void guiDoubleEdit(Painter *p, int digits, double *number)
 {
