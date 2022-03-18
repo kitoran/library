@@ -1,7 +1,7 @@
 #if(guiPers) {
 include($$PWD/../settingsS/settings/settings.pri)
 include($$PWD/../loadImage/loadImage.pri)
-DEFINES += GUI_RESOURCE_PATH=$$PWD
+DEFINES += GUI_RESOURCE_PATH=\\\"$$PWD/gui\\\"
 SOURCES +=  \
     $$PWD/gui/persistent.c
 HEADERS +=  \

@@ -9,14 +9,14 @@
 #pragma GCC optimize ("Ofast")
 
 extern Display * xdisplay;
-XImage *loadLocalImageZT(char *path) {
+XImage *loadImageZT(char* startOfPath, char *path) {
 
     char imagePath[PATH_MAX] = {};
     int r;
     r+=5;
 //#define stringify2(a) #a
 //#define stringify(a) stringify2(a)
-    strncat(imagePath, MY_PATH, PATH_MAX);
+    strncat(imagePath, startOfPath, PATH_MAX);
     strncat(imagePath, "/", PATH_MAX);
     strncat(imagePath, path, PATH_MAX);
     int x,y, n;

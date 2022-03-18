@@ -55,6 +55,7 @@ bool guiButton(Painter *p, char* text, int len);
 bool guiToolButton(Painter* p, XImage* i, bool *consume);
 void guiLabelZT(Painter* p, char *text);
 bool guiButtonZT(Painter* p, char *text);
+bool guiSlider(Painter*, double* v, double start, double end);
 
 void guiDrawLine(Painter*, int, int, int, int);
 void guiDrawRectangle(Painter*, int, int, int, int);

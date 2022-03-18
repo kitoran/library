@@ -1,6 +1,6 @@
 ﻿#ifndef COLOR_GUI_H
 #define COLOR_GUI_H
-
+#include <stdlib.h>
 //typedef struct {
 //    double r;       // a fraction between 0 and 1
 //    double g;       // a fraction between 0 and 1
@@ -17,7 +17,7 @@ typedef struct {
 //static rgb   /hsv2rgb(hsv in);
 
 #pragma GCC push_options
-#pragma GCC optimise ("O0")
+#pragma GCC optimize ("O0")
 static int hsvd2bgr(double h, double s, double v)
 {
     hsv in = {h, s, v};

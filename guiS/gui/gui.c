@@ -282,6 +282,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
     return res;
 }
 
+extern const char* appName;
 void guiStartDrawing() {
 
     xdisplay = XOpenDisplay(NULL);
@@ -339,7 +340,7 @@ void guiStartDrawing() {
                  | ExposureMask | KeyPressMask
                  | ButtonMotionMask | ButtonReleaseMask);
 
-    XStoreName(xdisplay, rootWindow, "Additive synthesis!");
+    XStoreName(xdisplay, rootWindow, appName);
     // "Map" the window (that is, make it appear on the screen)
     XMapWindow(xdisplay , rootWindow);
 
@@ -382,7 +383,7 @@ void guiNextEvent()
     if (XPending(xdisplay) || wait_fd(ConnectionNumber(xdisplay),0.530)) {
        XNextEvent(xdisplay, &xEvent);
        if(xEvent.xany.window != rootWindow) {
-            fprintf(stderr, "got wrong event %d %d\n", xEvent.type, xEvent.xany.window );
+            fprintf(stderr, "got wrong event %ud %ud\n", xEvent.type, xEvent.xany.window );
            abort();
        }
 
