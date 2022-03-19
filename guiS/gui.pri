@@ -19,7 +19,8 @@ HEADERS += \
     $$PWD/gui/gui.h \
 #    $$PWD/gui/stb_ds.h \
     $$PWD/gui/gridlayout.h \
-    $$PWD/gui/color.h
+    $$PWD/gui/color.h \
+    $$PWD/gui/shittyintrospection.h 
 
 INCLUDEPATH += $$PWD/gui/
 

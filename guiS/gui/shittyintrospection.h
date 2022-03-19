@@ -58,8 +58,8 @@
 #define STRINGIFY_COMMA_SECOND(X, Y)    #Y,
 //#define SECOND(X, Y)    Y
 //#define FITSTS2(...)
-#define INTROSPECT_ENUM(Name, ...) constexpr char const*const Name ## Names [NUM_ARGS(__VA_ARGS__)] = {FOREACH(STRINGIFY_COMMA, (__VA_ARGS__))}; \
-    enum Name {__VA_ARGS__}; \
+#define INTROSPECT_ENUM(Name, ...) const char const*const Name ## Names [NUM_ARGS(__VA_ARGS__)+1] = {FOREACH(STRINGIFY_COMMA, (__VA_ARGS__))}; \
+    typedef enum {__VA_ARGS__} Name; \
     const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)] = {__VA_ARGS__}; \
     const int Name ## Size = NUM_ARGS(__VA_ARGS__);
 
@@ -68,6 +68,12 @@
     const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
     const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
 
+#define INTROSPECT_ENUM_PERSISTENT_COMBOBOX(Name, ...) INTROSPECT_ENUM(Name, __VA_ARGS__) \
+    bool Name ## PersistentComboBox (Painter *p, Name* current, char* name) { \
+        return persistentComboBoxZT_(p, Name ## Names, current, name); \
+    }
+#define persistentEnumComboBox(enum, p, c) \
+    enum ## PersistentComboBox(p, c, #c)
 //#define INTROSPECT_ENUM_VISIBLE_NAMES_PERSISTENT_COMBOBOX(Name, ...) INTROSPECT_ENUM_VISIBLE_NAMES(Name, __VA_ARGS__) \
 //    class Name ## ComboBox : public QComboBox           \
 //    {                                                   \

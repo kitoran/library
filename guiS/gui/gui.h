@@ -37,6 +37,9 @@ extern Point (*getPos)();
 extern void (*feedbackSize)(Size);
 
 
+//Point getSavedPos();
+//void savePos(int x, int y);
+
 typedef struct Painter {
     Drawable drawable;
     GC gc;
@@ -46,12 +49,13 @@ typedef struct RawPicture {
     size_t w;
     size_t h;
 } RawPicture ;
-
+// in interactive widgets p->drawable should be a Window
 void guiLabel(Painter* p, char *text, int len);
-int guiComboBoxZT(Painter* p, char** elements, int current);
+bool guiComboBoxZT(Painter *p, char **elements, int* current);
 bool guiNumberEdit(Painter*p, int digits, int* number, bool* consume);
 void guiDoubleEdit(Painter*p, int digits, double* number);
 bool guiButton(Painter *p, char* text, int len);
+//bool guiButtonWindow(Painter *p, char* text, int len);
 bool guiToolButton(Painter* p, XImage* i, bool *consume);
 void guiLabelZT(Painter* p, char *text);
 bool guiButtonZT(Painter* p, char *text);

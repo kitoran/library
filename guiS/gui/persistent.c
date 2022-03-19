@@ -42,3 +42,26 @@ bool resourseToolButton(Painter*p, char* name, bool* consume) {
     }
     return guiToolButton(p, image, consume);
 }
+
+bool persistentComboBoxZT_(Painter *p, char **elements, int *current, char *name)
+{
+    static struct {
+        char* key;
+        Unit value;
+    } *map = NULL;
+
+    int index = shgeti(map, name);
+    if(index == -1) {
+        bool success;
+        int value = loadInt(name, &success);
+        if(success) {
+            *current = value;
+        }
+        shput(map, name, unit);
+    }
+    if(guiComboBoxZT(p, elements, current)) {
+        saveInt(name, *current);
+        return true;
+    }
+    return false;
+}

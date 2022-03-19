@@ -82,6 +82,7 @@ void guiLabelZT(Painter* p, char *text) {
 }
 bool guiButton(Painter *p, char* text, int len)
 {
+    if(xEvent.xany.window != p->drawable) return false;
     Point pos = getPos();
     XRectangle overallInk;
     XRectangle overallLog;
@@ -120,6 +121,7 @@ bool guiButtonZT(Painter* p, char *text) {
 }
 bool guiToolButton(Painter *p, XImage *i, bool *consume) {
 //    if(consume) *consume = false;
+    if(xEvent.xany.window != p->drawable) return false;
     Point pos = getPos();
     Size size = {i->width,
                  i->height};
