@@ -51,7 +51,7 @@ typedef struct RawPicture {
 } RawPicture ;
 // in interactive widgets p->drawable should be a Window
 void guiLabel(Painter* p, char *text, int len);
-bool guiComboBoxZT(Painter *p, char **elements, int* current);
+bool guiComboBoxZT(Painter *p, char const*const*elements, int* current);
 bool guiNumberEdit(Painter*p, int digits, int* number, bool* consume);
 void guiDoubleEdit(Painter*p, int digits, double* number);
 bool guiButton(Painter *p, char* text, int len);

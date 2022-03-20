@@ -48,3 +48,14 @@ int getGridBottom()
     }
     return x;
 }
+
+void gridNextRow()
+{
+    currentY++;
+}
+
+void gridNextColumn()
+{
+    currentY = 0;
+    currentX++;
+}

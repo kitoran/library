@@ -9,5 +9,5 @@ bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name, bool 
 
 bool resourseToolButton(Painter*p, char* name, bool *consume);
 
-bool persistentComboBoxZT_(Painter*p, char** elements, int *current, char* name);
+bool persistentComboBoxZT_(Painter*p, char const*const* elements, int *current, char* name);
 #endif // PERSISTENT_H

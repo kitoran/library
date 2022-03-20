@@ -8,8 +8,9 @@ extern Point gridStart;
 Point gridGetPos();
 void gridFeedbackSize(Size s);
 void setCurrentGridPos(int row, int column);
+void gridNextRow();
+void gridNextColumn();
 int getGridBottom();
-
 
 
 #endif // GRIDLAYOUT_H

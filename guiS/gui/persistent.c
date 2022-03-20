@@ -43,7 +43,7 @@ bool resourseToolButton(Painter*p, char* name, bool* consume) {
     return guiToolButton(p, image, consume);
 }
 
-bool persistentComboBoxZT_(Painter *p, char **elements, int *current, char *name)
+bool persistentComboBoxZT_(Painter *p, const char * const *elements, int *current, char *name)
 {
     static struct {
         char* key;
