@@ -284,8 +284,8 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
     return res;
 }
 
-extern const char* appName;
-void guiStartDrawing() {
+//extern const char* appName;
+void guiStartDrawing(const char* appName) {
 
     xdisplay = XOpenDisplay(NULL);
     assert(xdisplay);
@@ -316,7 +316,6 @@ void guiStartDrawing() {
     }
 
 
-
     int screen = DefaultScreen(xdisplay);
     int blackColor = BlackPixel(xdisplay, screen );
     int whiteColor = WhitePixel(xdisplay, screen );
@@ -333,10 +332,6 @@ void guiStartDrawing() {
         ForgetGravity, NorthWestGravity, NotUseful,
         -1, 0, False, 0, 0, False, CopyFromParent, None
     };
-//    rootWindow = XCreateWindow(xdisplay , DefaultRootWindow(xdisplay ), 0, 0,
-//        700, 700, /*border*/ 0, /*depth*/4, InputOutput,
-//            CopyFromParent, 0,0);
-
     // We want to get MapNotify events
     XSelectInput(xdisplay, rootWindow, StructureNotifyMask | ButtonPressMask
                  | ExposureMask | KeyPressMask
@@ -394,9 +389,9 @@ void guiNextEvent()
                 xEvent.xconfigure.width,
                 xEvent.xconfigure.height};
             rootWindowSize = newSize;
-            fprintf(stderr, "reconfigure  %d x %d\n!!",
-                    newSize.width,
-                                          newSize.height);;
+//            fprintf(stderr, "reconfigure  %d x %d\n!!",
+//                    newSize.width,
+//                                          newSize.height);;
         }
        return;
     } else {

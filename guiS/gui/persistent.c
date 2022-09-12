@@ -2,6 +2,8 @@
 #include "settings.h"
 #include "loadImage.h"
 #include "stb_ds.h"
+#include "stdio.h"
+
 typedef struct Unit {} Unit;
 static Unit unit;
 bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name, bool* consume) {
@@ -25,7 +27,22 @@ bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name, bool*
     }
     return false;
 }
+bool standardResourseToolButton(Painter*p, char* name, bool* consume) {
+    static struct {
+        char* key;
+        XImage* value;
+    } *map = NULL;
 
+    XImage* image;
+    int index = shgeti(map, name);
+    if(index == -1) {
+        image = loadImageZT(GUI_RESOURCE_PATH, name);
+        shput(map, name, image);
+    } else {
+        image = map[index].value;
+    }
+    return guiToolButton(p, image, consume);
+}
 bool resourseToolButton(Painter*p, char* name, bool* consume) {
     static struct {
         char* key;
@@ -34,6 +51,7 @@ bool resourseToolButton(Painter*p, char* name, bool* consume) {
 
     XImage* image;
     int index = shgeti(map, name);
+//    fprintf(stderr, "%d, index", index);
     if(index == -1) {
         image = loadLocalImageZT(name);
         shput(map, name, image);

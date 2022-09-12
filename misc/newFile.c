@@ -1,4 +1,4 @@
-﻿#include "newfile.h"
+﻿#include "newFile.h"
 
 
 #include <sys/types.h>
@@ -22,7 +22,7 @@ char* newFile(char* path, char* extension) {
     snprintf(cat, sizeof(cat), "%s.%s",
              path, extension);
     if (!exists___(cat)) {
-        return path;
+        return cat;
     }
     int i = 1;
     do {

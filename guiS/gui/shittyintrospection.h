@@ -71,30 +71,30 @@
     const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
     const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
 
-//#define INTROSPECT_ENUM_PERSISTENT_COMBOBOX(Name, ...) INTROSPECT_ENUM(Name, __VA_ARGS__) \
-//    bool Name ## PersistentComboBox (Painter *p, Name* current, char* name) { \
-//        return persistentComboBoxZT_(p, Name ## Names, current, name); \
+//#define INTROSPECT_ENUM_PERSISTENT_COMBOBOX(Name, ...) INTROSPECT_ENUM(Name, __VA_ARGS__)
+//    bool Name ## PersistentComboBox (Painter *p, Name* current, char* name) {
+//        return persistentComboBoxZT_(p, Name ## Names, current, name);
 //    }
 #define persistentEnumComboBox(enum, p, c) \
     persistentComboBoxZT_(p, enum ## Names, c, #c)
-//#define INTROSPECT_ENUM_VISIBLE_NAMES_PERSISTENT_COMBOBOX(Name, ...) INTROSPECT_ENUM_VISIBLE_NAMES(Name, __VA_ARGS__) \
-//    class Name ## ComboBox : public QComboBox           \
-//    {                                                   \
-//        Q_OBJECT                                        \
-//    public:                                             \
-//        explicit Name ## ComboBox (QWidget *parent = 0):QComboBox(parent) { \
-//            for(Name name : Name ## Enumerators) {      \
-//                addItem(Name ## Names[name], name);     \
-//            }                                           \
-//            connect(this, &QComboBox::objectNameChanged, this, & Name ## ComboBox::restoreSetting); \
-//        }                                               \
-//        ~Name ## ComboBox() {                           \
-//            QSettings().setValue(objectName(), currentText()); \
-//        }                                               \
-//    private slots:                                      \
-//        void restoreSetting(const QString& name) {      \
-//            setCurrentText(QSettings().value(name).toString()); \
-//        }                                               \
+//#define INTROSPECT_ENUM_VISIBLE_NAMES_PERSISTENT_COMBOBOX(Name, ...) INTROSPECT_ENUM_VISIBLE_NAMES(Name, __VA_ARGS__)
+//    class Name ## ComboBox : public QComboBox
+//    {
+//        Q_OBJECT
+//    public:
+//        explicit Name ## ComboBox (QWidget *parent = 0):QComboBox(parent) {
+//            for(Name name : Name ## Enumerators) {
+//                addItem(Name ## Names[name], name);
+//            }
+//            connect(this, &QComboBox::objectNameChanged, this, & Name ## ComboBox::restoreSetting);
+//        }
+//        ~Name ## ComboBox() {
+//            QSettings().setValue(objectName(), currentText());
+//        }
+//    private slots:
+//        void restoreSetting(const QString& name) {
+//            setCurrentText(QSettings().value(name).toString());
+//        }
 //    };
 
 #define INTROSPECT_ENUM_VISIBLE_NAMES_PERSISTENT_COMBOBOX_ENUMNAME(Name, ...) INTROSPECT_ENUM_VISIBLE_NAMES(Name, __VA_ARGS__) \

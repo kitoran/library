@@ -3,9 +3,11 @@ include($$PWD/../settingsS/settings/settings.pri)
 include($$PWD/../loadImage/loadImage.pri)
 DEFINES += GUI_RESOURCE_PATH=\\\"$$PWD/gui\\\"
 SOURCES +=  \
-    $$PWD/gui/persistent.c
+    $$PWD/gui/persistent.c \
+    $$PWD/gui/draw.c
 HEADERS +=  \
-    $$PWD/gui/persistent.h
+    $$PWD/gui/persistent.h \
+    $$PWD/gui/draw.h
 #}
 SOURCES += \
     $$PWD/gui/gui.c \

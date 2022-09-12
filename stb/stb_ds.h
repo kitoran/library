@@ -1893,3 +1893,12 @@ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ------------------------------------------------------------------------------
 */
+
+
+
+
+// Added by me
+#define FOR_STB_ARRAY_I(index, array) for(int index = 0; index < arrlen(array); index++)
+#define FOR_STB_ARRAY(element, array) for(typeof(array) element = array; element < array+arrlen(array); element++)
+
+

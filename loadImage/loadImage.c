@@ -1,9 +1,12 @@
 ﻿#include "loadImage.h"
 #include "stb_image.h"
+#include "newFile.h"
+#include "stb_image_write.h"
 #include <X11/Xlib.h> // Every Xlib program must include this
 #include <linux/limits.h>
 #include <string.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #pragma GCC push_options
 #pragma GCC optimize ("Ofast")
@@ -36,3 +39,19 @@ XImage *loadImageZT(char* startOfPath, char *path) {
     return res;
 }
 #pragma GCC pop_options
+
+FILE* saveImage = 0;
+static void stbicallback(void *context, void *data, int size) {
+    fwrite(data, size, 1, saveImage);
+}
+void saveImageSomewhereNewWrongChannelsZT(struct _XImage *image, char *name) {
+    for(int i = 0; i < image->width*image->height; i++) {
+        image->data[i*4+3] = 0xff;
+    }
+    char* path = newFile(name, "bmp");
+    saveImage = fopen(path, "w");
+    stbi_write_bmp_to_func(stbicallback, NULL, image->width,
+                           image->height, 4, image->data);
+    fclose(saveImage);
+    saveImage=0;
+}

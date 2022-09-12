@@ -25,6 +25,7 @@ static void init() {
     if(initialized) {
         return;
     }
+    //return;
     char* home = getenv("HOME");
     assert(home);
 
