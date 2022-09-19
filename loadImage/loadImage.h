@@ -1,10 +1,19 @@
 ﻿
+
+
+#ifdef SDL
+struct SDL_Surface;
+#define IMAGE struct SDL_Surface
+#else
 struct _XImage;
-struct _XImage *loadImageZT(char* firstPartOfThePath,
+#define IMAGE struct _XImage
+#endif
+
+IMAGE *loadImageZT(char* firstPartOfThePath,
                             char* secondPartOfThePath);
-static struct _XImage *loadLocalImageZT(char* path) {
+static IMAGE *loadLocalImageZT(char* path) {
     return loadImageZT(MY_PATH, path);
 }
 
-void saveImageSomewhereNewWrongChannelsZT(struct _XImage *, char* name);
-
+void saveImageSomewhereNewWrongChannelsZT(IMAGE *, char* name);
+#undef IMAGE

@@ -78,7 +78,7 @@ static inline unsigned int rgb(int r, int g, int b) {
 static inline unsigned int rgbf(double r, double g, double b) {
     return rgb(r*255, g*255, b*255);
 }
-void guiStartDrawing(const char *name);
+void guiStartDrawing();
 void guiNextEvent();
 void guiRedraw();
 #endif // GUI_H

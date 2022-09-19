@@ -1,9 +1,9 @@
 ﻿#include "gui.h"
-Display * xdisplay = 0;
+//Display * xdisplay = 0;
 //XFontStruct *xFontStruct;
-XFontSet xFontSet;
+TTF_Font sdlFontSet;
 Window rootWindow = 0;
-int xDepth = 0;
+int sdlDepth = 0;
 int maxDigitWidth = 0;
 int maxDigitHeight = 0;
 bool redraw = false;

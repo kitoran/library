@@ -122,7 +122,7 @@ bool guiButtonZT(Painter* p, char *text) {
 bool guiToolButton(Painter *p, XImage *i, bool *consume) {
 //    if(consume) *consume = false;
     if(xEvent.xany.window != p->drawable) return false;
-    Point pos = getPos();
+    volatile Point pos = getPos();
     Size size = {i->width,
                  i->height};
     if(xEvent.type != MotionNotify) {
@@ -280,12 +280,12 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
   }
     feedbackSize(size);
 //    fprintf(stderr, "%d", *consume);
-
     return res;
 }
 
-//extern const char* appName;
-void guiStartDrawing(const char* appName) {
+extern const char* appName;
+const char* __attribute__((weak))  appName = "gui application";
+void guiStartDrawing(/*const char* appName*/) {
 
     xdisplay = XOpenDisplay(NULL);
     assert(xdisplay);

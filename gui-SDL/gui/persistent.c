@@ -30,10 +30,10 @@ bool persistentNumberEdit_(Painter*p, int digits, int* number, char* name, bool*
 bool standardResourseToolButton(Painter*p, char* name, bool* consume) {
     static struct {
         char* key;
-        XImage* value;
+        SDL_Surface* value;
     } *map = NULL;
 
-    XImage* image;
+    SDL_Surface* image;
     int index = shgeti(map, name);
     if(index == -1) {
         image = loadImageZT(GUI_RESOURCE_PATH, name);
@@ -46,10 +46,10 @@ bool standardResourseToolButton(Painter*p, char* name, bool* consume) {
 bool resourseToolButton(Painter*p, char* name, bool* consume) {
     static struct {
         char* key;
-        XImage* value;
+        SDL_Surface* value;
     } *map = NULL;
 
-    XImage* image;
+    SDL_Surface* image;
     int index = shgeti(map, name);
 //    fprintf(stderr, "%d, index", index);
     if(index == -1) {

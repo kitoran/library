@@ -2,26 +2,36 @@
 #include "stb_image.h"
 #include "newFile.h"
 #include "stb_image_write.h"
-#include <X11/Xlib.h> // Every Xlib program must include this
+#include <SDL2/SDL.h>
+#include <X11/Xlib.h>
 #include <linux/limits.h>
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
-
+#ifdef SDL
+struct SDL_Surface;
+#define IMAGE struct SDL_Surface
+#else
+struct _XImage;
+#define IMAGE struct _XImage
+#endif
 #pragma GCC push_options
 #pragma GCC optimize ("Ofast")
 
+#ifndef SDL
 extern Display * xdisplay;
-XImage *loadImageZT(char* startOfPath, char *path) {
+#endif
+//extern Display * xdisplay;
+IMAGE *loadImageZT(char* startOfPath, char *path) {
 
     char imagePath[PATH_MAX] = {};
-    int r;
-    r+=5;
+//    int r;
+//    r+=5;
 //#define stringify2(a) #a
 //#define stringify(a) stringify2(a)
-    strncat(imagePath, startOfPath, PATH_MAX);
+    strncat(imagePath, startOfPath, PATH_MAX-1);
     strncat(imagePath, "/", PATH_MAX);
-    strncat(imagePath, path, PATH_MAX);
+    strncat(imagePath, path, PATH_MAX-1);
     int x,y, n;
     unsigned char *data = stbi_load(imagePath, &x, &y, &n, 4);
     if(!data) abort();
@@ -32,10 +42,15 @@ XImage *loadImageZT(char* startOfPath, char *path) {
         data[i*4+2] = data[i*4];
         data[i*4] = temp;
     }
+#ifdef SDL
+    SDL_Surface *res = SDL_CreateRGBSurfaceWithFormatFrom(data, x, y, 24, x*4, SDL_PIXELFORMAT_ARGB32);
+#else
     XImage *res = XCreateImage(xdisplay, DefaultVisual(xdisplay, DefaultScreen(xdisplay)), 24,
-                 ZPixmap, 0, data, x, y, 32,
-                         x*4);
-
+                     ZPixmap, 0, data, x, y, 32,
+                             x*4);
+#endif
+    //    SDL_Texture * texture = SDL_CreateTextureFromSurface(a->rend, surface);
+    //IMG_LoadTexture_RW../?
     return res;
 }
 #pragma GCC pop_options
@@ -44,9 +59,10 @@ FILE* saveImage = 0;
 static void stbicallback(void *context, void *data, int size) {
     fwrite(data, size, 1, saveImage);
 }
-void saveImageSomewhereNewWrongChannelsZT(struct _XImage *image, char *name) {
+
+void saveImageSomewhereNewWrongChannelsZT(XImage *image, char *name) {
     for(int i = 0; i < image->width*image->height; i++) {
-        image->data[i*4+3] = 0xff;
+        ((char*)(image->data))[i*4+3] = 0xff;
     }
     char* path = newFile(name, "bmp");
     saveImage = fopen(path, "w");
