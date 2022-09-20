@@ -22,7 +22,7 @@ struct _XImage;
 extern Display * xdisplay;
 #endif
 //extern Display * xdisplay;
-IMAGE *loadImageZT(char* startOfPath, char *path) {
+IMAGE *loadImageZT(char* startOfPath, const char *path) {
 
     char imagePath[PATH_MAX] = {};
 //    int r;

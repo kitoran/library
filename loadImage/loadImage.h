@@ -10,8 +10,8 @@ struct _XImage;
 #endif
 
 IMAGE *loadImageZT(char* firstPartOfThePath,
-                            char* secondPartOfThePath);
-static IMAGE *loadLocalImageZT(char* path) {
+                            const char* secondPartOfThePath);
+static IMAGE *loadLocalImageZT(const char* path) {
     return loadImageZT(MY_PATH, path);
 }
 

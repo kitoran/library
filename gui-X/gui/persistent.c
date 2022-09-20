@@ -43,7 +43,10 @@ bool standardResourseToolButton(Painter*p, char* name, bool* consume) {
     }
     return guiToolButton(p, image, consume);
 }
-bool resourseToolButton(Painter*p, char* name, bool* consume) {
+bool resourseToolButton(Painter*p, const char* name, bool* consume) {
+   return resourseToolButtonA(p, name, false, consume);
+}
+bool resourseToolButtonA(Painter*p, const char* name, bool active, bool* consume) {
     static struct {
         char* key;
         XImage* value;
@@ -58,7 +61,7 @@ bool resourseToolButton(Painter*p, char* name, bool* consume) {
     } else {
         image = map[index].value;
     }
-    return guiToolButton(p, image, consume);
+    return guiToolButtonA(p, image, active, consume);
 }
 
 bool persistentComboBoxZT_(Painter *p, const char * const *elements, int *current, char *name)

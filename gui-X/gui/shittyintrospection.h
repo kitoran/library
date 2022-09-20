@@ -70,84 +70,11 @@
     enum Name {FOREACH2(FIRST, (__VA_ARGS__))}; \
     const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
     const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
+#define INTROSPECT_ENUM_FILENAMES(Name, ...) char const*const Name ## Filenames [NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(STRINGIFY_COMMA_SECOND, (__VA_ARGS__))}; \
+    typedef enum Name {FOREACH2(FIRST, (__VA_ARGS__))} Name; \
+    const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
+    const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
 
-//#define INTROSPECT_ENUM_PERSISTENT_COMBOBOX(Name, ...) INTROSPECT_ENUM(Name, __VA_ARGS__)
-//    bool Name ## PersistentComboBox (Painter *p, Name* current, char* name) {
-//        return persistentComboBoxZT_(p, Name ## Names, current, name);
-//    }
-//#define INTROSPECT_ENUM_VISIBLE_NAMES_PERSISTENT_COMBOBOX(Name, ...) INTROSPECT_ENUM_VISIBLE_NAMES(Name, __VA_ARGS__)
-//    class Name ## ComboBox : public QComboBox
-//    {
-//        Q_OBJECT
-//    public:
-//        explicit Name ## ComboBox (QWidget *parent = 0):QComboBox(parent) {
-//            for(Name name : Name ## Enumerators) {
-//                addItem(Name ## Names[name], name);
-//            }
-//            connect(this, &QComboBox::objectNameChanged, this, & Name ## ComboBox::restoreSetting);
-//        }
-//        ~Name ## ComboBox() {
-//            QSettings().setValue(objectName(), currentText());
-//        }
-//    private slots:
-//        void restoreSetting(const QString& name) {
-//            setCurrentText(QSettings().value(name).toString());
-//        }
-//    };
-
-#define INTROSPECT_ENUM_VISIBLE_NAMES_PERSISTENT_COMBOBOX_ENUMNAME(Name, ...) INTROSPECT_ENUM_VISIBLE_NAMES(Name, __VA_ARGS__) \
-    class Name ## ComboBox : public QComboBox           \
-    {                                                   \
-        Q_OBJECT                                        \
-    public:                                             \
-        explicit Name ## ComboBox (QWidget *parent = 0):QComboBox(parent) { \
-            for(Name name : Name ## Enumerators) {      \
-                addItem(Name ## Names[name], name);     \
-            }                                           \
-            setCurrentIndex(QSettings().value(#Name).toInt()); \
-        }                                               \
-        explicit Name ## ComboBox (Name* var, QWidget *parent = 0):QComboBox(parent) { \
-            for(Name name : Name ## Enumerators) {      \
-                addItem(Name ## Names[name], name);     \
-            }                                           \
-            connect(this, qOverload<int>(&QComboBox::currentIndexChanged), \
-                    this, [var](int index){             \
-                *var = (Name)index;                     \
-            });                                         \
-            setCurrentIndex(QSettings().value(#Name).toInt()); \
-        }                                               \
-        ~Name ## ComboBox() {                           \
-            QSettings().setValue(#Name, 0); \
-        }                                               \
-    };
-
-#define INTROSPECT_ENUM_VISIBLE_NAMES_COMBOBOX(Name, ...) INTROSPECT_ENUM_VISIBLE_NAMES(Name, __VA_ARGS__) \
-    class Name ## ComboBox : public QComboBox           \
-    {                                                   \
-        Q_OBJECT                                        \
-    public:                                             \
-        explicit Name ## ComboBox (QWidget *parent = 0):QComboBox(parent) { \
-            for(Name name : Name ## Enumerators) {      \
-                addItem(Name ## Names[name], name);     \
-            }                                           \
-        }                                               \
-    };
-
-
-#define DECLARE_QDEBUG_OP(Name) QDebug operator<<(QDebug, Name);
-#define QDEBUG_OP(Name) QDebug operator<<(QDebug debug, Name n) { \
-    using namespace std; \
-    QDebugStateSaver saver(debug); Q_UNUSED(saver) \
-    if(n > 0 && n < Name ## Size) { \
-        debug.nospace().noquote() << Name ## Names [n]; \
-    } else { \
-        debug.nospace().noquote() << "invalid " #Name "(" << static_cast< \
-                conditional<is_same<underlying_type<Name>::type, char>::value, int, \
-                conditional<is_same<underlying_type<Name>::type, unsigned char>::value, unsigned int, \
-                underlying_type<Name>::type>::type>::type>(n) << ")"; \
-    } \
-    return debug; \
-}
 #else
 #define INTROSPECT_ENUM(Name, ...)  enum Name {__VA_ARGS__};
 #endif

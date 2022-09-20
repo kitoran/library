@@ -57,6 +57,7 @@ void guiDoubleEdit(Painter*p, int digits, double* number);
 bool guiButton(Painter *p, char* text, int len);
 //bool guiButtonWindow(Painter *p, char* text, int len);
 bool guiToolButton(Painter* p, XImage* i, bool *consume);
+bool guiToolButtonA(Painter* p, XImage* i, bool active, bool *consume);
 void guiLabelZT(Painter* p, char *text);
 bool guiButtonZT(Painter* p, char *text);
 bool guiSlider(Painter*, double* v, double start, double end);

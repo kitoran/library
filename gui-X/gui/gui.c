@@ -120,14 +120,21 @@ bool guiButtonZT(Painter* p, char *text) {
     return guiButton(p, text, strlen(text));
 }
 bool guiToolButton(Painter *p, XImage *i, bool *consume) {
+    guiToolButtonA(p,i,false,consume);
+}
+bool guiToolButtonA(Painter *p, XImage *i, bool active, bool *consume) {
 //    if(consume) *consume = false;
     if(xEvent.xany.window != p->drawable) return false;
     volatile Point pos = getPos();
-    Size size = {i->width,
-                 i->height};
+    Size size = {i->width+2,
+                 i->height+2};
+    if(active) {
+        guiSetForeground(p, 0xffff9999);
+        guiFillRectangle(p, pos.x, pos.y, size.width, size.height);
+    }
     if(xEvent.type != MotionNotify) {
         XPutImage(xdisplay, p->drawable, p->gc, i,
-                  0,0, pos.x, pos.y,
+                  0,0, pos.x+1, pos.y+1,
                   i->width, i->height);
     }
     bool res = false;

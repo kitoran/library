@@ -54,7 +54,7 @@ static void init() {
     fileContent = malloc(sb.st_size);
     FILE* f = fopen(path, "r");
     char* line;
-    int len = 0;
+    size_t len = 0;
     while(getline(&line, &len, f) > 0) {
         char* key; char* value;
         if(sscanf(line, " %ms = %ms ", &key, &value) > 0) {
