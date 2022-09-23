@@ -47,6 +47,7 @@ bool resourseToolButton(Painter*p, const char* name, bool* consume) {
    return resourseToolButtonA(p, name, false, consume);
 }
 bool resourseToolButtonA(Painter*p, const char* name, bool active, bool* consume) {
+//    ω⁴²³⁵“Unicode Character “”
     static struct {
         char* key;
         XImage* value;

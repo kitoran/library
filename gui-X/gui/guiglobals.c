@@ -1,4 +1,5 @@
 ﻿#include "gui.h"
+#include "guiglobals.h"
 Display * xdisplay = 0;
 //XFontStruct *xFontStruct;
 //XEvent xEvent;
@@ -7,9 +8,13 @@ Window rootWindow = 0;
 int xDepth = 0;
 int maxDigitWidth = 0;
 int maxDigitHeight = 0;
+struct XftFont  *xFont;
 bool redraw = false;
-struct context {
-    void* active;
-    int pos;
-} context;
+struct context context = {
+    NULL,
+    0,
+    {0},
+    0,
+    0
+};
 Size rootWindowSize;

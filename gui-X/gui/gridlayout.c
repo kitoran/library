@@ -1,5 +1,6 @@
 ﻿#include "gridlayout.h"
 #include <stdio.h>
+//#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,8 +12,14 @@ Grid allocateGrid(int cols, int rows, int spacing) {
     memset(r.gridHeights, 0, 4*rows);
     return r;
 }
-
+#define assert(a, msg, ...) if(!(a)) { \
+    fprintf(stderr, "%s: " msg, __PRETTY_FUNCTION__, ##__VA_ARGS__); \
+    abort(); \
+}
+//fprintf(stderr, msg, ##__VA_ARGS__);
 void setCurrentGridPos(Grid* g, int row, int column) {
+    assert(row < g->gridHeightsLen, "row too big")
+    assert(column < g->gridWidthsLen, "col too big")
     g->currentX = column;
     g->currentY = row;
 }
@@ -48,23 +55,30 @@ void gridNextColumn(Grid* g)
     g->currentX++;
 }
 
-
+#define ELEMS(a) (sizeof(a)/sizeof(*a))
 Grid* stack[10];
-int stackTop = -1;
+size_t stackTop = 0;
 
 void pushGrid(Grid *g)
 {
-    stackTop++;
+    assert(stackTop < ELEMS(stack), "pushing grid, stackTop is %d, elems is %d, "
+           "cond is %d, !cond id %d", stackTop, ELEMS(stack),
+           stackTop < ELEMS(stack), !(stackTop < ELEMS(stack)))
     stack[stackTop] = g;
+    stackTop++;
 }
 
 void popGrid()
 {
+    assert(stackTop > 0, "stack is empty, trying to pop")
     stackTop--;
 }
 
 Point gridGetPos() {
-    Grid* g = stack[stackTop];
+    assert(stackTop > 0, "stack is empty, trying to use")
+    Grid* g = stack[stackTop-1];
+    assert(g->currentX < g->gridWidthsLen, "%d, %d", g->currentX, g->gridWidthsLen)
+    assert(g->currentY < g->gridHeightsLen,"")
     int x = g->gridStart.x, y = g->gridStart.y;
     for(int i = 0; i < g->currentX; i++) {
         if(g->gridWidths[i])
@@ -79,7 +93,10 @@ Point gridGetPos() {
 }
 
 void gridFeedbackSize(Size s) {
-    Grid* g = stack[stackTop];
+    assert(stackTop > 0, "stack is empty, trying to pop")
+    Grid* g = stack[stackTop-1];
+    assert(g->currentX < g->gridWidthsLen, "%d, %d", g->currentX, g->gridWidthsLen)
+    assert(g->currentY < g->gridHeightsLen,"")
     Grid* fw3ehbsergser = g;
     if(s.height > 1000) {
         fprintf(stderr, "deep %p", fw3ehbsergser);
@@ -96,5 +113,6 @@ void gridFeedbackSize(Size s) {
 
 Grid *topGrid()
 {
-    return stack[stackTop];
+    assert(stackTop > 0, "stack is empty, trying to pop")
+    return stack[stackTop-1];
 }

@@ -1,6 +1,7 @@
 ﻿#include "gui.h"
 #include "guiglobals.h"
 #include <X11/Xlib.h>
+#include <X11/Xft/Xft.h>
 #include <math.h>
 #include <assert.h>
 #include <string.h>
@@ -54,31 +55,60 @@ void guiSetSize(Window win, uint w, uint h)
 {
     XResizeWindow(xdisplay, win, w, h);
 }
-
-void guiLabel(Painter* p, char *text, int len)
-{
+void guiLabelWithBackground(Painter* p, char *text, int len, bool back) {
     Point pos = getPos();
-    XRectangle overallInk;
-    XRectangle overallLog;
+//    XRectangle overallInk;
+//    XRectangle overallLog;
+    XGlyphInfo extents;
+//    Xutf8TextExtents(xFontSet, text, len, &overallInk, &overallLog);
 
-    Xutf8TextExtents(xFontSet, text, len, &overallInk, &overallLog);
-    Size size = {overallLog.width + 10,
-                overallLog.height + 10};
+    XftTextExtentsUtf8( xdisplay, xFont, (XftChar8 *)text, len, &extents );
+
+    Size size = {extents.width + 10,
+                extents.height + 10};
 
 //    XDrawRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
 //                   size.width, size.height);
     if(xEvent.type != MotionNotify) {
+        XRenderColor            xrcolor;
+        XftColor                xftcolor, hlcolor, xftcolor_bg, xftcolor_bg2;
+        /* Xft text color */
+        xrcolor.red = 0xffff;
+        xrcolor.green = 0xffff;
+        xrcolor.blue = 0xffff;
+        xrcolor.alpha = 0xffff;
+        XftColorAllocValue( xdisplay, DefaultVisual(xdisplay,DefaultScreen(xdisplay)),
+                    DefaultColormap( xdisplay, DefaultScreen(xdisplay) ), &xrcolor, &xftcolor );
+        XftDraw                 *xftdraw;
+
+        /* Xft draw context */
+        xftdraw = XftDrawCreate( xdisplay, rootWindow, DefaultVisual(xdisplay,DefaultScreen(xdisplay)),
+                    DefaultColormap( xdisplay, DefaultScreen(xdisplay) ) );
+        if(back) {
+            guiSetForeground(p,0);
+            guiFillRectangle(p, pos.x, pos.y, size.width, size.height);
+        }
         XSetForeground(xdisplay, p->gc, WhitePixel(xdisplay,
                                                    DefaultScreen(xdisplay)));
 //        fprintf(stderr, "printing label %s %d %d\n",
 //                text, pos.x+5 + overallLog.x, pos.y+5 - overallLog.y);
-        Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
-                    pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
+        XftDrawStringUtf8( xftdraw, &xftcolor, xFont, pos.x+5 , pos.y+5 + extents.height , (XftChar8 *)text, len );
+//        XftDrawStringUtf8( xftdraw, &xftcolor, xFont, pos.x+5 + extents.x, pos.y+5 - extents.y, (XftChar8 *)text, len );
+//        Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
+//                    pos.x+5 + overallLog.x, pos.y+5 - overallLog.y, text, len);
     }
     feedbackSize(size);
 }
+
+void guiLabelZTWithBackground(Painter* p, char *text, bool back) {
+    guiLabelWithBackground(p, text, strlen(text), back);
+}
+void guiLabel(Painter* p, char *text, int len)
+{
+    guiLabelWithBackground(p,text,len,false);
+}
 void guiLabelZT(Painter* p, char *text) {
-    guiLabel(p, text, strlen(text));
+    guiLabelZTWithBackground(p, text, false);
 }
 bool guiButton(Painter *p, char* text, int len)
 {
@@ -128,11 +158,11 @@ bool guiToolButtonA(Painter *p, XImage *i, bool active, bool *consume) {
     volatile Point pos = getPos();
     Size size = {i->width+2,
                  i->height+2};
-    if(active) {
-        guiSetForeground(p, 0xffff9999);
-        guiFillRectangle(p, pos.x, pos.y, size.width, size.height);
-    }
     if(xEvent.type != MotionNotify) {
+        if(active) {
+            guiSetForeground(p, 0xffff9999);
+            guiFillRectangle(p, pos.x, pos.y, size.width, size.height);
+        }
         XPutImage(xdisplay, p->drawable, p->gc, i,
                   0,0, pos.x+1, pos.y+1,
                   i->width, i->height);
@@ -155,78 +185,71 @@ bool guiToolButtonA(Painter *p, XImage *i, bool active, bool *consume) {
 }
 
 bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
-//    if(consume) *consume = false;
+
+    //    if(consume) *consume = false;
 //    fprintf(stderr, "%d", *consume);
     Point pos = getPos();
     static bool cursor = false;
 
     Size size = {maxDigitWidth*digits + 10,
                 maxDigitHeight + 10};
-
-    int numberOfDigits = 0;
-    {
-        int curNumber = *number;
-        while(curNumber) {
-            numberOfDigits++;
-            curNumber/=10;
-        }
-        if(*number <= 0) {
-            numberOfDigits++;
-        }
-    }
+    //    int numberOfDigits = 0;
+//    {
+//        int curNumber = *number;
+//        while(curNumber) {
+//            numberOfDigits++;
+//            curNumber/=10;
+//        }
+//        if(*number <= 0) {
+//            numberOfDigits++;
+//        }
+//    }
     bool res = false;
-
+    void commit()
+    {
+        context.active = 0;
+        context.editedString[context.editedStringLen] = 0;
+        sscanf(context.editedString, "%d", number);
+        res = true;
+    }
+//    fprintf(stderr, "%d digits", numberOfDigits);
     if(xEvent.type == KeyPress && context.active == number) {
         if(consume) *consume = true;
         KeySym sym = XLookupKeysym(&xEvent.xkey, 0);
         fprintf(stderr, "%c %c! \n", (int)sym, XK_Right);
         if(sym == XK_Right) {
-            if(context.pos < numberOfDigits) {
+            if(context.pos < context.editedStringLen) {
                 context.pos++;
             }
             cursor = true;
+        } else if(sym == XK_Return) {
+            commit();
         } else if(sym == XK_Left) {
             if(context.pos > 0) {
                 context.pos--;
             }
             cursor = true;
-        } else if(sym >= '0' && sym <= '9' || sym == XK_BackSpace) {
-            if(context.pos == 0 && *number < 0) {
+        } else if(sym == XK_BackSpace) {
+            if(context.pos == 0) {
                 goto keyPressBreak;
             }
-            int valueExponent = numberOfDigits - context.pos;
-            int value = 1;
-            for(int i = 0; i < valueExponent; i++) {
-                value*=10;
+            for(int i = context.pos; i < context.editedStringLen-1; i++) {
+                context.editedString[i] = context.editedString[i+1];
             }
-            if(sym == XK_BackSpace) {
-                if(context.pos == 0) {
-                    goto keyPressBreak;
-                } else if(context.pos == 1  && *number < 0) {
-                    *number = -*number;
-                    res = true;
-                } else {
-                    *number = (*number)/value/10*value + (*number)%value;
-                    res = true;
-                }
-                if(context.pos > 0) {
-                    context.pos--;
-                }
-            } else {
-                if(*number == 0) context.pos--;
-                bool neg = *number < 0;
-                if(neg) *number = -*number;
-                *number = (*number)/value*value*10 +
-                 (sym-'0')*value + (*number)%value;
-                if(neg) *number = -*number;
-                context.pos++;
-                res = true;
+            context.editedStringLen--;
+            context.pos--;
+//                res = true;
+        } else if(sym >= '0' && sym <= '9' || sym == '-') {
+            if(context.editedStringLen == MAX_DIGITS) {
+                goto keyPressBreak;
             }
-        } else if(sym == '-') {
-            if(context.pos == 0 && *number > 0) {
-                *number = -*number;
-                res = true;
+            for(int i = context.editedStringLen-1; i > context.pos; i--) {
+                context.editedString[i] = context.editedString[i-1];
             }
+            context.editedStringLen++;
+            context.editedString[context.pos] = sym;
+            context.pos++;
+//                res = true;
         }
     }
     keyPressBreak:
@@ -242,11 +265,9 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
             context.active = number;
 //            fprintf(stderr, "%d", *consume);
             int newPos = (mx - pos.x - 5)/maxDigitWidth;
-            context.pos = newPos > numberOfDigits? numberOfDigits:
-                          newPos > 0 ? newPos :
-                          0;
+            context.pos = MIN(MAX(newPos, 0), context.editedStringLen);
         } else if(context.active == number) {
-            context.active = 0;
+            commit();
         }
     }
     if(xEvent.type != MotionNotify) {
@@ -264,11 +285,20 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
         XDrawRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
                        size.width, size.height);
         XSetForeground(xdisplay, p->gc, 0xffffffff);
-        char string[20];
-        int len = snprintf(string, 20, "%d", *number);
-        Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
-                    pos.x+5 /*+ maxDigitWidth*digits*/,
-                        pos.y+5 + maxDigitHeight, string, len);
+        char stringN[20];
+        char* string;
+        if(context.active == number) {
+            string = context.editedString;
+            Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
+                        pos.x+5 /*+ maxDigitWidth*digits*/,
+                            pos.y+5 + maxDigitHeight, context.editedString, context.editedStringLen);
+        } else {
+            string = stringN;
+            int len = snprintf(stringN, 20, "%d", *number);
+            Xutf8DrawString(xdisplay, p->drawable, xFontSet, p->gc,
+                        pos.x+5 /*+ maxDigitWidth*digits*/,
+                            pos.y+5 + maxDigitHeight, stringN, len);
+        }
         if(cursor && context.active == number) {
             XRectangle overallInk;
             XRectangle overallLog;
@@ -303,6 +333,7 @@ void guiStartDrawing(/*const char* appName*/) {
     xFontSet =
         XCreateFontSet(xdisplay,  "-*-*-*-*-*-*-*-*-*-*-*-*-*-*",
                        &missingList, &missingCount, &defString);
+    xFont = XftFontOpenName( xdisplay, DefaultScreen( xdisplay ), "morpheus-12" );
     if (xFontSet == NULL) {
         fprintf(stderr, "Failed to create fontset\n");
         abort();

@@ -4,7 +4,7 @@
 #include "gridlayout.h"
 #include "persistent.h"
 #include "stb_ds.h"
-bool guiToolButtonGroup_(Painter* p, int* enumv, const char* enumNames[], int enumSize)
+bool guiToolButtonGroup_(Painter* p, int* enumv, const char*const enumNames[], int enumSize)
 {
     Point pos = getPos();
 
