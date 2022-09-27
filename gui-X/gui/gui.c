@@ -55,6 +55,24 @@ void guiSetSize(Window win, uint w, uint h)
 {
     XResizeWindow(xdisplay, win, w, h);
 }
+
+void guiDrawText(Painter* p, char *text, int len, Point pos, i32 color) {
+    XRenderColor            xrcolor;
+    XftColor                xftcolor;
+    /* Xft text color */
+    xrcolor.red = (color >> 16)&0xff * 256;
+    xrcolor.green = (color >> 8)&0xff * 256;
+    xrcolor.blue = (color >> 0)&0xff * 256;
+    xrcolor.alpha = 0xffff;
+    XftColorAllocValue( xdisplay, DefaultVisual(xdisplay,DefaultScreen(xdisplay)),
+                DefaultColormap( xdisplay, DefaultScreen(xdisplay) ), &xrcolor, &xftcolor );
+    XftDraw                 *xftdraw;
+
+    /* Xft draw context */
+    xftdraw = XftDrawCreate( xdisplay, p->drawable, DefaultVisual(xdisplay,DefaultScreen(xdisplay)),
+                DefaultColormap( xdisplay, DefaultScreen(xdisplay) ) );
+    XftDrawStringUtf8( xftdraw, &xftcolor, xFont, pos.x, pos.y, (XftChar8 *)text, len );
+}
 void guiLabelWithBackground(Painter* p, char *text, int len, bool back) {
     Point pos = getPos();
 //    XRectangle overallInk;
@@ -262,6 +280,12 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
             my >= pos.y && my <= pos.y + (int)size.height) {
             if(consume) *consume = true;
             fprintf(stderr, "fwefwefw!\n");
+            if(context.active != number) {
+                context.editedStringLen = snprintf(context.editedString,
+                         MAX_DIGITS,
+                         "%d",
+                         *number);
+            }
             context.active = number;
 //            fprintf(stderr, "%d", *consume);
             int newPos = (mx - pos.x - 5)/maxDigitWidth;

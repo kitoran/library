@@ -15,6 +15,7 @@
 //    int x;
 //    int y;
 //} State;
+typedef int i32;
 typedef struct GuiImage {
 
 } GuiImage;
@@ -39,7 +40,6 @@ extern void (*feedbackSize)(Size);
 
 //Point getSavedPos();
 //void savePos(int x, int y);
-
 typedef struct Painter {
     Drawable drawable;
     GC gc;
@@ -57,6 +57,7 @@ bool guiButton(Painter *p, char* text, int len);
 //bool guiButtonWindow(Painter *p, char* text, int len);
 bool guiToolButton(Painter* p, XImage* i, bool *consume);
 bool guiToolButtonA(Painter* p, XImage* i, bool active, bool *consume);
+void guiDrawText(Painter* p, char *text, int len, Point pos, i32 color);
 void guiLabel(Painter* p, char *text, int len);
 void guiLabelZT(Painter* p, char *text);
 void guiLabelZTWithBackground(Painter* p, char *text, bool back);

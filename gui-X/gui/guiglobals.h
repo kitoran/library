@@ -16,6 +16,7 @@ struct context {
     char editedString[MAX_DIGITS];
     char terminator;
     int editedStringLen;
+    void (*commit)(void* data);
 };
 extern struct context context;
 extern Size rootWindowSize;

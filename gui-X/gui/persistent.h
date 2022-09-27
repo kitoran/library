@@ -12,4 +12,7 @@ bool standardResourseToolButton(Painter*p, char* name, bool* consume);
 bool persistentComboBoxZT_(Painter*p, char const*const* elements, int *current, char* name);
 #define persistentEnumComboBox(enum, p, c) \
     persistentComboBoxZT_(p, enum ## Names, c, #c)
+#define persistentToolButtonGroup(p, e, c) \
+    persistentToolButtonGroup_(p, (int*)c, e ## Filenames, e## Size, c);
+
 #endif // PERSISTENT_H
