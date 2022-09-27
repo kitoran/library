@@ -30,7 +30,7 @@ int getGridHeight(Grid* g)
         if(g->gridHeights[i])
             y += g->gridHeights[i]+g->spacing;
     }
-    return y;
+    return y+g->spacing;
 }
 
 int getGridWidth(Grid *g)
@@ -40,7 +40,7 @@ int getGridWidth(Grid *g)
         if(g->gridWidths[i])
             x += g->gridWidths[i]+g->spacing;
     }
-    return x;
+    return x+g->spacing;
 }
 
 int getGridBottom(Grid *g);

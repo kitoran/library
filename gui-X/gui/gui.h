@@ -85,4 +85,5 @@ static inline unsigned int rgbf(double r, double g, double b) {
 void guiStartDrawing();
 void guiNextEvent();
 void guiRedraw();
+
 #endif // GUI_H

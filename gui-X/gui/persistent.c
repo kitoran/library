@@ -1,5 +1,6 @@
 ﻿#include "persistent.h"
 #include "settings.h"
+#include "toolbuttongroup.h"
 #include "loadImage.h"
 #include "stb_ds.h"
 #include "stdio.h"
@@ -47,14 +48,13 @@ bool resourseToolButton(Painter*p, const char* name, bool* consume) {
    return resourseToolButtonA(p, name, false, consume);
 }
 bool resourseToolButtonA(Painter*p, const char* name, bool active, bool* consume) {
-//    ω⁴²³⁵“Unicode Character “”
     static struct {
         char* key;
         XImage* value;
     } *map = NULL;
 
-    volatile XImage* image;
-    volatile int index = shgeti(map, name);
+    XImage* image;
+    int index = shgeti(map, name);
 //    fprintf(stderr, "%d, index", index);
     if(index == -1) {
         image = loadLocalImageZT(name);
@@ -83,6 +83,27 @@ bool persistentComboBoxZT_(Painter *p, const char * const *elements, int *curren
     }
     if(guiComboBoxZT(p, elements, current)) {
         saveInt(name, *current);
+        return true;
+    }
+    return false;
+}
+bool persistentToolButtonGroup_(Painter *p, int *v, const char*const  filenames, int enumSize, char* saveName) {
+    static struct {
+        char* key;
+        Unit value;
+    } *map = NULL;
+
+    int index = shgeti(map, saveName);
+    if(index == -1) {
+        bool success;
+        int value = loadInt(saveName, &success);
+        if(success) {
+            *v = value;
+        }
+        shput(map, saveName, unit);
+    }
+    if(guiToolButtonGroup_(p,v,filenames,enumSize)) {
+        saveInt(saveName, *v);
         return true;
     }
     return false;

@@ -4,7 +4,7 @@
 #include "gridlayout.h"
 #include "persistent.h"
 #include "stb_ds.h"
-bool guiToolButtonGroup_(Painter* p, int* enumv, const char*const enumNames[], int enumSize)
+bool guiToolButtonGroup_(Painter* p, int* enumv, const char*const fileNames[], int enumSize)
 {
     Point pos = getPos();
 
@@ -31,7 +31,7 @@ bool guiToolButtonGroup_(Painter* p, int* enumv, const char*const enumNames[], i
     setCurrentGridPos(g, 0,0);
 
     for(int i = 0; i < enumSize; i++) {
-        if(resourseToolButtonA(p, enumNames[i], i == *enumv, &noConsume)) {
+        if(resourseToolButtonA(p, fileNames[i], i == *enumv, &noConsume)) {
             *enumv = i;
             res = true;
             guiRedraw();
