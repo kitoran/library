@@ -28,7 +28,7 @@ bool guiToolButtonGroup_(Painter* p, int* enumv, const char*const fileNames[], i
 
     bool res = false;
     bool noConsume;
-    setCurrentGridPos(g, 0,0);
+    setCurrentGridPos(0,0);
 
     for(int i = 0; i < enumSize; i++) {
         if(resourseToolButtonA(p, fileNames[i], i == *enumv, &noConsume)) {

@@ -17,7 +17,8 @@ Grid allocateGrid(int cols, int rows, int spacing) {
     abort(); \
 }
 //fprintf(stderr, msg, ##__VA_ARGS__);
-void setCurrentGridPos(Grid* g, int row, int column) {
+void setCurrentGridPos(int row, int column) {
+    Grid* g = topGrid();
     assert(row < g->gridHeightsLen, "row too big")
     assert(column < g->gridWidthsLen, "col too big")
     g->currentX = column;
@@ -44,13 +45,16 @@ int getGridWidth(Grid *g)
 }
 
 int getGridBottom(Grid *g);
-void gridNextRow(Grid* g)
+void gridNextRow()
 {
+    Grid* g = topGrid();
+//    assert(g->gridWidthsLenvsdv
     g->currentY++;
 }
 
-void gridNextColumn(Grid* g)
+void gridNextColumn()
 {
+    Grid* g = topGrid();
     g->currentY = 0;
     g->currentX++;
 }
@@ -61,7 +65,7 @@ size_t stackTop = 0;
 
 void pushGrid(Grid *g)
 {
-    assert(stackTop < ELEMS(stack), "pushing grid, stackTop is %d, elems is %d, "
+    assert(stackTop < ELEMS(stack), "pushing grid, stackTop is %lud, elems is %lud, "
            "cond is %d, !cond id %d", stackTop, ELEMS(stack),
            stackTop < ELEMS(stack), !(stackTop < ELEMS(stack)))
     stack[stackTop] = g;
@@ -71,12 +75,13 @@ void pushGrid(Grid *g)
 void popGrid()
 {
     assert(stackTop > 0, "stack is empty, trying to pop")
+    stack[stackTop] = NULL;
     stackTop--;
 }
 
 Point gridGetPos() {
-    assert(stackTop > 0, "stack is empty, trying to use")
-    Grid* g = stack[stackTop-1];
+//    assert(stackTop > 0, "stack is empty, trying to use")
+    Grid* g = topGrid();
     assert(g->currentX < g->gridWidthsLen, "%d, %d", g->currentX, g->gridWidthsLen)
     assert(g->currentY < g->gridHeightsLen,"")
     int x = g->gridStart.x, y = g->gridStart.y;
@@ -113,6 +118,6 @@ void gridFeedbackSize(Size s) {
 
 Grid *topGrid()
 {
-    assert(stackTop > 0, "stack is empty, trying to pop")
+    assert(stackTop > 0, "stack is empty, trying to get top")
     return stack[stackTop-1];
 }

@@ -55,10 +55,14 @@ void guiSetSize(Window win, uint w, uint h)
 {
     XResizeWindow(xdisplay, win, w, h);
 }
-
-void guiDrawText(Painter* p, char *text, int len, Point pos, i32 color) {
+#warning remove memory leak
+Size guiDrawText(Painter* p, char *text, int len, Point pos, i32 color) {
     XRenderColor            xrcolor;
     XftColor                xftcolor;
+
+    XGlyphInfo extents;
+    XftTextExtentsUtf8( xdisplay, xFont, (XftChar8 *)text, len, &extents );
+
     /* Xft text color */
     xrcolor.red = (color >> 16)&0xff * 256;
     xrcolor.green = (color >> 8)&0xff * 256;
@@ -89,7 +93,7 @@ void guiLabelWithBackground(Painter* p, char *text, int len, bool back) {
 //                   size.width, size.height);
     if(xEvent.type != MotionNotify) {
         XRenderColor            xrcolor;
-        XftColor                xftcolor, hlcolor, xftcolor_bg, xftcolor_bg2;
+        XftColor                xftcolor;
         /* Xft text color */
         xrcolor.red = 0xffff;
         xrcolor.green = 0xffff;
@@ -177,10 +181,10 @@ bool guiToolButtonA(Painter *p, XImage *i, bool active, bool *consume) {
     Size size = {i->width+2,
                  i->height+2};
     if(xEvent.type != MotionNotify) {
-        if(active) {
-            guiSetForeground(p, 0xffff9999);
+//        if(active) {
+            guiSetForeground(p, active?0xffff9999:0xff000000);
             guiFillRectangle(p, pos.x, pos.y, size.width, size.height);
-        }
+//        }
         XPutImage(xdisplay, p->drawable, p->gc, i,
                   0,0, pos.x+1, pos.y+1,
                   i->width, i->height);
@@ -257,7 +261,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
             context.editedStringLen--;
             context.pos--;
 //                res = true;
-        } else if(sym >= '0' && sym <= '9' || sym == '-') {
+        } else if((sym >= '0' && sym <= '9') || sym == '-') {
             if(context.editedStringLen == MAX_DIGITS) {
                 goto keyPressBreak;
             }
@@ -383,17 +387,17 @@ void guiStartDrawing(/*const char* appName*/) {
     int whiteColor = WhitePixel(xdisplay, screen );
     xDepth = DefaultDepth(xdisplay, screen);
 
-    int numberOfDepths;
-    int* depths = XListDepths(xdisplay, screen, &numberOfDepths);
+//    int numberOfDepths;
+//    int* depths = XListDepths(xdisplay, screen, &numberOfDepths);
     printf("Depth %d\n", xDepth);
     // Create the window
     rootWindow = XCreateSimpleWindow(xdisplay , DefaultRootWindow(xdisplay ), 0, 0,
                                         700, 700, 0, blackColor, blackColor);
-    XSetWindowAttributes ats = {
-     None, blackColor, CopyFromParent, whiteColor,
-        ForgetGravity, NorthWestGravity, NotUseful,
-        -1, 0, False, 0, 0, False, CopyFromParent, None
-    };
+//    XSetWindowAttributes ats = {
+//     None, blackColor, CopyFromParent, whiteColor,
+//        ForgetGravity, NorthWestGravity, NotUseful,
+//        -1, 0, False, 0, 0, False, CopyFromParent, None
+//    };
     // We want to get MapNotify events
     XSelectInput(xdisplay, rootWindow, StructureNotifyMask | ButtonPressMask
                  | ExposureMask | KeyPressMask
@@ -442,7 +446,7 @@ void guiNextEvent()
     if (XPending(xdisplay) || wait_fd(ConnectionNumber(xdisplay),0.530)) {
        XNextEvent(xdisplay, &xEvent);
        if(xEvent.xany.window != rootWindow) {
-            fprintf(stderr, "got wrong event %ud %ud\n", xEvent.type, xEvent.xany.window );
+            fprintf(stderr, "got wrong event %d %lud\n", xEvent.type, xEvent.xany.window );
            abort();
        }
 
@@ -569,3 +573,38 @@ void guiFillRawRectangle(RawPicture *p, int x, int y, int w, int h, char r, char
 }
 #pragma GCC pop_options
 
+
+Size guiDrawTextZT(Painter *p, char *text, Point pos, i32 color)
+{
+    return guiDrawText(p, text, strlen(text), pos, color);
+}
+
+bool guiCheckBox(Painter *p, bool *v)
+{
+    Point pos = getPos();
+    Size size = {10,
+                 10};
+    if(xEvent.type == ButtonPress) {
+        int mx = xEvent.xbutton.x;
+        int my = xEvent.xbutton.y;
+        if(mx >= pos.x && mx <= pos.x + (int)size.width &&
+            my >= pos.y && my <= pos.y + (int)size.height) {
+            *v = !*v;
+        }
+    }
+
+    if(*v) {
+        XDrawLine(xdisplay, p->drawable, p->gc, pos.x, pos.y+size.height,
+                  pos.x+size.width, pos.y);
+        XDrawLine(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                  pos.x+size.width, pos.y+size.height);
+    } else {
+        XSetForeground(xdisplay, p->gc, 0xff000000);
+        XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                       size.width, size.height);
+    }
+    XSetForeground(xdisplay, p->gc, 0xffffffff);
+    XDrawRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
+                   size.width, size.height);
+    feedbackSize(size);
+}

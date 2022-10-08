@@ -22,9 +22,9 @@ void popGrid();
 Grid* topGrid();
 Point gridGetPos();
 void gridFeedbackSize(Size s);
-void setCurrentGridPos(Grid *g, int row, int column);
-void gridNextRow(Grid *g);
-void gridNextColumn(Grid *g);
+void setCurrentGridPos(int row, int column);
+void gridNextRow();
+void gridNextColumn();
 int getGridHeight(Grid *g);
 inline int getGridBottom(Grid *g) {
   return g->gridStart.y + getGridHeight(g);

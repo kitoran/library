@@ -1,9 +1,9 @@
-﻿#include "gui.h"
+﻿//#include "gui.h"
 extern Display * xdisplay;
 //XFontStruct *xFontStruct;
 extern XFontSet xFontSet;
-struct XftFont;
-extern struct XftFont *xFont;
+struct _XftFont;
+extern struct _XftFont *xFont;
 extern Window rootWindow;
 extern int xDepth;
 extern int maxDigitWidth;

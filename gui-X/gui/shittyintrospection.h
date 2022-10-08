@@ -59,6 +59,7 @@
 #define FOREACH2_50(M, LIST) EXPAND(M FIRSTARGS2 LIST) FOREACH2_48(M, RESTARGS2 LIST)
 #define FIRST(X, Y) X,
 #define STRINGIFY_COMMA_SECOND(X, Y)    #Y,
+#define COMMA_SECOND(X, Y)    Y,
 //#define SECOND(X, Y)    Y
 //#define FITSTS2(...)
 //typedef arrayOfStrings;
@@ -74,6 +75,10 @@
     const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
     const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
 #define INTROSPECT_ENUM_FILENAMES(Name, ...) char const*const Name ## Filenames [NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(STRINGIFY_COMMA_SECOND, (__VA_ARGS__))}; \
+    typedef enum Name {FOREACH2(FIRST, (__VA_ARGS__))} Name; \
+    const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
+    const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
+#define INTROSPECT_ENUM_VALUES(Name, Type, ...) const Name ## Values [NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(COMMA_SECOND, (__VA_ARGS__))}; \
     typedef enum Name {FOREACH2(FIRST, (__VA_ARGS__))} Name; \
     const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
     const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;

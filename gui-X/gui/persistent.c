@@ -87,7 +87,7 @@ bool persistentComboBoxZT_(Painter *p, const char * const *elements, int *curren
     }
     return false;
 }
-bool persistentToolButtonGroup_(Painter *p, int *v, const char*const  filenames, int enumSize, char* saveName) {
+bool persistentToolButtonGroup_(Painter *p, int *v, const char*const*  filenames, int enumSize, char* saveName) {
     static struct {
         char* key;
         Unit value;

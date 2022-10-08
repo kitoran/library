@@ -135,10 +135,10 @@ bool guiToolButton(Painter *p, SDL_Texture *i, bool *consume) {
     Point pos = getPos();
     Size size;/* = {i->w,
                  i->h};*/
-    SDL_QueryTexture(i,0,0,&size.w,&size.h);
+    SDL_QueryTexture(i,0,0,&size.width,&size.height);
     if(sdlEvent.type != SDL_MOUSEMOTION) {
         SDL_Rect r = {pos.x, pos.y,
-                      size.w, size.h};
+                      size.width, size.height};
         SDL_RenderCopy(p->rend, i,
                   0,&r );
     }
