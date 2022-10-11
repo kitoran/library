@@ -8,7 +8,7 @@ bool guiToolButtonGroup_(Painter* p, int* enumv, const char*const fileNames[], i
 {
     Point pos = getPos();
 
-    if(xEvent.xany.window != p->drawable) return false;
+    if(event.xany.window != p->drawable) return false;
     Grid* g;
     static struct {
         void* key;

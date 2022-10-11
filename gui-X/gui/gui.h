@@ -19,7 +19,7 @@ typedef int i32;
 typedef struct GuiImage {
 
 } GuiImage;
-extern XEvent xEvent;
+extern XEvent event;
 //extern State state;
 extern Display * xdisplay;
 extern XFontStruct *xFontStruct;
@@ -74,7 +74,7 @@ void guiFillRectangle(Painter *a, int b, int c, int d, int e);
 void guiFillRawRectangle(RawPicture *p, int x, int y, int w, int h, char r, char g, char b);
 void guiSetForeground(Painter*, unsigned long);
 void guiDrawTextWithLen(Painter*, int, int, char*, unsigned long);
-void guiSetSize(Window, uint, uint);
+void guiSetSize(uint, uint);
 Size guiGetSize();
 
 

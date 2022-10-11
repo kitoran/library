@@ -70,9 +70,9 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
 
     bool res = false;
 //    if(xEvent.xany.window == listWindow) {
-        if(xEvent.type == ButtonRelease && context.active == current) {
-            int mx = xEvent.xbutton.x-pos.x;
-            int my = xEvent.xbutton.y-pos.y - (int)size.height;
+        if(event.type == ButtonRelease && context.active == current) {
+            int mx = event.xbutton.x-pos.x;
+            int my = event.xbutton.y-pos.y - (int)size.height;
 //            , ,
             for(int i = 0; i < numberOfElements; i++) {
                 if(mx >= 1 && mx <= size.width-2  +  1 &&
@@ -84,10 +84,10 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
         }
 //    }
 
-    if(xEvent.xany.window == p->drawable) {
-        if(xEvent.type == ButtonRelease) {
-            int mx = xEvent.xbutton.x;
-            int my = xEvent.xbutton.y;
+    if(event.xany.window == p->drawable) {
+        if(event.type == ButtonRelease) {
+            int mx = event.xbutton.x;
+            int my = event.xbutton.y;
             if(mx >= pos.x && mx <= pos.x + (int)size.width &&
                 my >= pos.y && my <= pos.y + (int)size.height) {
     //            if(xEvent.type == ButtonRelease) {
@@ -113,7 +113,7 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
                 }
             }
         }
-        if(xEvent.type != MotionNotify) {
+        if(event.type != MotionNotify) {
             XSetForeground(xdisplay, p->gc, 0xff555555);
             XFillRectangle(xdisplay, p->drawable, p->gc, pos.x, pos.y,
                            size.width, size.height);

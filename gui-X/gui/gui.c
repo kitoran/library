@@ -51,9 +51,9 @@ void guiDrawTextWithLen(Painter *a, int b, int c, char *d, unsigned long e)
     Xutf8DrawString(xdisplay, a->drawable, xFontSet, a->gc, b, c, d, e);
 }
 
-void guiSetSize(Window win, uint w, uint h)
+void guiSetSize(uint w, uint h)
 {
-    XResizeWindow(xdisplay, win, w, h);
+    XResizeWindow(xdisplay, rootWindow, w, h);
 }
 #warning remove memory leak
 Size guiDrawText(Painter* p, char *text, int len, Point pos, i32 color) {
@@ -91,7 +91,7 @@ void guiLabelWithBackground(Painter* p, char *text, int len, bool back) {
 
 //    XDrawRectangle(xdisplay, p->window, p->gc, pos.x, pos.y,
 //                   size.width, size.height);
-    if(xEvent.type != MotionNotify) {
+    if(event.type != MotionNotify) {
         XRenderColor            xrcolor;
         XftColor                xftcolor;
         /* Xft text color */
@@ -134,7 +134,7 @@ void guiLabelZT(Painter* p, char *text) {
 }
 bool guiButton(Painter *p, char* text, int len)
 {
-    if(xEvent.xany.window != p->drawable) return false;
+    if(event.xany.window != p->drawable) return false;
     Point pos = getPos();
     XRectangle overallInk;
     XRectangle overallLog;
@@ -142,7 +142,7 @@ bool guiButton(Painter *p, char* text, int len)
     Xutf8TextExtents(xFontSet, text, len, &overallInk, &overallLog);
     Size size = {overallLog.width + 10,
                 overallLog.height + 10};
-    if(xEvent.type != MotionNotify) {
+    if(event.type != MotionNotify) {
         XSetForeground(xdisplay, p->gc, 0xff555555);
 //        XSetBackground(xdisplay, l->gc, 0xffff5555);
 //        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
@@ -155,9 +155,9 @@ bool guiButton(Painter *p, char* text, int len)
     }
 //    XPutImage(xdisplay, l->window, l->gc, l->x+5, l->y+5, width, height);
     bool res = false;
-    if(xEvent.type == ButtonRelease) {
-        int mx = xEvent.xbutton.x;
-        int my = xEvent.xbutton.y;
+    if(event.type == ButtonRelease) {
+        int mx = event.xbutton.x;
+        int my = event.xbutton.y;
         if(mx >= pos.x && mx <= pos.x + (int)size.width &&
             my >= pos.y && my <= pos.y + (int)size.height) {
             res = true;
@@ -176,11 +176,11 @@ bool guiToolButton(Painter *p, XImage *i, bool *consume) {
 }
 bool guiToolButtonA(Painter *p, XImage *i, bool active, bool *consume) {
 //    if(consume) *consume = false;
-    if(xEvent.xany.window != p->drawable) return false;
+    if(event.xany.window != p->drawable) return false;
     volatile Point pos = getPos();
     Size size = {i->width+2,
                  i->height+2};
-    if(xEvent.type != MotionNotify) {
+    if(event.type != MotionNotify) {
 //        if(active) {
             guiSetForeground(p, active?0xffff9999:0xff000000);
             guiFillRectangle(p, pos.x, pos.y, size.width, size.height);
@@ -190,13 +190,13 @@ bool guiToolButtonA(Painter *p, XImage *i, bool active, bool *consume) {
                   i->width, i->height);
     }
     bool res = false;
-    if(xEvent.type == ButtonRelease
-            || xEvent.type == ButtonPress) {
-        int mx = xEvent.xbutton.x;
-        int my = xEvent.xbutton.y;
+    if(event.type == ButtonRelease
+            || event.type == ButtonPress) {
+        int mx = event.xbutton.x;
+        int my = event.xbutton.y;
         if(mx >= pos.x && mx <= pos.x + (int)size.width &&
             my >= pos.y && my <= pos.y + (int)size.height) {
-            if(xEvent.type == ButtonRelease) {
+            if(event.type == ButtonRelease) {
                 res = true;
             }
             if(consume) *consume = true;
@@ -235,9 +235,9 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
         res = true;
     }
 //    fprintf(stderr, "%d digits", numberOfDigits);
-    if(xEvent.type == KeyPress && context.active == number) {
+    if(event.type == KeyPress && context.active == number) {
         if(consume) *consume = true;
-        KeySym sym = XLookupKeysym(&xEvent.xkey, 0);
+        KeySym sym = XLookupKeysym(&event.xkey, 0);
         fprintf(stderr, "%c %c! \n", (int)sym, XK_Right);
         if(sym == XK_Right) {
             if(context.pos < context.editedStringLen) {
@@ -276,9 +276,9 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
     }
     keyPressBreak:
 
-    if(xEvent.type == ButtonPress || xEvent.type == ButtonRelease) {
-        int mx = xEvent.xbutton.x;
-        int my = xEvent.xbutton.y;
+    if(event.type == ButtonPress || event.type == ButtonRelease) {
+        int mx = event.xbutton.x;
+        int my = event.xbutton.y;
 //        fprintf(stderr, "%d", *consume);
         if(mx >= pos.x && mx <= pos.x + (int)size.width &&
             my >= pos.y && my <= pos.y + (int)size.height) {
@@ -298,7 +298,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
             commit();
         }
     }
-    if(xEvent.type != MotionNotify) {
+    if(event.type != MotionNotify) {
         XSetForeground(xdisplay, p->gc, 0xff333333);
 //        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
 //                size.width, size.height);
@@ -339,7 +339,7 @@ bool guiNumberEdit(Painter *p, int digits, int *number, bool *consume) {
 //            fprintf(stderr, "%d", *consume);
 
         }
-        if(xEvent.type == TimerEvent) {
+        if(event.type == TimerEvent) {
             cursor = !cursor;
         }
   }
@@ -439,21 +439,21 @@ void guiNextEvent()
 {
     if(redraw) {
         redraw = false;
-        xEvent.type = Expose;
+        event.type = Expose;
         return;
     }
 
     if (XPending(xdisplay) || wait_fd(ConnectionNumber(xdisplay),0.530)) {
-       XNextEvent(xdisplay, &xEvent);
-       if(xEvent.xany.window != rootWindow) {
-            fprintf(stderr, "got wrong event %d %lud\n", xEvent.type, xEvent.xany.window );
+       XNextEvent(xdisplay, &event);
+       if(event.xany.window != rootWindow) {
+            fprintf(stderr, "got wrong event %d %lud\n", event.type, event.xany.window );
            abort();
        }
 
-        if(xEvent.type == ConfigureNotify) {
+        if(event.type == ConfigureNotify) {
             Size newSize = {
-                xEvent.xconfigure.width,
-                xEvent.xconfigure.height};
+                event.xconfigure.width,
+                event.xconfigure.height};
             rootWindowSize = newSize;
 //            fprintf(stderr, "reconfigure  %d x %d\n!!",
 //                    newSize.width,
@@ -461,7 +461,7 @@ void guiNextEvent()
         }
        return;
     } else {
-        xEvent.type = TimerEvent;
+        event.type = TimerEvent;
     }
 }
 
@@ -496,9 +496,9 @@ void guiDoubleEdit(Painter *p, int digits, double *number)
 
     int numberOfDigits = 5;
 
-    if(xEvent.type == ButtonPress) {
-        int mx = xEvent.xbutton.x;
-        int my = xEvent.xbutton.y;
+    if(event.type == ButtonPress) {
+        int mx = event.xbutton.x;
+        int my = event.xbutton.y;
         if(mx >= pos.x && mx <= pos.x + (int)size.width &&
             my >= pos.y && my <= pos.y + (int)size.height) {
             fprintf(stderr, "fwefwefw!\n");
@@ -543,7 +543,7 @@ void guiDoubleEdit(Painter *p, int digits, double *number)
                       pos.x + 5 + overallInk.width, pos.y + 5,
                       pos.x + 5 + overallInk.width, pos.y + 5 + maxDigitHeight);
         }
-        if(xEvent.type == TimerEvent) {
+        if(event.type == TimerEvent) {
             cursor = !cursor;
         }
 //  }
@@ -584,9 +584,9 @@ bool guiCheckBox(Painter *p, bool *v)
     Point pos = getPos();
     Size size = {10,
                  10};
-    if(xEvent.type == ButtonPress) {
-        int mx = xEvent.xbutton.x;
-        int my = xEvent.xbutton.y;
+    if(event.type == ButtonPress) {
+        int mx = event.xbutton.x;
+        int my = event.xbutton.y;
         if(mx >= pos.x && mx <= pos.x + (int)size.width &&
             my >= pos.y && my <= pos.y + (int)size.height) {
             *v = !*v;
