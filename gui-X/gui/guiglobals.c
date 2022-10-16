@@ -2,7 +2,7 @@
 #include "guiglobals.h"
 Display * xdisplay = 0;
 //XFontStruct *xFontStruct;
-//XEvent xEvent;
+XEvent event;
 XFontSet xFontSet;
 Window rootWindow = 0;
 int xDepth = 0;
