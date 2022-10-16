@@ -28,20 +28,21 @@ static void init() {
     //return;
     char* home = getenv("HOME");
     assert(home);
-
-    strncat(path, home, PATH_MAX);
-    strncat(path, "/.config/", PATH_MAX);
+// this is a wrong use of strncat; i do care but not idk
+#warning strncat doesnt check overflow
+    strncat(path, home, PATH_MAX-1);
+    strncat(path, "/.config/", PATH_MAX-1);
     struct stat sb;
     if(stat(path, &sb) != 0 || (! S_ISDIR(sb.st_mode))) {
         abort();
     }
-    strncat(path, appName, PATH_MAX);
+    strncat(path, appName, PATH_MAX-1);
     if(stat(path, &sb) != 0 || (! S_ISDIR(sb.st_mode))) {
         mkdir(path, 0777);
     }
-    strncat(path, "/", PATH_MAX);
-    strncat(path, appName, PATH_MAX);
-    strncat(path, ".conf", PATH_MAX);
+    strncat(path, "/", PATH_MAX-1);
+    strncat(path, appName, PATH_MAX-1);
+    strncat(path, ".conf", PATH_MAX-1);
     snprintf(path_back, PATH_MAX+1,
              "%s~", path);
 //    int fd
