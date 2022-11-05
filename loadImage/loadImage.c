@@ -63,8 +63,12 @@ static void stbicallback(void *context, void *data, int size) {
 void saveImageSomewhereNewWrongChannelsZT(XImage *image, char *name) {
     for(int i = 0; i < image->width*image->height; i++) {
         ((char*)(image->data))[i*4+3] = 0xff;
+        char t = ((char*)(image->data))[i*4+2];
+        ((char*)(image->data))[i*4+2] = ((char*)(image->data))[i*4+0];
+        ((char*)(image->data))[i*4+0] = t;
     }
     char* path = newFile(name, "bmp");
+    fprintf(stdout, "saving to %s\n", path);
     saveImage = fopen(path, "w");
     stbi_write_bmp_to_func(stbicallback, NULL, image->width,
                            image->height, 4, image->data);
