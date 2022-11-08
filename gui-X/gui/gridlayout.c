@@ -116,7 +116,7 @@ Size gridAvailableSize() {
             x += g->gridWidths[i]+g->spacing;
     }
     Size allSize = guiGetSize();
-    return STRU(Size, allSize.width-x, allSize-y);
+    return STRU(Size, allSize.width-x, allSize.height-y);
 }
 
 void gridFeedbackSize(Size s) {
