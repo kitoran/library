@@ -21,6 +21,7 @@ void pushGrid(Grid*);
 void popGrid();
 Grid* topGrid();
 Point gridGetPos();
+Size gridAvailableSize();
 void gridFeedbackSize(Size s);
 void setCurrentGridPos(int row, int column);
 void gridNextRow();

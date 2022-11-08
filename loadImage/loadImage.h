@@ -1,7 +1,4 @@
-﻿
-
-
-#ifdef SDL
+﻿#ifdef SDL
 struct SDL_Surface;
 #define IMAGE struct SDL_Surface
 #else
@@ -11,9 +8,7 @@ struct _XImage;
 
 IMAGE *loadImageZT(char* firstPartOfThePath,
                             const char* secondPartOfThePath);
-static IMAGE *loadLocalImageZT(const char* path) {
-    return loadImageZT(MY_PATH, path);
-}
+IMAGE *loadLocalImageZT(const char* path);
 
 void saveImageSomewhereNewWrongChannelsZT(IMAGE *, char* name);
-#undef IMAGE
+//#undef IMAGE

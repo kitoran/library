@@ -3,6 +3,7 @@
 //#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "misc.h"
 
 Grid allocateGrid(int cols, int rows, int spacing) {
     Grid r = {.gridWidths = malloc(4*cols), .gridWidthsLen = cols,
@@ -97,6 +98,27 @@ Point gridGetPos() {
     return res;
 }
 
+Size gridAvailableSize() {
+    Grid* g = topGrid();
+    assert(g->currentX < g->gridWidthsLen, "%d, %d", g->currentX, g->gridWidthsLen)
+    assert(g->currentY < g->gridHeightsLen,"")
+    assert(stackTop == 1, "if you hit this assert, expand the function gridAvailableSize"
+           " to handle the case of nested layouts");
+
+    int y = 0;
+    for(int i = 0; i < g->gridHeightsLen; i++) {
+        if(g->gridHeights[i] && i != g->currentY)
+            y += g->gridHeights[i]+g->spacing;
+    }
+    int x = 0;
+    for(int i = 0; i < g->gridWidthsLen; i++) {
+        if(g->gridWidths[i] && i != g->currentX)
+            x += g->gridWidths[i]+g->spacing;
+    }
+    Size allSize = guiGetSize();
+    return STRU(Size, allSize.width-x, allSize-y);
+}
+
 void gridFeedbackSize(Size s) {
     assert(stackTop > 0, "stack is empty, trying to pop")
     Grid* g = stack[stackTop-1];
@@ -121,3 +143,4 @@ Grid *topGrid()
     assert(stackTop > 0, "stack is empty, trying to get top")
     return stack[stackTop-1];
 }
+

@@ -1,9 +1,12 @@
-﻿#include "loadImage.h"
-#include "stb_image.h"
+﻿#include "stb_image.h"
+#include "loadImage.h"
 #include "newFile.h"
 #include "stb_image_write.h"
+#ifdef SDL
 #include <SDL2/SDL.h>
+#else
 #include <X11/Xlib.h>
+#endif
 #include <linux/limits.h>
 #include <string.h>
 #include <stdlib.h>
@@ -56,10 +59,12 @@ IMAGE *loadImageZT(char* startOfPath, const char *path) {
 #pragma GCC pop_options
 
 FILE* saveImage = 0;
+
+#ifndef SDL
 static void stbicallback(void *context, void *data, int size) {
+    (void)context;
     fwrite(data, size, 1, saveImage);
 }
-
 void saveImageSomewhereNewWrongChannelsZT(XImage *image, char *name) {
     for(int i = 0; i < image->width*image->height; i++) {
         ((char*)(image->data))[i*4+3] = 0xff;
@@ -68,10 +73,14 @@ void saveImageSomewhereNewWrongChannelsZT(XImage *image, char *name) {
         ((char*)(image->data))[i*4+0] = t;
     }
     char* path = newFile(name, "bmp");
-    fprintf(stdout, "saving to %s\n", path);
     saveImage = fopen(path, "w");
     stbi_write_bmp_to_func(stbicallback, NULL, image->width,
                            image->height, 4, image->data);
     fclose(saveImage);
     saveImage=0;
+}
+#endif
+
+IMAGE *loadLocalImageZT(const char *path) {
+    return loadImageZT(MY_PATH, path);
 }
