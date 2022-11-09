@@ -124,3 +124,33 @@ void saveInt(char *name, int value)
     save();
     return;
 }
+
+int loadDouble(char *name, bool* success)
+{
+    init();
+    int index = shgeti(hmap, name);
+    if(index >= 0) {
+        *success = true;
+        char* s = hmap[index].value;
+        double res;
+        sscanf(s, " %lf ", &res);
+        return res;
+    } else {
+        *success = false;
+        return 0;
+    }
+}
+void saveDouble(char *name, double value)
+{
+    init();
+    int index = shgeti(hmap, name);
+    if(index >= 0) {
+        free(hmap[index].value);
+    }
+    char * string = malloc(20);
+    snprintf(string, 20, "%lf", value);
+    shput(hmap, name, string);
+
+    save();
+    return;
+}
