@@ -4,6 +4,7 @@
 #include "stb_image_write.h"
 #ifdef SDL
 #include <SDL2/SDL.h>
+extern SDL_Renderer* rootWindowRenderer;
 #else
 #include <X11/Xlib.h>
 #endif
@@ -11,20 +12,20 @@
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#ifdef SDL
-struct SDL_Surface;
-#define IMAGE struct SDL_Surface
-#else
-struct _XImage;
-#define IMAGE struct _XImage
-#endif
+//#ifdef SDL
+//struct SDL_Surface;
+//#define IMAGE struct SDL_Surface
+//#else
+//struct _XImage;
+//#define IMAGE struct _XImage
+//#endif
 #pragma GCC push_options
 #pragma GCC optimize ("Ofast")
 
 #ifndef SDL
 extern Display * xdisplay;
 #endif
-//extern Display * xdisplay;
+// i use strncat completely wrong, completely wrong
 IMAGE *loadImageZT(char* startOfPath, const char *path) {
 
     char imagePath[PATH_MAX] = {};
@@ -41,20 +42,21 @@ IMAGE *loadImageZT(char* startOfPath, const char *path) {
     for(int i = 0; i < x*y; i++) {
         char temp;
 //        memcpy(temp, rcdata+i*4, 4);
-        temp = data[i*4+2];
-        data[i*4+2] = data[i*4];
+        temp = data[i*4+3];
+        data[i*4+3] = data[i*4];
         data[i*4] = temp;
     }
 #ifdef SDL
-    SDL_Surface *res = SDL_CreateRGBSurfaceWithFormatFrom(data, x, y, 24, x*4, SDL_PIXELFORMAT_ARGB32);
+    SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormatFrom(data, x, y, 24, x*4, SDL_PIXELFORMAT_ARGB32);
 #else
     XImage *res = XCreateImage(xdisplay, DefaultVisual(xdisplay, DefaultScreen(xdisplay)), 24,
                      ZPixmap, 0, data, x, y, 32,
                              x*4);
 #endif
-    //    SDL_Texture * texture = SDL_CreateTextureFromSurface(a->rend, surface);
+    SDL_Texture * texture = SDL_CreateTextureFromSurface(rootWindowRenderer, surface);
     //IMG_LoadTexture_RW../?
-    return res;
+    SDL_FreeSurface(surface);
+    return texture;
 }
 #pragma GCC pop_options
 

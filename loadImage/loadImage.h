@@ -1,6 +1,6 @@
 ﻿#ifdef SDL
-struct SDL_Surface;
-#define IMAGE struct SDL_Surface
+struct SDL_Texture;
+#define IMAGE struct SDL_Texture
 #else
 struct _XImage;
 #define IMAGE struct _XImage
