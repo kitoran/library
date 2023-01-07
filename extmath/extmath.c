@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 
-const double tau = M_PI*2;
+const double tau = 6.283185307179586476925286766559005768394338798750211641949889184615632812572417997256069650684234135964296173026564613294187689219101164463450718816256962234900568205403;
 double *makeSinLookupTable()
 {
     static bool initialized = false;
@@ -54,9 +54,9 @@ void initializeMathExt()
     sinLookupTableInt = makeSinLookupTableInt();
 }
 
-void convergents(double s, int* res, int n) {
-    assert(n == 3);
-    double intPart = round(s);
-    res[0] = intPart; res[1] = 1;
-    s = 1/(s-intPart);
-}
+//void convergents(double s, int* res, int n) {
+//    assert(n == 3);
+//    double intPart = round(s);
+//    res[0] = intPart; res[1] = 1;
+//    s = 1/(s-intPart);
+//}

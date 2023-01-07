@@ -1,11 +1,12 @@
-﻿#ifndef XBACKEND_H
-#define XBACKEND_H
+﻿#ifndef BACKEND_H
+#define BACKEND_H
+typedef struct Size Size;
 
 #ifdef SDL
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_video.h>
-#include <SDL2/SDL_render.h>
+#include <SDL_events.h>
+#include <SDL_surface.h>
+#include <SDL_video.h>
+#include <SDL_render.h>
 //union SDL_Event;//struct SDL_Event;
 typedef SDL_Event Event;
 typedef SDL_Window* GuiWindow;
@@ -29,12 +30,12 @@ typedef enum GuiKeySym {
     enter = SDLK_RETURN,
     leftKey = SDLK_LEFT,
     backspace = SDLK_BACKSPACE,
-    delete = SDLK_DELETE
+    deleteKey = SDLK_DELETE
 } GuiKeySym;
 typedef SDL_Texture Image;
 //#define IMAGE_WIDTH w
 //#define IMAGE_HEIGHT h
-#define IMAGE_SIZE(a) ({Size s; SDL_QueryTexture(a, NULL, NULL, &s.w, &s.h); s;})
+Size imageSize(Image* a); 
 typedef struct Painter {
     SDL_Renderer* gc;
     SDL_Surface* drawable;
@@ -80,7 +81,6 @@ typedef XImage Image;
 
 
 //typedef struct Painter Painter;
-typedef struct Size Size;
 
 GuiWindow guiMakeWindow();
 Painter guiMakePainter(GuiWindow w);
@@ -92,4 +92,4 @@ void guiGetTextPart(char* text, int wid, int* resWid, int* resCount);
 struct Rect;
 void guiSetClipRect(Painter* p, struct Rect r);
 void guiUnsetClipRect(Painter* p);
-#endif // XBACKEND_H
+#endif // BACKEND_H

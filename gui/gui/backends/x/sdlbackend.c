@@ -1,9 +1,11 @@
 ﻿#include "backend.h"
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL.h>
+#include <SDL_ttf.h>
 #include <assert.h>
+#include <stdio.h>
 #include "gui.h"
 #include <math.h>
+#include "guiglobals.h"
 
 extern char* appName;
 extern int xDepth;
@@ -114,7 +116,6 @@ void guiSetSize(u32 w, u32 h)
 void guiClearWindow(GuiWindow w) {
     SDL_RenderClear(SDL_GetRenderer(w));
 }
-#warning remove leak
 
 
 /**** TODO: функции работы с текстом копируют строку на стек потому что SDL_TTF работает только с 0-терминированными строками
@@ -124,10 +125,11 @@ void guiClearWindow(GuiWindow w) {
  */
 Size guiDrawText(Painter* p, const char *text, int len, Point pos,
                  i32 color) {
-    char copy[len+1];
+    static char copy[MAX_STRING_LEN];
+    if (len >= MAX_STRING_LEN) ABORT("String too long");
     memcpy(copy, text, len);
     copy[len] = 0;
-    if(copy[0]=='\0') return STRU(Size, 0, 0);
+    if (copy[0] == '\0') return (Size) { 0, 0 };
     (void)len;
     SDL_Color sdlcolor = {
             (color >> 16)&0xff,
@@ -156,7 +158,8 @@ Size guiDrawText(Painter* p, const char *text, int len, Point pos,
     return res;
 }
 Size guiTextExtents(/*Painter*p,*/const char*text, int len) {
-    char copy[len+1];
+    char copy[MAX_STRING_LEN];
+    ASSERT(len < MAX_STRING_LEN, "sorry");
     memcpy(copy, text, len);
     copy[len] = 0;
     Size res ;
@@ -178,9 +181,15 @@ void guiDrawImageEx(Painter* p, IMAGE* i, int x, int y, Size* size) {
 //    SDL_BlitSurface(i, NULL, p->drawable, &rect);
 //    SDL_UpdateWindowSurface( rootWindow );
 }
+Size imageSize(Image* a) {
+    Size s;
+    SDL_QueryTexture(a, NULL, NULL, &s.w, &s.h);
+    return s;
+}
+
 void guiDrawImage(Painter* p, IMAGE* i, int x, int y) {
 //    SDL_Texture* t = SDL_CreateTextureFromSurface(p->gc, i);
-    Size size = IMAGE_SIZE(i);
+    Size size = imageSize(i);
     SDL_Rect rect = {x, y, size.w, size.h};
     SDL_RenderCopy(p->gc, i, NULL, &rect);//
 //    SDL_BlitSurface(i, NULL, p->drawable, &rect);
@@ -205,8 +214,9 @@ static Uint32 timerCallback(Uint32 interval, void *param) {
     cursor = !cursor;
     return BLINK_TIME;
 }
-void guiStartDrawing(/*const char* appName*/) {
-    if (SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO  ) < 0) {
+
+ void  guiStartDrawing(void) {
+    if (SDL_Init( SDL_INIT_VIDEO ) < 0) {
         fprintf(stderr, "SDL could not initialize! SDL_Error: %s \n", SDL_GetError());
         abort();
     }
@@ -214,10 +224,12 @@ void guiStartDrawing(/*const char* appName*/) {
 //    assert(events == SDL_USEREVENT);
     SDL_AddTimer(BLINK_TIME, timerCallback, NULL);
 
-    TTF_Init();
+    ASSERT(TTF_Init()==0);
+#ifndef _MSC_VER
     font = TTF_OpenFont("/home/n/.fonts/comici.ttf", 24);
-
-
+#else
+    font = TTF_OpenFont("C:/src/comici.ttf", 24);
+#endif
     for(char d[2] = {'0', '\x00'}; d[0] < '9'; d[0]++) {
         int w,h;
         TTF_SizeUTF8(font, d, &w, &h);
@@ -227,15 +239,16 @@ void guiStartDrawing(/*const char* appName*/) {
 
     rootWindow = SDL_CreateWindow(
        appName,
-       700,0,700, 700,
+       700,20,rootWindowSize.w, rootWindowSize.h,
 //       0, 0,
        SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
    );
+
     rootWindowRenderer = SDL_CreateRenderer(rootWindow, -1,  0);
 //    SDL_Rect f = {0,0,windowWidth, windowHeight};
 //    SDL_RenderFillRect(renderer, &f);
-    rootWindowPainter = STRU(Painter,
-                             rootWindowRenderer, SDL_GetWindowSurface(rootWindow), rootWindow);
+    rootWindowPainter = (Painter){
+                             rootWindowRenderer, SDL_GetWindowSurface(rootWindow), rootWindow };
     // Create a "Graphics Context"
 //    GC gc = XCreateGC(xdisplay , rootWindow, 0, NULL);
 //    xFontStruct = XLoadQueryFont(xdisplay, "fixed");

@@ -11,7 +11,7 @@ typedef short int i16;
 #define MIN(x,y) ((x)<(y)?(x):(y))
 #define CLAMP(a,min,max) (MIN(max, MAX(min, a)))
 #define ELEMS(a) (sizeof(a)/sizeof(*(a)))
-#define FOR_STATIC_ARRAY(element, array) for(typeof(&array[0]) element = array; element < array+ELEMS(array); element++)
+#define FOR_STATIC_ARRAY(type, element, array) for(type element = array; element < array+ELEMS(array); element++)
 #define FOR(index, iters) for(int index = 0; index < iters; index++)
 //#define FOR_STB_ARRAY(element, array) for(typeof(array) element = array; element < array+arrlen(array); element++)
 
@@ -22,9 +22,9 @@ typedef short int i16;
 #define STATIC(a,b,c) static a b; { static _Bool init = 0;\
     if(!init) {init = 1; b = (c);} }
 
-#define STRU(type, ...) ({type ___r = {__VA_ARGS__}; ___r; })
-
-
+#ifdef _MSC_VER
+#define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif
 #define ASSERT(a, msg, ...) if(!(a)) { \
     fprintf(stderr, "%s: " msg, __PRETTY_FUNCTION__, ##__VA_ARGS__); \
     abort(); \
@@ -34,5 +34,9 @@ typedef short int i16;
 //#define DEFER_VARNAME(a) DEFER_MERGE(defer_scopevar_, a)
 //#define DEFER_FUNCNAME(a) DEFER_MERGE(defer_scopefunc_, a)
 //#define DEFER(BLOCK) void DEFER_FUNCNAME(__LINE__)(int *a) BLOCK; __attribute__((cleanup(DEFER_FUNCNAME(__LINE__)))) int DEFER_VARNAME(__LINE__)
+
+
+#define STR_IMPL(a) #a
+#define STR(a) STR_IMPL(a)
 
 #endif // MISC_H

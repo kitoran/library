@@ -1,13 +1,13 @@
 #include "layoutStack.h"
-
-Point defaultGetPos(LayoutVT*) {
+#include <stdio.h>
+Point defaultGetPos(LayoutVT* v) {
     fprintf(stderr, "getPos not set");
     abort();
 }
-void defaultFeedbackSize(LayoutVT*,Size s) {
+void defaultFeedbackSize(LayoutVT* v,Size s) {
     (void)s;
 }
-Size defaultAvailableSize(LayoutVT*) {
+Size defaultAvailableSize(LayoutVT* v) {
     fprintf(stderr, "availableSize not set");
     abort();
 }

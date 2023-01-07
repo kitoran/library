@@ -3,12 +3,17 @@
 #include "newFile.h"
 #include "stb_image_write.h"
 #ifdef SDL
-#include <SDL2/SDL.h>
+#include <SDL.h>
 extern SDL_Renderer* rootWindowRenderer;
 #else
 #include <X11/Xlib.h>
 #endif
+#ifndef _MSC_VER
 #include <linux/limits.h>
+#else
+#define PATH_MAX _MAX_PATH
+#endif
+
 #include <string.h>
 #include <stdlib.h>
 #include <inttypes.h>
@@ -28,7 +33,7 @@ extern Display * xdisplay;
 // i use strncat completely wrong, completely wrong
 IMAGE *loadImageZT(char* startOfPath, const char *path) {
 
-    char imagePath[PATH_MAX] = {};
+    char imagePath[PATH_MAX] = {0};
 //    int r;
 //    r+=5;
 //#define stringify2(a) #a

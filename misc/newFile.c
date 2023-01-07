@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#ifndef _MSC_VER
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
@@ -34,3 +35,4 @@ char* newFile(char* path, char* extension) {
 
     return cat;
 }
+#endif

@@ -5,7 +5,8 @@
 #include "stb_ds.h"
 #include "stdio.h"
 
-typedef struct Unit {} Unit;
+#ifndef GUI_NO_PERSISTENT_WIDGETS
+typedef struct Unit { char dummy; } Unit;
 static Unit unit;
 bool persistentIntField_(Painter*p, int digits, int* number, char* name) {
     static struct {
@@ -48,42 +49,6 @@ bool persistentDoubleField_(Painter*p, int digits, double* number, char* name) {
         return true;
     }
     return false;
-}
-bool standardResourseToolButton(Painter*p, char* name) {
-    static struct {
-        char* key;
-        IMAGE* value;
-    } *map = NULL;
-
-    IMAGE* image;
-    int index = shgeti(map, name);
-    if(index == -1) {
-        image = loadImageZT(GUI_RESOURCE_PATH, name);
-        shput(map, name, image);
-    } else {
-        image = map[index].value;
-    }
-    return guiToolButton(p, image);
-}
-bool resourseToolButton(Painter*p, const char* name) {
-   return resourseToolButtonEx(p, name, false, NULL);
-}
-bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size* desirableSize) {
-    static struct {
-        char* key;
-        IMAGE* value;
-    } *map = NULL;
-
-    IMAGE* image;
-    int index = shgeti(map, name);
-//    fprintf(stderr, "%d, index", index);
-    if(index == -1) {
-        image = loadLocalImageZT(name);
-        shput(map, name, image);
-    } else {
-        image = map[index].value;
-    }
-    return guiToolButtonEx(p, image, active, desirableSize);
 }
 
 bool persistentComboBoxZT_(Painter *p, const char * const *elements, int *current, char *name)
@@ -129,3 +94,4 @@ bool persistentToolButtonGroup_(Painter *p, int *v, const char*const*  filenames
     }
     return false;
 }
+#endif

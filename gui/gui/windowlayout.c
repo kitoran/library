@@ -1,4 +1,4 @@
-﻿#if 0
+﻿#ifndef _MSC_VER
 #include "gridlayout.h"
 #include <stdio.h>
 //#include <assert.h>

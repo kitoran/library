@@ -47,7 +47,7 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
     if(triangle ==  NULL) {
         triangle = loadImageZT(GUI_RESOURCE_PATH, "triangle.png");
     }
-    Size iSize = IMAGE_SIZE(triangle);
+    Size iSize = imageSize(triangle);
     Size size = {overallLogMax.width + iSize.w + 10,
                 MAX(overallLogMax.height, iSize.h) + 10};
 
@@ -104,9 +104,11 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
                            size.w, size.h);
             guiSetForeground(p, 0xffffffff);
             int len = strlen(elements[*current]);
-            guiDrawText(p,elements[*current], len,
-                        STRU(Point,pos.x+5 + overallLogMax.x,
-                    pos.y+5 - overallLogMax.y),0xffffffff);
+            guiDrawText(p, elements[*current], len,
+                (Point) {
+                pos.x + 5 + overallLogMax.x,
+                    pos.y + 5 - overallLogMax.y
+            }, 0xffffffff);
 
             guiDrawImage(p, triangle,
                       pos.x+overallLogMax.x+overallLogMax.width,
@@ -121,10 +123,11 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
                     int len = strlen(elements[i]);
                     guiSetForeground(&gc, 0xffffffff);
                     guiDrawText(&gc,
-                                elements[i], len,
-                               STRU(Point,
-                                    5 + overallLogMax.x,
-                                    (i)*size.h+5 - overallLogMax.y),
+                        elements[i], len,
+                        (Point) {
+                        5 + overallLogMax.x,
+                            (i)*size.h + 5 - overallLogMax.y
+                    },
                                 0xffffffff);
                 }
             }

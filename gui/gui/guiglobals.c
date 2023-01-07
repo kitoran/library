@@ -10,6 +10,6 @@ struct context context = {
     0,
     0
 };
-Size rootWindowSize;
+Size rootWindowSize = {700, 700};
 
 Painter rootWindowPainter;

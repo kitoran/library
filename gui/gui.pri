@@ -22,6 +22,7 @@ HEADERS +=  \
     $$PWD/gui/layoutStack.h \
     $$PWD/gui/linelayout.h \
     $$PWD/gui/persistent.h \
+    $$PWD/gui/guiglobals.h \
     $$PWD/gui/draw.h \
     $$PWD/gui/toolbuttongroup.h \
     $$PWD/gui/backends/x/backend.h \
@@ -29,7 +30,7 @@ HEADERS +=  \
 #}
 SOURCES += \
     $$PWD/gui/gui.c \
-    $$PWD/gui/stb.c \
+#    $$PWD/gui/stb.c \
     $$PWD/gui/gridlayout.c \
     $$PWD/gui/combobox.c \
     $$PWD/gui/guiglobals.c \

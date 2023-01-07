@@ -1,6 +1,6 @@
 ﻿#ifndef SETTINGS_H
 #define SETTINGS_H
-
+#define MAX_STRING_LEN 100
 int loadInt(char* name, _Bool *success);
 void saveInt(char* name, int value);
 

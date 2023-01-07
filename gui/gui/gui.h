@@ -1,28 +1,18 @@
 ﻿#ifndef GUI_H
 #define GUI_H
-//#include <X11/Xlib.h>
-//#include <assert.h>
 #include "backend.h"
 #include "misc.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include "loadImage.h"
-
-//enum mode {
-
-//};
-//typedef struct State {
-//    bool press;
-//    int x;
-//    int y;
-//} State;
-//typedef int i32;
-//typedef struct Image Image;
+#ifdef _MSC_VER  
+#define _Atomic
+#endif
 extern _Atomic bool cursor;
 extern Event event;
 #define SCROLLBAR_THICKNESS 15
 
-_Bool guiSameWindow(Painter* p);
+bool guiSameWindow(Painter* p);
 Size guiTextExtents(/*Painter*p,*/const char *text, int len);
 void guiDrawImageEx(Painter* p, IMAGE* i, int x, int y, Size *size);
 void guiDrawImage(Painter* p, IMAGE* i, int x, int y);
@@ -48,7 +38,7 @@ typedef struct Rect {
     u32 width;
     u32 height;
 } Rect;
-_Bool pointInRect(Point p, Rect r);
+bool pointInRect(Point p, Rect r);
 Point getPos();
 void feedbackSize(Size);
 Size availableSize();
@@ -78,8 +68,11 @@ void guiLabelZT(Painter* p, char *text);
 void guiLabelZTWithBackground(Painter* p, char *text, bool back);
 void guiLabelWithBackground(Painter* p, char *text, int len, bool back);
 bool guiButtonZT(Painter* p, char *text);
-_Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double sliderFraction);
+bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double sliderFraction);
 //bool guiSlider(Painter*, double* v, double start, double end);
+bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size *desirableSize);
+bool resourseToolButton(Painter*p, const char* name);
+bool standardResourseToolButton(Painter*p, char* name);
 
 void guiDrawLine(Painter*, int, int, int, int);
 void guiDrawRectangle(Painter*, int, int, int, int);
@@ -95,13 +88,20 @@ static inline unsigned int rgb(int r, int g, int b) {
     return r << 16 | g << 8 | b;
 }
 static inline unsigned int rgbf(double r, double g, double b) {
-    return rgb(r*255, g*255, b*255);
+    return rgb((int)r*255, (int)g*255, (int)b*255);
 }
 static inline u32 gray(int gv) {
     return rgb(gv,gv,gv);
 }
+
+#ifdef __cplusplus
+//extern "C"
+#endif
 void guiStartDrawing();
 void guiNextEvent();
 void guiRedraw();
 
+//#ifdef __cplusplus
+//} // extern "C"
+//#endif
 #endif // GUI_H

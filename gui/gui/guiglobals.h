@@ -5,8 +5,9 @@ extern bool redraw;
 struct context {
     void* active;
     int pos;
-#define MAX_INPUT_LEN 100
-    char editedString[MAX_INPUT_LEN];
+#define MAX_STRING_LEN 100
+    //TODO there are likely loads of off-by-1 bugs connected to this constant
+    char editedString[MAX_STRING_LEN];
     char nullTerminator;
     int editedStringLen;
 //    void (*commit)(void* data);

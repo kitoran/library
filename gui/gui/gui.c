@@ -4,7 +4,8 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
-#include <sys/select.h>
+#include <stb_ds.h>
+//#include <sys/select.h>
 #include <stdlib.h>
 
 #include <layoutStack.h>
@@ -23,7 +24,7 @@ Size availableSize() {
 }
 
 
-#warning cache textures or surfaces
+// TODO cache textures or surfaces
 void guiLabelWithBackground(Painter* p, char *text, int len, bool back) {
     Point pos = getPos();
     Size extents = guiTextExtents(text, len);
@@ -37,7 +38,7 @@ void guiLabelWithBackground(Painter* p, char *text, int len, bool back) {
             guiSetForeground(p,0);
             guiFillRectangle(p, pos.x, pos.y, size.w, size.h);
         }
-        guiDrawText(p, text, len, STRU(Point, pos.x+5,pos.y+5/*+ extents.height*/),0xffffffff);
+        guiDrawText(p, text, len, (Point){ pos.x+5,pos.y+5/*+ extents.height*/},0xffffffff);
 //    }
     feedbackSize(size);
 }
@@ -67,8 +68,9 @@ bool guiButton(Painter *p, char* text, int len)
         guiFillRectangle(p, pos.x, pos.y,
                        size.w, size.h);
         guiSetForeground(p, 0xffffffff);
-        guiDrawText(p, text, len, STRU(Point,
-                    pos.x+5 /*+ overallLog.x*/, pos.y+5 /*+ overallLog.height*/),
+        guiDrawText(p, text, len, (Point) {
+            pos.x + 5 /*+ overallLog.x*/, pos.y + 5 /*+ overallLog.height*/
+        },
                     0xffffffff);
 //    }
     bool res = false;
@@ -95,7 +97,7 @@ bool guiToolButtonEx(Painter *p, Image *i, bool active, Size* desirableSize) {
     if(!guiSameWindow(p)) return false;
     volatile Point pos = getPos();
 
-    Size iSize = IMAGE_SIZE(i);
+    Size iSize = imageSize(i);
     Size size;
     if(desirableSize) {
         size = *desirableSize;
@@ -123,6 +125,32 @@ bool guiToolButtonEx(Painter *p, Image *i, bool active, Size* desirableSize) {
     return res;
 }
 typedef enum PermittedSymbols {intSymbols, doubleSymbols, allSymbols} PermittedSymbols;
+void commit(bool* res)
+{
+    context.active = 0;
+    context.editedString[context.editedStringLen] = 0;
+    //        sscanf(context.editedString, "%d", number);
+    *res = true;
+}
+int chosesnprintf(PermittedSymbols symbols, void* id, char* buffer) {
+    switch(symbols) {
+    case intSymbols:
+        return snprintf(buffer,
+                        MAX_STRING_LEN,
+                        "%d",
+                        *(int*)id);
+    case doubleSymbols:
+        return snprintf(buffer,
+                        MAX_STRING_LEN,
+                        "%lf",
+                        *(double*)id);
+    default:
+        return snprintf(buffer,
+                     MAX_STRING_LEN,
+                     "%s",
+                     (char*)id);
+    }
+}
 bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symbols) {
     Point pos = getPos();
     Size size = {textWidth + 10,
@@ -130,32 +158,8 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
     Rect rect = {pos.x, pos.y, size.w, size.h};
     guiSetClipRect(p, rect);
     bool res = false;
-    void commit()
-    {
-        context.active = 0;
-        context.editedString[context.editedStringLen] = 0;
-//        sscanf(context.editedString, "%d", number);
-        res = true;
-    }
-    int chosesnprintf(char* buffer) {
-        switch(symbols) {
-        case intSymbols:
-            return snprintf(buffer,
-                            MAX_INPUT_LEN,
-                            "%d",
-                            *(int*)id);
-        case doubleSymbols:
-            return snprintf(buffer,
-                            MAX_INPUT_LEN,
-                            "%lf",
-                            *(double*)id);
-        default:
-            return snprintf(buffer,
-                         MAX_INPUT_LEN,
-                         "%s",
-                         (char*)id);
-        }
-    }
+    
+
 
     if(event.type == KeyPress && context.active == id) {
         GuiKeySym sym = GET_KEYSYM(event);
@@ -170,7 +174,7 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
             }
             cursor = true;
         } else if(sym == enter) {
-            commit();
+            commit(&res);
         } else if(sym == leftKey) {
             if(context.pos > 0) {
                 context.pos--;
@@ -185,7 +189,7 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
             }
             context.editedStringLen--;
             context.pos--;
-        } if(sym == delete) {
+        } if(sym == deleteKey) {
             if(context.pos == context.editedStringLen) {
                 goto keyPressBreak;
             }
@@ -196,7 +200,7 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
         } else if(symbols == intSymbols? ((sym >= '0' && sym <= '9') || sym == '-') :
                   symbols == doubleSymbols? ((sym >= '0' && sym <= '9') || sym == '-'||sym=='.'):
                   true) {
-            if(context.editedStringLen == MAX_INPUT_LEN) {
+            if(context.editedStringLen == MAX_STRING_LEN) {
                 goto keyPressBreak;
             }
             for(int i = context.editedStringLen; i > context.pos; i--) {
@@ -223,12 +227,12 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
         guiSetForeground(p, 0xffffffff);
         if(context.active == id) {
             guiDrawText(p, context.editedString, context.editedStringLen,
-                     STRU(Point, pos.x+5, pos.y+5), 0xffffffff);
+                     (Point){ pos.x+5, pos.y+5}, 0xffffffff);
         } else {
-            char stringN[MAX_INPUT_LEN+1];
-            int len = chosesnprintf(stringN);
+            char stringN[MAX_STRING_LEN+1];
+            int len = chosesnprintf(symbols, id, stringN);
             guiDrawText(p, stringN, len,
-                     STRU(Point, pos.x+5, pos.y+5), 0xffffffff);
+                     (Point){ pos.x+5, pos.y+5}, 0xffffffff);
         }
         if(cursor && context.active == id) {
             Size overallInk = guiTextExtents(context.editedString, context.pos);//, &overallInk, &overallLog);
@@ -245,7 +249,7 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
         if(mx >= pos.x && mx <= pos.x + (int)size.w &&
             my >= pos.y && my <= pos.y + (int)size.h) {
             if(context.active != id) {
-                context.editedStringLen = chosesnprintf(context.editedString);
+                context.editedStringLen = chosesnprintf(symbols, id, context.editedString);
             }
             context.active = id;
 
@@ -262,7 +266,7 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
             DEBUG_PRINT(newPos, "%d");
             context.pos = MIN(MAX(newPos, 0), context.editedStringLen);
         } else if(context.active == id) {
-            commit();
+            commit(&res);
         }
     }
     if(event.type == TimerEvent) {
@@ -289,8 +293,9 @@ bool guiDoubleField(Painter *p, int digits, double *number) {
     return res;
 }
 extern const char* appName;
+#ifndef _MSC_VER
 const char* __attribute__((weak))  appName = "gui application";
-
+#endif
 
 
 Size guiGetSize()
@@ -376,17 +381,18 @@ _Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double 
     double maxValue = 1-sliderFraction;
     Size buttonSize = {SCROLLBAR_THICKNESS, SCROLLBAR_THICKNESS};
     {
-        __attribute__ ((cleanup(popLayout))) ExactLayout l = makeExactLayout(pos);
+        ExactLayout l = makeExactLayout(pos);
         pushLayout(&l);
         if(guiToolButtonEx(p, left, false, &buttonSize)) {
             res = true;
             *value = MAX(*value - SCROLLBAR_SPEED, 0);
         }
-        l.exactPos = STRU(Point, pos.x+length-SCROLLBAR_THICKNESS, pos.y);
+        l.exactPos = (Point){ pos.x+length-SCROLLBAR_THICKNESS, pos.y};
         if(guiToolButtonEx(p, right, false, &buttonSize)) {
             res = true;
             *value = MIN(*value + SCROLLBAR_SPEED, maxValue);
         }
+        popLayout();
     }
     int internalStart = pos.x+SCROLLBAR_THICKNESS;
     int internalLength = length - 2*SCROLLBAR_THICKNESS;
@@ -406,7 +412,7 @@ _Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double 
     static Point dragStart = {-1, -1};
     static int dragStartPos = -1;
     if(event.type == ButtonPress) {
-        Point mpos = STRU(Point, GET_X(event), GET_Y(event));
+        Point mpos = (Point){ GET_X(event), GET_Y(event)};
         Rect leftPart = {internalStart, pos.y, slider.x-internalStart, SCROLLBAR_THICKNESS};
         if(pointInRect(mpos, leftPart)) {
             res = true;
@@ -430,7 +436,7 @@ _Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double 
     }
     if(context.active == value &&
             event.type == MotionEvent) {
-        Point mpos = STRU(Point, GET_X(event), GET_Y(event));
+        Point mpos = (Point){ GET_X(event), GET_Y(event)};
         *value = (dragStartPos + mpos.x-dragStart.x)*1.0/internalLength;
         *value = CLAMP(*value, 0, maxValue);
         res = true;
@@ -444,6 +450,42 @@ _Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double 
 
     feedbackSize(size);
     return res;
+}
+bool standardResourseToolButton(Painter*p, char* name) {
+    static struct {
+        char* key;
+        IMAGE* value;
+    } *map = NULL;
+
+    IMAGE* image;
+    int index = shgeti(map, name);
+    if(index == -1) {
+        image = loadImageZT(GUI_RESOURCE_PATH, name);
+        shput(map, name, image);
+    } else {
+        image = map[index].value;
+    }
+    return guiToolButton(p, image);
+}
+bool resourseToolButton(Painter*p, const char* name) {
+   return resourseToolButtonEx(p, name, false, NULL);
+}
+bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size* desirableSize) {
+    static struct {
+        char* key;
+        IMAGE* value;
+    } *map = NULL;
+
+    IMAGE* image;
+    int index = shgeti(map, name);
+//    fprintf(stderr, "%d, index", index);
+    if(index == -1) {
+        image = loadLocalImageZT(name);
+        shput(map, name, image);
+    } else {
+        image = map[index].value;
+    }
+    return guiToolButtonEx(p, image, active, desirableSize);
 }
 
 _Bool pointInRect(Point p, Rect r)
