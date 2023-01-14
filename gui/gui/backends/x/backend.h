@@ -1,6 +1,13 @@
 ﻿#ifndef BACKEND_H
 #define BACKEND_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct Size Size;
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef SDL
 #include <SDL_events.h>

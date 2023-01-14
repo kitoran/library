@@ -116,7 +116,7 @@ static void init() {
 
 //            int ind = shgeti(hmap, key);
 //            DEBUG_PRINT(ind, "%d");
-        }
+        } else ABORT("settings file is corrupted");
 
 //        int ind = shgeti(hmap, "bpm");
 //        DEBUG_PRINT(ind, "%d");

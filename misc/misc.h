@@ -19,7 +19,7 @@ typedef short int i16;
 //#ifndef tau
 //#define tau 6.283185307179586
 //#endif
-#define STATIC(a,b,c) static a b; { static _Bool init = 0;\
+#define STATIC(a,b,c) static a b; { static bool init = 0;\
     if(!init) {init = 1; b = (c);} }
 
 #ifdef _MSC_VER

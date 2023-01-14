@@ -9,6 +9,9 @@
 #define _Atomic
 #endif
 extern _Atomic bool cursor;
+#ifdef __cplusplus
+extern "C" {
+#endif
 extern Event event;
 #define SCROLLBAR_THICKNESS 15
 
@@ -101,7 +104,7 @@ void guiStartDrawing();
 void guiNextEvent();
 void guiRedraw();
 
-//#ifdef __cplusplus
-//} // extern "C"
-//#endif
+#ifdef __cplusplus
+} // extern "C"
+#endif
 #endif // GUI_H
