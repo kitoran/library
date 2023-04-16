@@ -60,26 +60,32 @@
 //#define SECOND(X, Y)    Y
 //#define FITSTS2(...)
 //typedef arrayOfStrings;
+struct IntrospectedEnumerator {
+    const char* name;
+    i64 enumerator;
+};
+
+#define INTROSPECTED_SIMPLE_ENUMERATOR_COMMA(X) {#X, X},
+#define INTROSPECTED_SIMPLE_ENUMERATOR_COMMA_FIRST(X, Y) {#X, X},
+
 #define INTROSPECT_ENUM(Name, ...) \
     typedef const char*const (The ## Name ## Type)[NUM_ARGS(__VA_ARGS__)+1]; \
     static  The ## Name ## Type Name ## Names  = {FOREACH(STRINGIFY_COMMA, (__VA_ARGS__))}; \
     typedef enum {__VA_ARGS__} Name; \
-    static const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)] = {__VA_ARGS__}; \
+    static const struct IntrospectedEnumerator Name ## Enumerators[NUM_ARGS(__VA_ARGS__)] = {FOREACH(INTROSPECTED_SIMPLE_ENUMERATOR_COMMA, (__VA_ARGS__))}; \
     static const int Name ## Size = NUM_ARGS(__VA_ARGS__);
 
-#define INTROSPECT_ENUM_VISIBLE_NAMES(Name, ...) constexpr char const*const Name ## Names [NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(STRINGIFY_COMMA_SECOND, (__VA_ARGS__))}; \
-    enum Name {FOREACH2(FIRST, (__VA_ARGS__))}; \
-    const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
-    const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
-#define INTROSPECT_ENUM_FILENAMES(Name, ...) char const*const Name ## Filenames [NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(STRINGIFY_COMMA_SECOND, (__VA_ARGS__))}; \
+#define INTROSPECT_ENUM_VISIBLE_NAMES(Name, ...) \
+    static const char *const Name ## Names [NUM_ARGS(__VA_ARGS__)/2+1] = {FOREACH2(COMMA_SECOND, (__VA_ARGS__))}; \
+    typedef enum Name {FOREACH2(FIRST, (__VA_ARGS__))} Name; \
+    static const struct IntrospectedEnumerator Name ## Enumerators[NUM_ARGS(__VA_ARGS__)] = {FOREACH2(INTROSPECTED_SIMPLE_ENUMERATOR_COMMA_FIRST, (__VA_ARGS__))}; \
+    static const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
+#define INTROSPECT_ENUM_FILENAMES(Name, ...) \
+    char const*const Name ## Filenames [NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(STRINGIFY_COMMA_SECOND, (__VA_ARGS__))}; \
     typedef enum Name {FOREACH2(FIRST, (__VA_ARGS__))} Name; \
     const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
     const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
 
-struct IntrospectedEnumerator {
-    const char* name;
-    u64 enumerator;
-};
 #define INTROSPECTED_ENUMERATOR_COMMA(X, Y) {#X, Y},
 #define ENUMERATOR_WITH_VALUE_COMMA(X, Y) X = Y,
 #define INTROSPECT_ENUM_VALUES(Name, ...) \
@@ -96,6 +102,23 @@ static const char* nameFromValue(const struct IntrospectedEnumerator* values, in
 }
 #define NAME_FROM_VALUE(type, value) \
     nameFromValue(type ## Enumerators, ELEMS(type ## Enumerators), value)
+#ifdef _INC_STDLIB
+static i64 valueFromName(const struct IntrospectedEnumerator* values, int size, char const* name, bool* succ) {
+    *succ = false;
+    for(int i = 0; i < size; i++) {
+        if(!strcmp(values[i].name, name)) {
+            *succ = true;
+            return values[i].enumerator;
+        }
+    }
+    return -1;
+}
+#define VALUE_FROM_NAME(type, name, succ) \
+    ((type)valueFromName(type ## Enumerators, ELEMS(type ## Enumerators), name, (succ)))
+#else
+#define VALUE_FROM_NAME(type, name, succ) \
+    _Pragma ("message( \"Please import stdlib to use VALUE_FROM_NAME\")") *Please import stdlib to use VALUE_FROM_NAME
+#endif
 
 #else
 #define INTROSPECT_ENUM(Name, ...)  enum Name {__VA_ARGS__};

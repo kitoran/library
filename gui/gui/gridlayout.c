@@ -92,8 +92,8 @@ void gridFeedbackSize(Grid* g, Size s) {
 }
 
 LayoutVT gridVT = {
-    gridGetPos,
-    gridFeedbackSize,
+    (Point (*)(struct LayoutVT*))gridGetPos,
+    (void (*)(struct LayoutVT*,Size))gridFeedbackSize,
     NULL
 };
 

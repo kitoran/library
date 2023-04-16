@@ -9,13 +9,13 @@ bool guiToolButtonGroup_(Painter* p, int* enumv, const char*const fileNames[], i
 {
     Point pos = getPos();
 
-    if(!guiSameWindow(p)) return false;
+    if(!guiSameWindow(p, true)) return false;
     Grid* g;
     static struct {
         void* key;
         Grid* value;
     } *map = NULL;
-    int index = hmgeti(map, enumv);
+    int index = (int)hmgeti(map, enumv);
     if(index == -1) {
         g = malloc(sizeof(Grid));
         *g = allocateGrid(enumSize, 1, 1);

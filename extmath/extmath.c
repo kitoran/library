@@ -25,7 +25,7 @@ int * makeSinLookupTableInt()
     static int lookup[LOOKUP_TABLE_SIZE];
     if(!initialized) {
         for(int i = 0; i < LOOKUP_TABLE_SIZE; i++) {
-          lookup[i] = /*(*/sin(i*tau/LOOKUP_TABLE_SIZE)/*/2+1)*/*INT16_MAX;
+          lookup[i] = (int)round(/*(*/sin(i*tau/LOOKUP_TABLE_SIZE)/*/2+1)*/*INT16_MAX);
         }
         initialized = true;
     }

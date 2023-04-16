@@ -1,4 +1,4 @@
-﻿//#include "gui.h"
+﻿#include "gui.h"
 extern int maxDigitWidth;
 extern int maxDigitHeight;
 extern bool redraw;
@@ -10,7 +10,9 @@ struct context {
     char editedString[MAX_STRING_LEN];
     char nullTerminator;
     int editedStringLen;
+    int numberOfDropDownElements;
+    Size sizeOfDropDownElements;
 //    void (*commit)(void* data);
 };
 extern struct context context;
-extern Size rootWindowSize;
+extern Rect rootWindowRect;

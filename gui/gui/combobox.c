@@ -1,23 +1,29 @@
 ﻿#include "gui.h"
 #include "guiglobals.h"
 #include "loadImage.h"
+#include "combobox.h"
 //#include <math.h>
 //#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
 
+
+
+#include <SDL.h>
 //#include <X11/Xlib.h>
 //#define XK_LATIN1
 //#define XK_MISCELLANY
 //#include <X11/keysymdef.h>
 //#include <sys/select.h>
 //#include <stdlib.h>
-
+Painter dropDownPainter = {0,0,0};
+GuiWindow listWindow = 0;
 bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
 {
-    STATIC(GuiWindow, listWindow, guiMakeWindow())
-    STATIC(Painter, gc, guiMakePainter(listWindow))
+    STATIC(bool, init, (listWindow = guiMakeHiddenPopupWindow(),
+                        dropDownPainter = guiMakePainter(listWindow),
+                        true))
 
 
     Point pos = getPos();
@@ -26,9 +32,9 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
     int numberOfElements = 0;
     while(*c != NULL) {
         numberOfElements++;
-        Size overallLog = guiTextExtents(*c, strlen(*c));
-        overallLogMax.width = MAX(overallLog.w, overallLogMax.width);
-        overallLogMax.height = MAX(overallLog.h, overallLogMax.height);
+        Size overallLog = guiTextExtents(*c, (int)strlen(*c));
+        overallLogMax.w = MAX(overallLog.w, overallLogMax.w);
+        overallLogMax.h = MAX(overallLog.h, overallLogMax.h);
 //        int newx = MIN(overallLogMax.x, overallLog.x);
 //        int newy = MIN(overallLogMax.y, overallLog.y);
 //        int newr = MAX(overallLogMax.x + overallLogMax.width,
@@ -42,32 +48,21 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
         c++;
     }
 
-    overallLogMax.width += 10;//no fucking idea why
-    static IMAGE* triangle = NULL;
-    if(triangle ==  NULL) {
-        triangle = loadImageZT(GUI_RESOURCE_PATH, "triangle.png");
-    }
+    overallLogMax.w += 10;//no fucking idea why
+    STATIC(IMAGE*, triangle, loadImageZT(GUI_RESOURCE_PATH, "triangle.png"));// = NULL;
+//    if(triangle ==  NULL) {
+//        triangle = ;
+//    }
     Size iSize = imageSize(triangle);
-    Size size = {overallLogMax.width + iSize.w + 10,
-                MAX(overallLogMax.height, iSize.h) + 10};
+    Size size = {overallLogMax.w + iSize.w + 10,
+                MAX(overallLogMax.h, iSize.h) + 10};
 
     bool res = false;
 //    if(event.xany.window == listWindow) {
-        if(event.type == ButtonRelease && context.active == current) {
-            int mx = GET_X(event)-pos.x;
-            int my = GET_Y(event)-pos.y - (int)size.h;
-//            , ,
-            for(int i = 0; i < numberOfElements; i++) {
-                if(mx >= 1 && mx <= (int)size.w-2  +  1 &&
-                    my >= (i)*(int)size.h+1 && my <= (int)size.h-2   +   (int)((i)*size.h+1)) {
-                    res = true;
-                    *current = i;
-                }
-            }
-        }
+
 //    }
 
-    if(guiSameWindow(p)) {
+    if(guiSameWindow(p, true)) {
         if(event.type ==ButtonRelease) {
             int mx = GET_X(event);
             int my = GET_Y(event);
@@ -75,15 +70,19 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
                 my >= pos.y && my <= pos.y + (int)size.h) {
     //            if(event.type == ButtonRelease) {
     //                res = true;
-                    fprintf(stderr, "Mapping window\n");
-                    guiMoveResizeWindow(listWindow, pos.x, pos.y + (int)size.h,
+                    fprintf(stderr, "Mapping windown");
+                    Rect rect = guiGetRect();
+                    guiMoveResizeWindow(listWindow, rect.x+pos.x, rect.y + pos.y + (int)size.h,
                                       size.w+1/*непонятно почему здесь окно получается на пиксель тоньше*/, (size.h)*numberOfElements);
 //                    XSetBackground(xdisplay, &gc, 0xffffffff);
-                    guiSetForeground(&gc, 0xffffffff);
-                    guiDrawRectangle(&gc, 5,5,30,30);
+                    guiSetForeground(&dropDownPainter, 0xffffffff);
+                    guiDrawRectangle(&dropDownPainter, (Rect){5,5,30,30});
                     guiShowWindow(listWindow);
+                    guiRaiseWindow(listWindow);
     //            }
-                context.active = current;
+                    context.numberOfDropDownElements = numberOfElements;
+                    context.sizeOfDropDownElements = size;
+                    context.active = current;
             }
             else {
                 if(context.active == current) {
@@ -95,15 +94,13 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
                 }
             }
         }
-        if(event.type != MotionEvent) {
+        if(true/*event.type != MotionEvent*/) {
             guiSetForeground(p, 0xff555555);
-            guiFillRectangle(p, pos.x, pos.y,
-                           size.w, size.h);
+            guiFillRectangle(p, (Rect){pos, size});
             guiSetForeground(p, 0xffffffff);
-            guiDrawRectangle(p, pos.x, pos.y,
-                           size.w, size.h);
+            guiDrawRectangle(p, (Rect){pos, size});
             guiSetForeground(p, 0xffffffff);
-            int len = strlen(elements[*current]);
+            int len = (int)strlen(elements[*current]);
             guiDrawText(p, elements[*current], len,
                 (Point) {
                 pos.x + 5 + overallLogMax.x,
@@ -111,18 +108,18 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
             }, 0xffffffff);
 
             guiDrawImage(p, triangle,
-                      pos.x+overallLogMax.x+overallLogMax.width,
+                      pos.x+overallLogMax.x+overallLogMax.w,
                          pos.y+5);
             if(context.active == current) {
                 guiClearWindow(listWindow);
                 for(int i = 0; i <numberOfElements; i++) {
-                    guiSetForeground(&gc, 0xff333333);
-                    guiFillRectangle(&gc, 1, (i)*size.h+1,
-                                   size.w-2, size.h-2);
+                    guiSetForeground(&dropDownPainter, 0xff333353);
+                    guiFillRectangle(&dropDownPainter, (Rect){1, (i)*size.h+1,
+                                   size.w-2, size.h-2});
 
-                    int len = strlen(elements[i]);
-                    guiSetForeground(&gc, 0xffffffff);
-                    guiDrawText(&gc,
+                    int len = (int)strlen(elements[i]);
+                    guiSetForeground(&dropDownPainter, 0xffffffff);
+                    guiDrawText(&dropDownPainter,
                         elements[i], len,
                         (Point) {
                         5 + overallLogMax.x,
@@ -135,4 +132,28 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
     }
     feedbackSize(size);
     return res;
+}
+
+void proccessComboBox() {
+    if(event.type == ButtonRelease) {
+        int mx = GET_X(event);
+        int my = GET_Y(event);
+//            , ,
+        for(int i = 0; i < context.numberOfDropDownElements; i++) {
+            Size size = context.sizeOfDropDownElements;
+            if(mx >= 1 && mx <= (int)size.w-2  +  1 &&
+                my >= (i)*(int)size.h+1 && my <= (int)size.h-2   +   (int)((i)*size.h+1)) {
+//                res = true;
+                *(int*)context.active = i;
+            }
+        }
+        guiHideWindow(listWindow);
+
+        SDL_UserEvent userevent = {TimerEvent, SDL_GetTicks(), 0, 0, 0, 0};
+        SDL_Event event; event.user = userevent;
+        SDL_PushEvent(&event);
+    }
+    if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
+        guiHideWindow(listWindow);
+    }
 }

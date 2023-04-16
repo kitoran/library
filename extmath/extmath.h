@@ -4,6 +4,9 @@
 
 #define LOOKUP_POWER 15
 #define LOOKUP_TABLE_SIZE (1 << LOOKUP_POWER)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void initializeMathExt();
 
@@ -21,5 +24,8 @@ static inline unsigned int hash(unsigned int x) {
 }
 
 void convergents(double s, int* res, int n);
+#ifdef __cplusplus
+}
+#endif
 
 #endif // EXTMATH_H

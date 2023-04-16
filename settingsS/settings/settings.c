@@ -10,6 +10,9 @@
 //#include <libconfig.h>
 #include <stdlib.h>
 #include "stb_ds.h"
+#ifdef WIN32
+#include "windows.h"
+#endif
 extern const char* appName;
 #ifdef _MSC_VER
 #define PATH_MAX _MAX_PATH
@@ -143,12 +146,16 @@ static void save() {
         fprintf(f, "%s = %s\n", hmap[i].key, hmap[i].value);
     }
     fclose(f);
+#ifndef WIN32
     rename(path_back, path);
+#else
+    ReplaceFileA(path, path_back, NULL, 0,0,0);
+#endif
 }
 int loadInt(char *name, bool* success)
 {
     init();
-    int index = shgeti(hmap, name);
+    int index = (int)shgeti(hmap, name);
     if(index >= 0) {
         *success = true;
         char* s = hmap[index].value;
@@ -164,7 +171,7 @@ int loadInt(char *name, bool* success)
 void saveInt(char *name, int value)
 {
     init();
-    int index = shgeti(hmap, name);
+    int index = (int)shgeti(hmap, name);
     if(index >= 0) {
         free(hmap[index].value);
     }
@@ -175,10 +182,10 @@ void saveInt(char *name, int value)
     return;
 }
 
-int loadDouble(char *name, bool* success)
+double loadDouble(char *name, bool* success)
 {
     init();
-    int index = shgeti(hmap, name);
+    int index = (int)shgeti(hmap, name);
     if(index >= 0) {
         *success = true;
         char* s = hmap[index].value;
@@ -193,7 +200,7 @@ int loadDouble(char *name, bool* success)
 void saveDouble(char *name, double value)
 {
     init();
-    int index = shgeti(hmap, name);
+    int index = (int)shgeti(hmap, name);
     if(index >= 0) {
         free(hmap[index].value);
     }

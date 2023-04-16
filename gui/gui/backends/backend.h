@@ -1,13 +1,10 @@
-﻿#ifndef BACKEND_H
+#ifndef BACKEND_H
 #define BACKEND_H
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct Size Size;
-#ifdef __cplusplus
-}
-#endif
 
 #ifdef SDL
 #include <SDL_events.h>
@@ -23,8 +20,11 @@ enum {
     ButtonPress = SDL_MOUSEBUTTONDOWN,
     MouseWheel = SDL_MOUSEWHEEL,
     KeyPress = SDL_KEYDOWN,
-    TimerEvent = SDL_USEREVENT,
+//    TimerEvent = SDL_USEREVENT,
 };
+extern int TimerEvent;
+extern int RedrawEvent;
+
 #define GET_X(a) ((a).type == SDL_MOUSEMOTION?(a).motion.x:\
                   ((a).type == SDL_MOUSEBUTTONUP || (a).type == SDL_MOUSEBUTTONDOWN)?(a).button.x:\
                   (a).type == SDL_MOUSEWHEEL?(a).wheel.x:(abort(), 0))
@@ -99,4 +99,11 @@ void guiGetTextPart(char* text, int wid, int* resWid, int* resCount);
 struct Rect;
 void guiSetClipRect(Painter* p, struct Rect r);
 void guiUnsetClipRect(Painter* p);
+void guiMoveWindow(GuiWindow window, int x, int y);
+GuiWindow guiMakeHiddenPopupWindow();
+void guiRaiseWindow(GuiWindow w);
+void makeMenu();
+#ifdef __cplusplus
+}
+#endif
 #endif // BACKEND_H

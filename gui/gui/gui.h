@@ -14,8 +14,7 @@ extern "C" {
 #endif
 extern Event event;
 #define SCROLLBAR_THICKNESS 15
-
-bool guiSameWindow(Painter* p);
+bool guiSameWindow(Painter* p, bool def);
 Size guiTextExtents(/*Painter*p,*/const char *text, int len);
 void guiDrawImageEx(Painter* p, IMAGE* i, int x, int y, Size *size);
 void guiDrawImage(Painter* p, IMAGE* i, int x, int y);
@@ -36,11 +35,23 @@ typedef struct Size {
     u32 h;
 } Size;
 typedef struct Rect {
-    i32 x;
-    i32 y;
-    u32 width;
-    u32 height;
+    union {
+        Point pos;
+        struct {
+            i32 x;
+            i32 y;
+        };
+    };
+    union {
+        Size size;
+        struct {
+            u32 w;
+            u32 h;
+        };
+    };
 } Rect;
+#define RECT_FORMAT "%d %d %d %d"
+#define RECT_ARGS(a) a.x, a.y, a.w, a.h
 bool pointInRect(Point p, Rect r);
 Point getPos();
 void feedbackSize(Size);
@@ -62,29 +73,35 @@ bool guiButton(Painter *p, char* text, int len);
 //bool guiButtonWindow(Painter *p, char* text, int len);
 bool guiCheckBox(Painter* p, bool* v);
 bool guiToolButton(Painter* p, IMAGE* i);
-bool guiToolButtonEx(Painter* p, IMAGE* i, bool active, Size* desirableSize);
+bool guiToolButtonEx(Painter* p, IMAGE* i, bool active, const Size* desirableSize);
 Size guiDrawText(Painter* p, const char *text, int len,
                  Point pos, i32 color);
-Size guiDrawTextZT(Painter* p, char *text, Point pos, i32 color);
+Size guiDrawTextZT(Painter* p, const char *text, Point pos, i32 color);
 void guiLabel(Painter* p, char *text, int len);
 void guiLabelZT(Painter* p, char *text);
 void guiLabelZTWithBackground(Painter* p, char *text, bool back);
 void guiLabelWithBackground(Painter* p, char *text, int len, bool back);
 bool guiButtonZT(Painter* p, char *text);
-bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double sliderFraction);
+//typedef enum {
+//    gui_horizontal,
+//    gui_vertical
+//} GuiOrientation;
+//bool guiHorizontalScrollBar(Painter *p, int length, double* value, double sliderFraction);
+bool guiScrollBar(Painter *p, int length, double* value, double sliderFraction, bool horizontal);
 //bool guiSlider(Painter*, double* v, double start, double end);
 bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size *desirableSize);
 bool resourseToolButton(Painter*p, const char* name);
 bool standardResourseToolButton(Painter*p, char* name);
 
 void guiDrawLine(Painter*, int, int, int, int);
-void guiDrawRectangle(Painter*, int, int, int, int);
-void guiFillRectangle(Painter *a, int b, int c, int d, int e);
+void guiDrawRectangle(Painter*, Rect r);
+void guiFillRectangle(Painter *a, Rect r);
+//void guiFillRectangleP(Painter *a, Rect* r);
 void guiFillRawRectangle(RawPicture *p, int x, int y, int w, int h, char r, char g, char b);
 void guiSetForeground(Painter*, unsigned long);
-void guiDrawTextWithLen(Painter*, int, int, char*, unsigned long);
+//void guiDrawTextWithLen(Painter*, int, int, char*, unsigned long);
 void guiSetSize(u32, u32);
-Size guiGetSize();
+Rect guiGetRect();
 
 static const unsigned int GuiDarkMagenta = 0x880088;
 static inline unsigned int rgb(int r, int g, int b) {
@@ -101,6 +118,7 @@ static inline u32 gray(int gv) {
 //extern "C"
 #endif
 void guiStartDrawing();
+void guiStartDrawingEx(bool shown);
 void guiNextEvent();
 void guiRedraw();
 

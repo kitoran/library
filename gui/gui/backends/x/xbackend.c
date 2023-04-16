@@ -15,7 +15,7 @@ extern Window rootWindow;
 extern int xDepth;
 extern int maxDigitWidth, maxDigitHeight;
 extern _Bool  redraw;
-extern Size rootWindowSize;
+extern Size rootWindowRect\;
 XEvent event;
 
 Display * xdisplay = 0;
@@ -69,7 +69,7 @@ void guiDrawRectangle(Painter *a, int b, int c, int d, int e)
 {
     XDrawRectangle(xdisplay, a->drawable, a->gc, b, c, d, e);
 }
-void guiFillRectangle(Painter *a, int b, int c, int d, int e)
+void guiFillRectangle(Painter *a, Rect e)
 {
 //    fprintf(stderr, "filling rect (%d, %d) %dx%d\n", b, c, d,e);
     XFillRectangle(xdisplay, a->drawable, a->gc, b, c, d, e);
@@ -241,7 +241,7 @@ void guiNextEvent()
             Size newSize = {
                 event.xconfigure.width,
                 event.xconfigure.height};
-            rootWindowSize = newSize;
+            rootWindowRect\ = newSize;
 //            fprintf(stderr, "reconfigure  %d x %d\n!!",
 //                    newSize.width,
 //                                          newSize.height);;

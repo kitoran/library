@@ -14,7 +14,7 @@ bool persistentIntField_(Painter*p, int digits, int* number, char* name) {
         Unit value;
     } *map = NULL;
 
-    int index = shgeti(map, name);
+    ptrdiff_t index = shgeti(map, name);
     if(index == -1) {
         bool success;
         int value = loadInt(name, &success);
@@ -35,7 +35,7 @@ bool persistentDoubleField_(Painter*p, int digits, double* number, char* name) {
         Unit value;
     } *map = NULL;
 
-    int index = shgeti(map, name);
+    ptrdiff_t index = shgeti(map, name);
     if(index == -1) {
         bool success;
         double value = loadDouble(name, &success);
@@ -58,7 +58,7 @@ bool persistentComboBoxZT_(Painter *p, const char * const *elements, int *curren
         Unit value;
     } *map = NULL;
 
-    int index = shgeti(map, name);
+    ptrdiff_t index = shgeti(map, name);
     if(index == -1) {
         bool success;
         int value = loadInt(name, &success);
@@ -79,7 +79,7 @@ bool persistentToolButtonGroup_(Painter *p, int *v, const char*const*  filenames
         Unit value;
     } *map = NULL;
 
-    int index = shgeti(map, saveName);
+    ptrdiff_t index = shgeti(map, saveName);
     if(index == -1) {
         bool success;
         int value = loadInt(saveName, &success);

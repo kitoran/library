@@ -5,7 +5,10 @@
 typedef struct LayoutVT {
     Point (*getPos)(struct LayoutVT*);
     void (*feedbackSize)(struct LayoutVT*,Size);
-    Size (*availableSize)(struct LayoutVT*);
+    Size (*availableSize)(struct LayoutVT*); // unused
+    // probably better to use a
+    // a function like Size (*getSize)(struct LayoutVT*,
+     //                         enum sizePolicy policy);
 } LayoutVT;
 
 void pushLayout(void*);

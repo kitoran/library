@@ -1900,5 +1900,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // Added by me
 #define FOR_STB_ARRAY_I(index, array) for(int index = 0; index < arrlen(array); index++)
 #define FOR_STB_ARRAY(type, element, array) for(type element = array; element < array+arrlen(array); element++)
+#define FOR_STB_MAP(type, element, array) for(type element = array; element < array+hmlen(array); element++)
 
 

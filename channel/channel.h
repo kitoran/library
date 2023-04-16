@@ -3,7 +3,6 @@
 #define _GNU_SOURCE
 #include <pthread.h>
 //#include <queue>
-#include <sys/syscall.h>
 //#include <signal.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -12,9 +11,18 @@
 #ifdef __cplusplus
 #define _Thread_local thread_local
 #endif
+#ifdef __linux__
+#include <sys/syscall.h>
 inline static pid_t gettid() {
     return syscall(SYS_gettid);
 }
+#endif
+#ifdef __CYGWIN__ 
+#include <processthreadsapi.h>
+inline static int gettid() {
+    return GetCurrentThreadId();
+}
+#endif
 #define CHANNEL_MAX_SIZE 127
 struct Channel {
     char thing[CHANNEL_MAX_SIZE  ];

@@ -19,13 +19,14 @@ SOURCES += \
     INCLUDEPATH += /usr/include/freetype2/
 }
 HEADERS +=  \
+    $$PWD/gui/backends/backend.h \
+    $$PWD/gui/combobox.h \
     $$PWD/gui/layoutStack.h \
     $$PWD/gui/linelayout.h \
     $$PWD/gui/persistent.h \
     $$PWD/gui/guiglobals.h \
     $$PWD/gui/draw.h \
     $$PWD/gui/toolbuttongroup.h \
-    $$PWD/gui/backends/x/backend.h \
     $$PWD/gui/windowlayout.h
 #}
 SOURCES += \
@@ -40,11 +41,10 @@ HEADERS += \
     $$PWD/gui/gui.h \
 #    $$PWD/gui/stb_ds.h \
     $$PWD/gui/gridlayout.h \
-    $$PWD/gui/color.h \
-    $$PWD/gui/shittyintrospection.h 
+    $$PWD/gui/color.h
 
 INCLUDEPATH += $$PWD/gui/
-INCLUDEPATH += $$PWD/gui/backends/x
+INCLUDEPATH += $$PWD/gui/backends/
 
 X {
 #LIBS += -lSDL2 #-lSDL_TTF

@@ -15,9 +15,10 @@ typedef struct {
 
 //static hsv   rgb2hsv(rgb in);
 //static rgb   /hsv2rgb(hsv in);
-
+#ifdef __GNUC__
 #pragma GCC push_options
 #pragma GCC optimize ("O0")
+#endif
 static inline int hsvd2bgr(double h, double s, double v)
 {
     hsv in = {h, s, v};
@@ -82,5 +83,7 @@ static inline int hsvd2bgr(double h, double s, double v)
 
     return out;
 }
+#ifdef __GNUC__
 #pragma GCC pop_options
+#endif
 #endif

@@ -24,9 +24,10 @@ extern SDL_Renderer* rootWindowRenderer;
 //struct _XImage;
 //#define IMAGE struct _XImage
 //#endif
+#ifdef __GNUC__
 #pragma GCC push_options
 #pragma GCC optimize ("Ofast")
-
+#endif
 #ifndef SDL
 extern Display * xdisplay;
 #endif
@@ -63,8 +64,9 @@ IMAGE *loadImageZT(char* startOfPath, const char *path) {
     SDL_FreeSurface(surface);
     return texture;
 }
+#ifdef __GNUC__
 #pragma GCC pop_options
-
+#endif
 FILE* saveImage = 0;
 
 #ifndef SDL

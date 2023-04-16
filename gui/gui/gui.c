@@ -12,15 +12,15 @@
 
 Point getPos() {
     LayoutVT** layout = (topLayout());
-    return (*layout)->getPos(layout);
+    return (*layout)->getPos((LayoutVT*)layout);
 }
 void feedbackSize(Size s) {
     LayoutVT** layout = topLayout();
-    return (*layout)->feedbackSize(layout, s);
+    (*layout)->feedbackSize((LayoutVT*)layout, s);
 }
 Size availableSize() {
     LayoutVT** layout = topLayout();
-    return (*layout)->availableSize(layout);
+    return (*layout)->availableSize((LayoutVT*)layout);
 }
 
 
@@ -36,7 +36,7 @@ void guiLabelWithBackground(Painter* p, char *text, int len, bool back) {
 //    if(!(event.type == MotionEvent)) {
         if(back) {
             guiSetForeground(p,0);
-            guiFillRectangle(p, pos.x, pos.y, size.w, size.h);
+            guiFillRectangle(p, (Rect){pos, size});
         }
         guiDrawText(p, text, len, (Point){ pos.x+5,pos.y+5/*+ extents.height*/},0xffffffff);
 //    }
@@ -44,7 +44,7 @@ void guiLabelWithBackground(Painter* p, char *text, int len, bool back) {
 }
 
 void guiLabelZTWithBackground(Painter* p, char *text, bool back) {
-    guiLabelWithBackground(p, text, strlen(text), back);
+    guiLabelWithBackground(p, text, (int)strlen(text), back);
 }
 void guiLabel(Painter* p, char *text, int len)
 {
@@ -65,8 +65,7 @@ bool guiButton(Painter *p, char* text, int len)
 //        XSetBackground(xdisplay, l->gc, 0xffff5555);
 //        fprintf(stderr, "filling rect (%d, %d) %dx%d\n", pos.x, pos.y,
 //                size.width, size.height);
-        guiFillRectangle(p, pos.x, pos.y,
-                       size.w, size.h);
+        guiFillRectangle(p, (Rect){pos, size});
         guiSetForeground(p, 0xffffffff);
         guiDrawText(p, text, len, (Point) {
             pos.x + 5 /*+ overallLog.x*/, pos.y + 5 /*+ overallLog.height*/
@@ -88,13 +87,13 @@ bool guiButton(Painter *p, char* text, int len)
     return res;
 }
 bool guiButtonZT(Painter* p, char *text) {
-    return guiButton(p, text, strlen(text));
+    return guiButton(p, text, (int)strlen(text));
 }
 bool guiToolButton(Painter *p, Image *i) {
     return guiToolButtonEx(p,i,false, NULL);
 }
-bool guiToolButtonEx(Painter *p, Image *i, bool active, Size* desirableSize) {
-    if(!guiSameWindow(p)) return false;
+bool guiToolButtonEx(Painter *p, Image *i, bool active, const Size* desirableSize) {
+    if(!guiSameWindow(p, true)) return false;
     volatile Point pos = getPos();
 
     Size iSize = imageSize(i);
@@ -106,7 +105,7 @@ bool guiToolButtonEx(Painter *p, Image *i, bool active, Size* desirableSize) {
     }
 //    if(!(event.type == MotionEvent)) {
             guiSetForeground(p, active?0xffff9999:0xff000000);
-            guiFillRectangle(p, pos.x, pos.y, size.w, size.h);
+            guiFillRectangle(p, (Rect){pos, size});
         guiDrawImageEx(p, i, pos.x, pos.y, &size);
 //    }
     bool res = false;
@@ -214,16 +213,14 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
     keyPressBreak:
 
     {
-        guiSetForeground(p, 0xff333333);
-        guiFillRectangle(p, pos.x, pos.y,
-                       size.w, size.h);
+        guiSetForeground(p, 0xff333363);
+        guiFillRectangle(p, (Rect){pos, size});
         if(context.active == id) {
             guiSetForeground(p, 0xff0000ff);
         } else {
             guiSetForeground(p, 0xffffffff);
         }
-        guiDrawRectangle(p, pos.x, pos.y,
-                       size.w, size.h);
+        guiDrawRectangle(p, (Rect){pos, size});
         guiSetForeground(p, 0xffffffff);
         if(context.active == id) {
             guiDrawText(p, context.editedString, context.editedStringLen,
@@ -298,18 +295,19 @@ const char* __attribute__((weak))  appName = "gui application";
 #endif
 
 
-Size guiGetSize()
+Rect guiGetRect()
 {
-    return rootWindowSize;
+    return rootWindowRect;
 }
 
 void guiRedraw()
 {
     redraw = true;
 }
-
+#ifdef __GNUC__
 #pragma GCC push_options
 #pragma GCC optimize ("Ofast")
+#endif
 void guiFillRawRectangle(RawPicture *p, int x, int y, int w, int h, char r, char g, char b)
 {
     assert(w >= 0);
@@ -317,10 +315,10 @@ void guiFillRawRectangle(RawPicture *p, int x, int y, int w, int h, char r, char
     assert(x >= 0);
     assert(y >= 0);
     if(x+w >= (int)(p->w)) {
-        w = p->w - x - 1;
+        w = (int)(p->w) - x - 1;
     }
     if(y+h+1 >= (int)(p->h)) {
-        h = p->h - y - 2;
+        h = (int)(p->h) - y - 2;
     }
     int color = rgb(r,g,b);
     for(int i = y; i <= y + h+1; i++) {
@@ -329,12 +327,13 @@ void guiFillRawRectangle(RawPicture *p, int x, int y, int w, int h, char r, char
         }
     }
 }
+#ifdef __GNUC__
 #pragma GCC pop_options
+#endif
 
-
-Size guiDrawTextZT(Painter *p, char *text, Point pos, i32 color)
+Size guiDrawTextZT(Painter *p, const char *text, Point pos, i32 color)
 {
-    return guiDrawText(p, text, strlen(text), pos, color);
+    return guiDrawText(p, text, (int)strlen(text), pos, color);
 }
 
 bool guiCheckBox(Painter *p, bool *v)
@@ -360,19 +359,18 @@ bool guiCheckBox(Painter *p, bool *v)
                   pos.x+size.w, pos.y+size.h);
     } else {
         guiSetForeground(p, 0xff000000);
-        guiFillRectangle(p, pos.x, pos.y,
-                       size.w, size.h);
+        guiFillRectangle(p, (Rect){pos, size});
     }
     guiSetForeground(p, 0xffffffff);
-    guiDrawRectangle(p, pos.x, pos.y,
-                   size.w, size.h);
+    guiDrawRectangle(p, (Rect){pos, size});
     feedbackSize(size);
     return res;
 }
 #define SCROLLBAR_SPEED 0.1
 // very nonfinal api
 // maybe ints instead of doubles
-_Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double sliderFraction) {
+/*
+_Bool guiHorizontalScrollBar(Painter *p, int length, double* value, double sliderFraction) {
     Point pos = getPos();
     Size size = {length, SCROLLBAR_THICKNESS};
     _Bool res = false;
@@ -400,15 +398,10 @@ _Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double 
     Rect slider = {pos.x + SCROLLBAR_THICKNESS + *value*internalLength,
                     pos.y,
                    sliderFraction*internalLength, SCROLLBAR_THICKNESS};
-//    if(event.type != MotionEvent || context.active == value) {
-        guiSetForeground(p, 0xff111111);
-        guiFillRectangle(p, internalStart, pos.y, internalLength, SCROLLBAR_THICKNESS);
-        guiSetForeground(p, 0xff555555);
-        guiFillRectangle(p, slider.x, slider.y, slider.width, slider.height);
-//    }
-
-
-
+    guiSetForeground(p, 0xff111111);
+    guiFillRectangle(p, internalStart, pos.y, internalLength, SCROLLBAR_THICKNESS);
+    guiSetForeground(p, 0xff555555);
+    guiFillRectangle(p, slider.x, slider.y, slider.w, slider.h);
     static Point dragStart = {-1, -1};
     static int dragStartPos = -1;
     if(event.type == ButtonPress) {
@@ -418,7 +411,7 @@ _Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double 
             res = true;
             *value = MAX(*value - sliderFraction, 0);
         }
-        Rect rightPart = {slider.x+slider.width,
+        Rect rightPart = {slider.x+slider.w,
                            pos.y,
                           pos.x+length-SCROLLBAR_THICKNESS, SCROLLBAR_THICKNESS};
         if(pointInRect(mpos, rightPart)) {
@@ -430,14 +423,12 @@ _Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double 
             dragStart = mpos;
             dragStartPos = slider.x;
         }
-//        if(context.active == value && !pointInRect(mpos, (Rect){pos, size})) {
-//            context.active = NULL;
-//        }
     }
     if(context.active == value &&
             event.type == MotionEvent) {
         Point mpos = (Point){ GET_X(event), GET_Y(event)};
-        *value = (dragStartPos + mpos.x-dragStart.x)*1.0/internalLength;
+        *value = (dragStartPos + mpos.x-dragStart.x-
+                  internalStart)*1.0/internalLength;
         *value = CLAMP(*value, 0, maxValue);
         res = true;
     }
@@ -451,6 +442,178 @@ _Bool guiScrollBar(Painter *p/*, Point pos*/, int length, double* value, double 
     feedbackSize(size);
     return res;
 }
+_Bool guiVerticalScrollBar(Painter *p, int length, double* value, double sliderFraction) {
+    Point pos = getPos();
+    Size size = {SCROLLBAR_THICKNESS, length};
+    _Bool res = false;
+    STATIC(IMAGE*, up, loadImageZT(GUI_RESOURCE_PATH, "upButton.png"));
+    STATIC(IMAGE*, down, loadImageZT(GUI_RESOURCE_PATH, "downButton.png"));
+    double maxValue = 1-sliderFraction;
+    Size buttonSize = {SCROLLBAR_THICKNESS, SCROLLBAR_THICKNESS};
+    {
+        ExactLayout l = makeExactLayout(pos);
+        pushLayout(&l);
+        if(guiToolButtonEx(p, up, false, &buttonSize)) {
+            res = true;
+            *value = MAX(*value - SCROLLBAR_SPEED, 0);
+        }
+        l.exactPos = (Point){ pos.x, pos.y+length-SCROLLBAR_THICKNESS };
+        if(guiToolButtonEx(p, down, false, &buttonSize)) {
+            res = true;
+            *value = MIN(*value + SCROLLBAR_SPEED, maxValue);
+        }
+        popLayout();
+    }
+    int internalStart = pos.y+SCROLLBAR_THICKNESS;
+    int internalLength = length - 2*SCROLLBAR_THICKNESS;
+
+    Rect slider = {pos.x,
+                    pos.y + SCROLLBAR_THICKNESS + *value*internalLength,
+                   SCROLLBAR_THICKNESS, sliderFraction*internalLength};
+    guiSetForeground(p, 0xff111111);
+    guiFillRectangle(p, pos.x, internalStart, SCROLLBAR_THICKNESS, internalLength);
+    guiSetForeground(p, 0xff555555);
+    guiFillRectangle(p, slider.x, slider.y, slider.w, slider.h);
+    static Point dragStart = {-1, -1};
+    static int dragStartPos = -1;
+    if(event.type == ButtonPress) {
+        Point mpos = (Point){ GET_X(event), GET_Y(event)};
+        Rect topPart = {pos.x, internalStart, SCROLLBAR_THICKNESS, slider.x-internalStart};
+        if(pointInRect(mpos, topPart)) {
+            res = true;
+            *value = MAX(*value - sliderFraction, 0);
+        }
+        Rect bottomPart = {slider.x,
+                           pos.y+slider.h,
+                          SCROLLBAR_THICKNESS,
+                          pos.y+length-SCROLLBAR_THICKNESS};
+        if(pointInRect(mpos, bottomPart)) {
+            res = true;
+            *value = MIN(*value + sliderFraction, maxValue);
+        }
+        if(pointInRect(mpos, slider)) {
+            context.active = value;
+            dragStart = mpos;
+            dragStartPos = slider.y;
+        }
+    }
+    if(context.active == value &&
+            event.type == MotionEvent) {
+        Point mpos = (Point){ GET_X(event), GET_Y(event)};
+        *value = (dragStartPos + mpos.y-dragStart.y-
+                  internalStart)*1.0/internalLength;
+        *value = CLAMP(*value, 0, maxValue);
+        res = true;
+    }
+    if(context.active == value &&
+            event.type == ButtonRelease) {
+        context.active = NULL;
+        dragStart = (Point){-1,-1};
+        dragStartPos = -1;
+    }
+
+    feedbackSize(size);
+    return res;
+}*/
+_Bool guiScrollBar(Painter *p, int length, double* value, double sliderFraction, bool ho) {
+    typedef struct AbstractPoint {
+        int across;
+        int along;
+    }AbstractPoint;
+    typedef struct AbstractSize {
+        int across;
+        int along;
+    }AbstractSize;
+    typedef struct AbstractRect {
+        AbstractPoint pos;
+        AbstractSize size;
+    }AbstractRect;
+#define toConcreteRect(a) ho?(Rect){{a.pos.along, a.pos.across}, {a.size.along, a.size.across}}:(Rect){{a.pos.across, a.pos.along}, {a.size.across, a.size.along}}
+#define toConcreteSize(a) ho?(Size){a.along, a.across}:(Size){a.across, a.along}
+#define toAbstractPoint(a) ho?(AbstractPoint){a.y, a.x}:(AbstractPoint){a.x, a.y}
+#define toConcretePoint(a) ho?(Point){a.along, a.across}:(Point){a.across, a.along}
+    Point pos = getPos();
+    AbstractPoint apos = toAbstractPoint(pos);
+    AbstractSize size = {SCROLLBAR_THICKNESS, length};
+    _Bool res = false;
+    STATIC(IMAGE*, up, loadImageZT(GUI_RESOURCE_PATH, "upButton.png"));
+    STATIC(IMAGE*, down, loadImageZT(GUI_RESOURCE_PATH, "downButton.png"));
+    STATIC(IMAGE*, left, loadImageZT(GUI_RESOURCE_PATH, "leftButton.png"));
+    STATIC(IMAGE*, right, loadImageZT(GUI_RESOURCE_PATH, "rightButton.png"));
+    Image* less = ho?left:up;
+    Image* more = ho?right:down;
+    double maxValue = 1-sliderFraction;
+    Size buttonSize = {SCROLLBAR_THICKNESS, SCROLLBAR_THICKNESS};
+    {
+        ExactLayout l = makeExactLayout(pos);
+        pushLayout(&l);
+
+        if(guiToolButtonEx(p, less, false, &buttonSize)) {
+            res = true;
+            *value = MAX(*value - SCROLLBAR_SPEED, 0);
+        }
+        AbstractPoint moreButtonPos = { apos.across, apos.along+length-SCROLLBAR_THICKNESS };
+        l.exactPos = toConcretePoint(moreButtonPos);
+        if(guiToolButtonEx(p, more, false, &buttonSize)) {
+            res = true;
+            *value = MIN(*value + SCROLLBAR_SPEED, maxValue);
+        }
+        popLayout();
+    }
+    int internalStart = apos.along+SCROLLBAR_THICKNESS;
+    int internalLength = length - 2*SCROLLBAR_THICKNESS;
+//    double maxValue = MAX(*value + sliderFraction, 1);
+    double sliderEarly = MAX(*value,0);
+    AbstractRect slider = {apos.across,
+                    (int)(apos.along + SCROLLBAR_THICKNESS + sliderEarly*internalLength),
+                   SCROLLBAR_THICKNESS, (int)(MIN(sliderFraction, 1-sliderEarly)*internalLength)};
+    guiSetForeground(p, 0xff111111);
+    AbstractRect internalRect = {apos.across, internalStart, SCROLLBAR_THICKNESS, internalLength};
+    guiFillRectangle(p, toConcreteRect(internalRect));
+    guiSetForeground(p, 0xff555555);
+    guiFillRectangle(p, toConcreteRect(slider));
+    static AbstractPoint dragStart = {-1, -1};
+    static int dragStartPos = -1;
+    if(event.type == ButtonPress) {
+        Point mpos = (Point){ GET_X(event), GET_Y(event)};
+        AbstractRect lessPart = {apos.across, internalStart, SCROLLBAR_THICKNESS, slider.pos.along-internalStart};
+        if(pointInRect(mpos, toConcreteRect(lessPart))) {
+            res = true;
+            *value = MAX(*value - sliderFraction, 0);
+        }
+        AbstractRect morePart = {slider.pos.across,
+                           slider.pos.along+slider.size.along,
+                          SCROLLBAR_THICKNESS,
+                          apos.along+length-SCROLLBAR_THICKNESS-(slider.pos.along+slider.size.along)};
+        if(pointInRect(mpos, toConcreteRect(morePart))) {
+            res = true;
+            *value = MIN(*value + sliderFraction, maxValue);
+        }
+        if(pointInRect(mpos, toConcreteRect(slider))) {
+            context.active = value;
+            dragStart = toAbstractPoint(mpos);
+            dragStartPos = slider.pos.along;
+        }
+    }
+    if(context.active == value &&
+            event.type == MotionEvent) {
+        AbstractPoint ampos = toAbstractPoint(((Point){ GET_X(event), GET_Y(event)}));
+        *value = (dragStartPos + ampos.along-dragStart.along-
+                  internalStart)*1.0/internalLength;
+        *value = CLAMP(*value, 0, maxValue);
+        res = true;
+    }
+    if(context.active == value &&
+            event.type == ButtonRelease) {
+        context.active = NULL;
+        dragStart = (AbstractPoint){-1,-1};
+        dragStartPos = -1;
+    }
+
+    feedbackSize(toConcreteSize(size));
+    return res;
+}
+
 bool standardResourseToolButton(Painter*p, char* name) {
     static struct {
         char* key;
@@ -458,7 +621,7 @@ bool standardResourseToolButton(Painter*p, char* name) {
     } *map = NULL;
 
     IMAGE* image;
-    int index = shgeti(map, name);
+    int index = (int)shgeti(map, name);
     if(index == -1) {
         image = loadImageZT(GUI_RESOURCE_PATH, name);
         shput(map, name, image);
@@ -477,7 +640,7 @@ bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size* desira
     } *map = NULL;
 
     IMAGE* image;
-    int index = shgeti(map, name);
+    int index = (int)shgeti(map, name);
 //    fprintf(stderr, "%d, index", index);
     if(index == -1) {
         image = loadLocalImageZT(name);
@@ -490,6 +653,11 @@ bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size* desira
 
 _Bool pointInRect(Point p, Rect r)
 {
-    return p.x >= r.x && p.x <= r.x+(i32)r.width &&
-            p.y >= r.y && p.y <= r.y +(i32)r.height;
+    return p.x >= r.x && p.x <= r.x+(i32)r.w &&
+            p.y >= r.y && p.y <= r.y +(i32)r.h;
+}
+
+
+void guiStartDrawing() {
+    guiStartDrawingEx(true);
 }
