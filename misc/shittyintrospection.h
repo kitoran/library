@@ -103,11 +103,11 @@ static const char* nameFromValue(const struct IntrospectedEnumerator* values, in
 #define NAME_FROM_VALUE(type, value) \
     nameFromValue(type ## Enumerators, ELEMS(type ## Enumerators), value)
 #ifdef _INC_STDLIB
-static i64 valueFromName(const struct IntrospectedEnumerator* values, int size, char const* name, bool* succ) {
-    *succ = false;
+static i64 valueFromName(const struct IntrospectedEnumerator* values, int size, char const* name, _Bool* succ) {
+    *succ = 0;
     for(int i = 0; i < size; i++) {
         if(!strcmp(values[i].name, name)) {
-            *succ = true;
+            *succ = 1;
             return values[i].enumerator;
         }
     }
