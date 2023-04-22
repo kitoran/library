@@ -3,9 +3,9 @@
 #include "gui.h"
 
 typedef struct LayoutVT {
-    Point (*getPos)(struct LayoutVT*);
-    void (*feedbackSize)(struct LayoutVT*,Size);
-    Size (*availableSize)(struct LayoutVT*); // unused
+    Point (*getPos)(struct LayoutVT**);
+    void (*feedbackSize)(struct LayoutVT**,Size);
+    Size (*availableSize)(struct LayoutVT**); // unused
     // probably better to use a
     // a function like Size (*getSize)(struct LayoutVT*,
      //                         enum sizePolicy policy);
@@ -13,7 +13,7 @@ typedef struct LayoutVT {
 
 void pushLayout(void*);
 void popLayout();
-void* topLayout();
+LayoutVT** topLayout();
 
 
 

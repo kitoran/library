@@ -17,6 +17,7 @@ typedef struct Grid {
 } Grid;
 
 Grid allocateGrid(int cols, int rows, int spacing);
+void clearGrid(Grid* g);
 void setCurrentGridPos(int row, int column);
 void gridNextRow();
 void gridNextColumn();

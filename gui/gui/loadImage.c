@@ -1,10 +1,10 @@
 ﻿#include "stb_image.h"
+#include "gui.h"
 #include "loadImage.h"
 #include "newFile.h"
 #include "stb_image_write.h"
 #ifdef SDL
 #include <SDL.h>
-extern SDL_Renderer* rootWindowRenderer;
 #else
 #include <X11/Xlib.h>
 #endif
@@ -54,14 +54,16 @@ IMAGE *loadImageZT(char* startOfPath, const char *path) {
     }
 #ifdef SDL
     SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormatFrom(data, x, y, 24, x*4, SDL_PIXELFORMAT_ARGB32);
+    SDL_bool res = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
+    SDL_Texture * texture = SDL_CreateTextureFromSurface(rootWindowPainter.gc, surface);
+    fprintf(stderr, "SDL_SetHint returned %d", res);
+    SDL_FreeSurface(surface);
 #else
     XImage *res = XCreateImage(xdisplay, DefaultVisual(xdisplay, DefaultScreen(xdisplay)), 24,
                      ZPixmap, 0, data, x, y, 32,
                              x*4);
 #endif
-    SDL_Texture * texture = SDL_CreateTextureFromSurface(rootWindowRenderer, surface);
     //IMG_LoadTexture_RW../?
-    SDL_FreeSurface(surface);
     return texture;
 }
 #ifdef __GNUC__

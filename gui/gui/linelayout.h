@@ -1,31 +1,19 @@
 #ifndef LINELAYOUT_H
 #define LINELAYOUT_H
-/*#include "gui.h"
+
+#include "gui.h"
+#include "layoutStack.h"
 
 typedef struct LineLayout {
-    int * sizesAlong;
-    int sizesAlongLen;
-    int sizeAcross;
+    const LayoutVT* vt;
+    bool horizontal;
+    int filled;
+    int across;
     int spacing;
-    int currentCell;
-    Point start;
+    Point pos;
 } LineLayout;
 
-LineLayout allocateLineLayout(int cols, int rows, int spacing);
-void pushLayout(Grid*);
-void popLayout();
-Grid* topLayout();
-Point gridGetPos();
-void gridFeedbackSize(Size s);
-void setCurrentGridPos(int row, int column);
-void gridNextRow();
-void gridNextColumn();
-int getGridHeight(Grid *g);
-inline int getGridBottom(Grid *g) {
-//    DEBUG_PRINT(g->gridStart.y + getGridHeight(g), "%d");
-  return g->gridStart.y + getGridHeight(g);
-}
-int getGridWidth(Grid *g);
-Size getGridSize(Grid *g);
-*/
+LineLayout makeHorizontalLayout(int spacing);
+LineLayout makeVerticalLayout(int spacing);
+Size getLineSize(LineLayout *ll);
 #endif // LINELAYOUT_H

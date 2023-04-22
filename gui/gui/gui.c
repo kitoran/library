@@ -12,33 +12,34 @@
 
 Point getPos() {
     LayoutVT** layout = (topLayout());
-    return (*layout)->getPos((LayoutVT*)layout);
+    return (*layout)->getPos(layout);
 }
 void feedbackSize(Size s) {
     LayoutVT** layout = topLayout();
-    (*layout)->feedbackSize((LayoutVT*)layout, s);
+    (*layout)->feedbackSize(layout, s);
 }
 Size availableSize() {
     LayoutVT** layout = topLayout();
-    return (*layout)->availableSize((LayoutVT*)layout);
+    return (*layout)->availableSize(layout);
 }
-
 
 // TODO cache textures or surfaces
 void guiLabelWithBackground(Painter* p, char *text, int len, bool back) {
     Point pos = getPos();
-    Size extents = guiTextExtents(text, len);
 
-
-    Size size = {extents.w + 10,
-                extents.h + 10};
-
+Size extents;
+Size size ;
 //    if(!(event.type == MotionEvent)) {
-        if(back) {
-            guiSetForeground(p,0);
-            guiFillRectangle(p, (Rect){pos, size});
-        }
-        guiDrawText(p, text, len, (Point){ pos.x+5,pos.y+5/*+ extents.height*/},0xffffffff);
+    if(back) {
+        extents = guiTextExtents(text, len);
+        size = (Size){extents.w + 10,
+                    extents.h + 10};
+        guiSetForeground(p,0);
+        guiFillRectangle(p, (Rect){pos, size});
+    }
+    extents = guiDrawText(p, text, len, (Point){ pos.x+5,pos.y+5/*+ extents.height*/},0xffffffff);
+    size = (Size){extents.w + 10,
+                extents.h + 10};
 //    }
     feedbackSize(size);
 }

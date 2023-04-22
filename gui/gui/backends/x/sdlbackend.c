@@ -21,7 +21,6 @@ _Atomic bool cursor;
 TTF_Font* font;
 TTF_Font* font_outline;
 SDL_Window* rootWindow = 0;
-SDL_Renderer* rootWindowRenderer;
 
 void guiShowWindow(GuiWindow w) {
     SDL_ShowWindow(w);
@@ -40,7 +39,7 @@ void guiMoveResizeWindow
 }
 #include <windows.h>
 GuiWindow guiMakeHiddenPopupWindow() {
-    GuiWindow listWindow = SDL_CreateWindow("", 0, 0,
+    GuiWindow listWindow = SDL_CreateWindow("", 100, 100,
                                          700, 700, SDL_WINDOW_HIDDEN |SDL_WINDOW_BORDERLESS |
                                             SDL_WINDOW_SKIP_TASKBAR | /*SDL_WINDOW_UTILITY |*/
                                             SDL_WINDOW_POPUP_MENU /*| SDL_WINDOW_TOOLTIP*/);
@@ -52,6 +51,13 @@ GuiWindow guiMakeHiddenPopupWindow() {
     SetWindowLong(hwnd, GWL_EXSTYLE , WS_EX_TOOLWINDOW);
 //    SetWindowLong(hwnd, GWL_STYLE ,  );
     return listWindow;
+}
+GuiWindow guiMakeWindow() {
+    GuiWindow window = SDL_CreateWindow("", 100, 100,
+                                         300, 400,
+                                            SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_RESIZABLE
+                                            );
+    return window;
 }
 
 void makeMenu() {
@@ -70,11 +76,12 @@ void makeMenu() {
     SetMenu(hwnd, hMenuBar);
 }
 
-
+static SDL_Renderer** renderers = NULL;
 Painter guiMakePainter(GuiWindow w) {
     Painter p = {SDL_CreateRenderer(w, -1,0),
                  SDL_GetWindowSurface(w),
                  w};
+    arrpush(renderers,p.gc);
     return p;
 }
 
@@ -156,7 +163,6 @@ typedef struct TextureHashEntry {
 /**** TODO: функции работы с текстом копируют строку на стек потому что SDL_TTF работает только с 0-терминированными строками
  * хотя ему приходится каждый раз вызывать strlen
  *
- * еще надо сделать хеш для текстур
  */
 Size guiDrawText(Painter* p, const char *text, int len, Point pos,
                  i32 color) {
@@ -299,27 +305,18 @@ void  guiStartDrawingEx(bool show) {
        (show?SDL_WINDOW_SHOWN:SDL_WINDOW_HIDDEN) | SDL_WINDOW_RESIZABLE
    );
 
-    rootWindowRenderer = SDL_CreateRenderer(rootWindow, -1,  0);
 //    SDL_Rect f = {0,0,windowWidth, windowHeight};
 //    SDL_RenderFillRect(renderer, &f);
-    rootWindowPainter = (Painter){
-                             rootWindowRenderer, SDL_GetWindowSurface(rootWindow), rootWindow };
-    // Create a "Graphics Context"
-//    GC gc = XCreateGC(xdisplay , rootWindow, 0, NULL);
-//    xFontStruct = XLoadQueryFont(xdisplay, "fixed");
-    // Tell the GC we draw using the white color
-//    XSetForeground(xdisplay , gc, whiteColor);
-
-//    XFlush(xdisplay);
-
+    rootWindowPainter = guiMakePainter(rootWindow);
 }
 int RedrawEvent;
 int TimerEvent;
 
 void guiNextEvent(/*bool dontblock*/)
 {
-    SDL_RenderPresent(rootWindowPainter.gc);
-    SDL_RenderPresent(dropDownPainter.gc);
+    FOR_STB_ARRAY(SDL_Renderer**, renderer, renderers) {
+        SDL_RenderPresent(*renderer);
+    }
 //    if(redraw) {
 //        redraw = false;
 //        event.type = Expose;

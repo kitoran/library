@@ -91,8 +91,8 @@ void gridFeedbackSize(Grid* g, Size s) {
     }
 }
 
-LayoutVT gridVT = {
-    (Point (*)(struct LayoutVT*))gridGetPos,
+static const LayoutVT gridVT = {
+    /*(Point (*)(struct LayoutVT*))*/gridGetPos,
     (void (*)(struct LayoutVT*,Size))gridFeedbackSize,
     NULL
 };
@@ -104,4 +104,10 @@ Grid allocateGrid(int cols, int rows, int spacing) {
     memset(r.gridWidths, 0, 4*cols);
     memset(r.gridHeights, 0, 4*rows);
     return r;
+}
+void clearGrid(Grid* g){
+    memset(g->gridWidths, 0, 4*g->gridWidthsLen);
+    memset(g->gridHeights, 0, 4*g->gridHeightsLen);
+    g->currentX = 0;
+    g->currentY = 0;
 }

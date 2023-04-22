@@ -1,10 +1,10 @@
 #if(guiPers) {
 include($$PWD/../settingsS/settings/settings.pri)
-include($$PWD/../loadImage/loadImage.pri)
 DEFINES += GUI_RESOURCE_PATH=\\\"$$PWD/gui/icons\\\"
 SOURCES +=  \
     $$PWD/gui/layoutStack.c \
     $$PWD/gui/linelayout.c \
+    $$PWD/gui/loadImage.c \
     $$PWD/gui/persistent.c \
     $$PWD/gui/draw.c \
     $$PWD/gui/toolbuttongroup.c \
@@ -23,6 +23,7 @@ HEADERS +=  \
     $$PWD/gui/combobox.h \
     $$PWD/gui/layoutStack.h \
     $$PWD/gui/linelayout.h \
+    $$PWD/gui/loadImage.h \
     $$PWD/gui/persistent.h \
     $$PWD/gui/guiglobals.h \
     $$PWD/gui/draw.h \
@@ -51,3 +52,6 @@ X {
 CONFIG += link_pkgconfig
 PKGCONFIG += x11 xrender xft
 }
+include($$PWD/../stb/stb_image.pri)
+include($$PWD/../misc/misc.pri)
+include($$PWD/../stb/stb_image_write.pri)

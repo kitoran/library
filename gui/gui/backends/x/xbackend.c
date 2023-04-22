@@ -41,7 +41,7 @@ void guiMoveResizwWindow(GuiWindow win, int x,int y,int w,int h) {
 }
 
 GuiWindow guiMakeWindow() {
-    Window listWindow = XCreateSimpleWindow(xdisplay, rootWindow, 0, 0,
+    Window listWindow = XCreateSimpleWindow(xdisplay, rootWindow, 100, 100,
                                          700, 700, 0,
                                                WhitePixel(xdisplay,
                                                           DefaultScreen(xdisplay)),

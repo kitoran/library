@@ -1,28 +1,28 @@
 #include "layoutStack.h"
 #include <stdio.h>
 #include <stdlib.h>
-Point defaultGetPos(LayoutVT* v) {
+Point defaultGetPos(LayoutVT** v) {
     fprintf(stderr, "getPos not set");
     abort();
 }
-void defaultFeedbackSize(LayoutVT* v,Size s) {
+void defaultFeedbackSize(LayoutVT** v,Size s) {
     (void)s;
 }
-Size defaultAvailableSize(LayoutVT* v) {
+Size defaultAvailableSize(LayoutVT** v) {
     fprintf(stderr, "availableSize not set");
     abort();
 }
-LayoutVT defaultLayout = {
+static LayoutVT defaultLayoutVt = {
     defaultGetPos,
     defaultFeedbackSize,
     defaultAvailableSize
 };
-
-void* stack[10] = {&defaultLayout};
+static LayoutVT* defaultLayout = &defaultLayoutVt;
+LayoutVT** stack[10] = {&defaultLayout};
 size_t stackTop = 1;
 
 
-Point exactPos(struct LayoutVT* lv) {
+Point exactPos(struct LayoutVT** lv) {
 //    (void)lv;
     ExactLayout* l = (ExactLayout* )lv;
     return l->exactPos;
@@ -36,7 +36,7 @@ LayoutVT exactLayoutVT = {
 
 
 
-void *topLayout()
+LayoutVT **topLayout()
 {
     ASSERT(stackTop > 0, "stack is empty, trying to get top")
     return stack[stackTop-1];
@@ -44,7 +44,7 @@ void *topLayout()
 
 void pushLayout(void *g)
 {
-    ASSERT(stackTop < ELEMS(stack), "pushing grid, stackTop is %lld, elems is %llud, "
+    ASSERT(stackTop < ELEMS(stack), "pushing layout, stackTop is %lld, elems is %llud, "
            "cond is %d, !cond id %d", stackTop, ELEMS(stack),
            stackTop < ELEMS(stack), !(stackTop < ELEMS(stack)))
     stack[stackTop] = g;

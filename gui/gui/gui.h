@@ -31,8 +31,8 @@ typedef struct Point {
     i32 y;
 } Point;
 typedef struct Size {
-    u32 w;
-    u32 h;
+    i32 w;
+    i32 h;
 } Size;
 typedef struct Rect {
     union {
@@ -45,8 +45,8 @@ typedef struct Rect {
     union {
         Size size;
         struct {
-            u32 w;
-            u32 h;
+            i32 w;
+            i32 h;
         };
     };
 } Rect;
