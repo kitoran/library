@@ -13,7 +13,7 @@ typedef struct LayoutVT {
 
 void pushLayout(void*);
 void popLayout();
-LayoutVT** topLayout();
+void* topLayout();
 
 
 

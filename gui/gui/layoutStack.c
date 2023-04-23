@@ -36,7 +36,7 @@ LayoutVT exactLayoutVT = {
 
 
 
-LayoutVT **topLayout()
+void* topLayout()
 {
     ASSERT(stackTop > 0, "stack is empty, trying to get top")
     return stack[stackTop-1];
