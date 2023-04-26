@@ -10,7 +10,7 @@ typedef struct Size Size;
 #include <SDL_events.h>
 #include <SDL_surface.h>
 #include <SDL_video.h>
-#include <SDL_render.h>
+//#include <SDL_render.h>
 //union SDL_Event;//struct SDL_Event;
 typedef SDL_Event Event;
 typedef SDL_Window* GuiWindow;
@@ -39,13 +39,13 @@ typedef enum GuiKeySym {
     backspace = SDLK_BACKSPACE,
     deleteKey = SDLK_DELETE
 } GuiKeySym;
-typedef SDL_Texture Image;
+typedef SDL_Surface Image;
 //#define IMAGE_WIDTH w
 //#define IMAGE_HEIGHT h
 Size imageSize(Image* a); 
 typedef struct Painter {
-    SDL_Renderer* gc;
-    SDL_Surface* drawable;
+//    SDL_Renderer* gc;
+//    SDL_Surface* drawable;
     SDL_Window* window;
 } Painter;
 #else
@@ -94,7 +94,7 @@ Painter guiMakePainter(GuiWindow w);
 void guiMoveResizeWindow(GuiWindow win, int x, int y, int w, int h);
 void guiShowWindow(GuiWindow w);
 void guiHideWindow(GuiWindow w);
-void guiClearWindow(GuiWindow w);
+void guiClearWindow(Painter* p);
 void guiGetTextPart(char* text, int wid, int* resWid, int* resCount);
 struct Rect;
 void guiSetClipRect(Painter* p, struct Rect r);
@@ -103,6 +103,8 @@ void guiMoveWindow(GuiWindow window, int x, int y);
 GuiWindow guiMakeHiddenPopupWindow();
 void guiRaiseWindow(GuiWindow w);
 void makeMenu();
+int guiFontHeight();
+void guiRedrawFromOtherThread(GuiWindow window);
 #ifdef __cplusplus
 }
 #endif

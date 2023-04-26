@@ -10,6 +10,6 @@ struct context context = {
     0,
     0
 };
-Rect rootWindowRect = {300, 20, 700, 700};
+//Rect rootWindowRect = {300, 20, 700, 700};
 
 Painter rootWindowPainter;

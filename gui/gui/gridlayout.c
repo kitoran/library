@@ -93,7 +93,7 @@ void gridFeedbackSize(Grid* g, Size s) {
 
 static const LayoutVT gridVT = {
     /*(Point (*)(struct LayoutVT*))*/gridGetPos,
-    (void (*)(struct LayoutVT*,Size))gridFeedbackSize,
+    (void (*)(struct LayoutVT**,Size))gridFeedbackSize,
     NULL
 };
 

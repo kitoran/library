@@ -11,13 +11,14 @@
 
 
 #include <SDL.h>
+#include <Windows.h>
 //#include <X11/Xlib.h>
 //#define XK_LATIN1
 //#define XK_MISCELLANY
 //#include <X11/keysymdef.h>
 //#include <sys/select.h>
 //#include <stdlib.h>
-Painter dropDownPainter = {0,0,0};
+Painter dropDownPainter = {/*0,0,*/0};
 GuiWindow listWindow = 0;
 bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
 {
@@ -62,7 +63,7 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
 
 //    }
 
-    if(guiSameWindow(p, true)) {
+    if(true || guiSameWindow(p, true)) {
         if(event.type ==ButtonRelease) {
             int mx = GET_X(event);
             int my = GET_Y(event);
@@ -71,15 +72,11 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
     //            if(event.type == ButtonRelease) {
     //                res = true;
                     fprintf(stderr, "Mapping windown");
-                    Rect rect = guiGetRect();
+                    Point rect; SDL_GetWindowPosition(p->window, &rect.x, &rect.y);//guiGetRect();
                     guiMoveResizeWindow(listWindow, rect.x+pos.x, rect.y + pos.y + (int)size.h,
                                       size.w+1/*непонятно почему здесь окно получается на пиксель тоньше*/, (size.h)*numberOfElements);
-//                    XSetBackground(xdisplay, &gc, 0xffffffff);
-                    guiSetForeground(&dropDownPainter, 0xffffffff);
-                    guiDrawRectangle(&dropDownPainter, (Rect){5,5,30,30});
                     guiShowWindow(listWindow);
                     guiRaiseWindow(listWindow);
-    //            }
                     context.numberOfDropDownElements = numberOfElements;
                     context.sizeOfDropDownElements = size;
                     context.active = current;
@@ -111,7 +108,8 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
                       pos.x+overallLogMax.x+overallLogMax.w,
                          pos.y+5);
             if(context.active == current) {
-                guiClearWindow(listWindow);
+//                guiSetForeground(p, 0xffff5555);
+//                guiClearWindow(&dropDownPainter);
                 for(int i = 0; i <numberOfElements; i++) {
                     guiSetForeground(&dropDownPainter, 0xff333353);
                     guiFillRectangle(&dropDownPainter, (Rect){1, (i)*size.h+1,
@@ -135,6 +133,9 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
 }
 
 void proccessComboBox() {
+//    guiSetForeground(&dropDownPainter, 0xffff5555);
+//    guiClearWindow(&dropDownPainter);
+
     if(event.type == ButtonRelease) {
         int mx = GET_X(event);
         int my = GET_Y(event);

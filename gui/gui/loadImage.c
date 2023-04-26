@@ -55,16 +55,16 @@ IMAGE *loadImageZT(char* startOfPath, const char *path) {
 #ifdef SDL
     SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormatFrom(data, x, y, 24, x*4, SDL_PIXELFORMAT_ARGB32);
     SDL_bool res = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
-    SDL_Texture * texture = SDL_CreateTextureFromSurface(rootWindowPainter.gc, surface);
+//    SDL_Texture * texture = SDL_CreateTextureFromSurface(rootWindowPainter.gc, surface);
     fprintf(stderr, "SDL_SetHint returned %d", res);
-    SDL_FreeSurface(surface);
+//    SDL_FreeSurface(surface);
 #else
     XImage *res = XCreateImage(xdisplay, DefaultVisual(xdisplay, DefaultScreen(xdisplay)), 24,
                      ZPixmap, 0, data, x, y, 32,
                              x*4);
 #endif
     //IMG_LoadTexture_RW../?
-    return texture;
+    return surface;
 }
 #ifdef __GNUC__
 #pragma GCC pop_options

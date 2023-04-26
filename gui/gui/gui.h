@@ -101,7 +101,7 @@ void guiFillRawRectangle(RawPicture *p, int x, int y, int w, int h, char r, char
 void guiSetForeground(Painter*, unsigned long);
 //void guiDrawTextWithLen(Painter*, int, int, char*, unsigned long);
 void guiSetSize(u32, u32);
-Rect guiGetRect();
+//Rect guiGetRect();
 
 static const unsigned int GuiDarkMagenta = 0x880088;
 static inline unsigned int rgb(int r, int g, int b) {

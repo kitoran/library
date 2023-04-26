@@ -5,7 +5,7 @@
 
 struct Grid;
 typedef struct Grid {
-    LayoutVT* vt;
+    const LayoutVT* vt;
     int * gridWidths;
     int gridWidthsLen;
     int * gridHeights;

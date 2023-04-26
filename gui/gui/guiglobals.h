@@ -15,4 +15,4 @@ struct context {
 //    void (*commit)(void* data);
 };
 extern struct context context;
-extern Rect rootWindowRect;
+//extern Rect rootWindowRect;

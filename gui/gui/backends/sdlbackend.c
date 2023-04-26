@@ -14,7 +14,7 @@ extern char* appName;
 extern int xDepth;
 extern int maxDigitWidth, maxDigitHeight;
 extern _Bool  redraw;
-extern Rect rootWindowRect;
+//extern Rect rootWindowRect;
 Event event;
 _Atomic bool cursor;
 
@@ -37,19 +37,19 @@ void guiMoveResizeWindow
     SDL_SetWindowSize(win,w,h);//SDL_absMoveResizeWindow(xdisplay,
     SDL_SetWindowPosition(win,x,y);
 }
+static GuiWindow* windows= NULL;
 #include <windows.h>
 GuiWindow guiMakeHiddenPopupWindow() {
     GuiWindow listWindow = SDL_CreateWindow("", 100, 100,
-                                         700, 700, SDL_WINDOW_HIDDEN |SDL_WINDOW_BORDERLESS |
-                                            SDL_WINDOW_SKIP_TASKBAR | /*SDL_WINDOW_UTILITY |*/
-                                            SDL_WINDOW_POPUP_MENU /*| SDL_WINDOW_TOOLTIP*/);
-//    XSelectInput(xdisplay, listWindow, ButtonReleaseMask);
+                                         700, 700, SDL_WINDOW_HIDDEN | SDL_WINDOW_BORDERLESS |
+                                            SDL_WINDOW_SKIP_TASKBAR |
+                                            SDL_WINDOW_POPUP_MENU);
+    arrpush(windows, listWindow);
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
     SDL_GetWindowWMInfo(listWindow, &wmInfo);
     HWND hwnd = wmInfo.info.win.window;
     SetWindowLong(hwnd, GWL_EXSTYLE , WS_EX_TOOLWINDOW);
-//    SetWindowLong(hwnd, GWL_STYLE ,  );
     return listWindow;
 }
 GuiWindow guiMakeWindow() {
@@ -57,36 +57,51 @@ GuiWindow guiMakeWindow() {
                                          300, 400,
                                             SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_RESIZABLE
                                             );
+    arrpush(windows, window);
     return window;
 }
-
-void makeMenu() {
+enum {
+    COMMAND_IMPORT,
+    COMMAND_CONVERT,
+    COMMAND_REOPEN,
+};
+void makeMenu(GuiWindow window) {
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
-    SDL_GetWindowWMInfo(rootWindow, &wmInfo);
+    SDL_GetWindowWMInfo(window, &wmInfo);
     HWND hwnd = wmInfo.info.win.window;
 
-
-//    static HMENU hMenuBar;
     HMENU hMenuBar = CreateMenu();
-    HMENU hEncoding =  CreateMenu();
-    AppendMenuA(hMenuBar, MF_POPUP, (UINT_PTR)hEncoding, "Encoding");
-    AppendMenuA(hEncoding, MF_STRING, 0x453434, "2 semitones");
-//TODO: ask reaper about free ids
+    HMENU hFile = CreateMenu();
+    AppendMenuA(hMenuBar, MF_POPUP, (UINT_PTR)hFile, "File");
+    HMENU hEncoding = CreateMenu();
+    AppendMenuA(hFile, MF_POPUP, (UINT_PTR)hEncoding, "Midi encoding");
+    AppendMenuA(hEncoding, MF_STRING, COMMAND_REOPEN, "Reopen with different encoding...");
+    AppendMenuA(hEncoding, MF_STRING, COMMAND_CONVERT, "Convert different encoding...");
+    AppendMenuA(hFile, MF_STRING, COMMAND_IMPORT, "Import MIDI file...");
+
+
     SetMenu(hwnd, hMenuBar);
 }
 
-static SDL_Renderer** renderers = NULL;
+//static SDL_Renderer** renderers = NULL;
 Painter guiMakePainter(GuiWindow w) {
-    Painter p = {SDL_CreateRenderer(w, -1,0),
-                 SDL_GetWindowSurface(w),
+    Painter p = {//SDL_CreateRenderer(w, -1,0),
+//                 SDL_GetWindowSurface(w),
                  w};
-    arrpush(renderers,p.gc);
+//    arrpush(renderers,p.gc);
     return p;
+}
+
+int guiFontHeight() {
+    return TTF_FontHeight(font);
 }
 
 _Bool guiSameWindow(Painter *p, _Bool def) {
     u32 wid = SDL_GetWindowID(p->window);
+    if(event.type >= SDL_USEREVENT) {
+        return wid == event.user.windowID;
+    }
     switch(event.type) {
     case SDL_DROPBEGIN:
     case SDL_DROPCOMPLETE:
@@ -111,35 +126,42 @@ _Bool guiSameWindow(Painter *p, _Bool def) {
     }
 
 }
-
+static u32 foreground = 0;
 void guiDrawLine(Painter *a, int b, int c, int d, int e)
 {
-    SDL_RenderDrawLine(a->gc, b, c, d, e);
+    ASSERT(c==e || b==d, "this new backend can only draw vertical and horizontal lines");
+    SDL_Rect r = {b,c,MAX(d-b, 1),MAX(e-c, 1)};
+    SDL_FillRect(SDL_GetWindowSurface(a->window), &r, foreground);
 }
 
 void guiDrawRectangle(Painter *a, Rect r)
 {
 //    SDL_Rect r = {b,c,d,e};
-    SDL_RenderDrawRect(a->gc, (SDL_Rect*)(&r));
+    guiDrawLine(a, r.x, r.y, r.x, r.y+r.h);
+    guiDrawLine(a, r.x, r.y, r.x+r.w, r.y);
+    guiDrawLine(a, r.x+r.w-1, r.y, r.x+r.w-1, r.y+r.h);
+    guiDrawLine(a, r.x, r.y+r.h-1, r.x+r.w, r.y+r.h-1);
+//    SDL_FillRect(DrawRect(a->gc, (SDL_Rect*)(&r));
 }
 void guiFillRectangle(Painter *a, Rect gr)
 {
-//    SDL_Rect r = gr;
+    SDL_Rect r = {gr.x,gr.y,gr.w,gr.h};
 //    fprintf(stderr, "filling rect (%d, %d) %dx%d\n", b, c, d,e);
-    SDL_RenderFillRect(a->gc, (SDL_Rect*)(&gr));
+    SDL_FillRect(SDL_GetWindowSurface(a->window), &r, foreground);
 }
 
 void guiSetForeground(Painter *a, unsigned long b)
 {
-    SDL_SetRenderDrawColor(a->gc, (b >> 16) & 0xff,
-                           (b >> 8) & 0xff,
-            (b >> 0) & 0xff,
-            (b >> 24) & 0xff);
+    foreground = b;
+//    SDL_SetRenderDrawColor(a->gc, (b >> 16) & 0xff,
+//                           (b >> 8) & 0xff,
+//            (b >> 0) & 0xff,
+//            (b >> 24) & 0xff);
 }
 
 //void guiDrawTextWithLen(Painter *a, int b, int c, char *d, unsigned long e)
 //{
-//    Xutf8DrawString(xdisplay, a->drawable, xFontSet, a->gc, b, c, d, e);
+//    Xutf8DrawString(xdisplay, SDL_GetWindowSurface(a->window), xFontSet, a->gc, b, c, d, e);
 //}
 
 void guiSetSize(u32 w, u32 h)
@@ -151,14 +173,16 @@ void guiSetSize(u32 w, u32 h)
 //                      win,
 //                      x,y, h, w);
 //}
-void guiClearWindow(GuiWindow w) {
-    SDL_RenderClear(SDL_GetRenderer(w));
+void guiClearWindow(Painter* w) {
+    SDL_Rect fdfs = {10, 10, 100, 100};
+    SDL_FillRect(SDL_GetWindowSurface(w->window), NULL, foreground);
+//            RenderClear(SDL_GetRenderer(w));
 }
 #define OUTLINE_SIZE 1
 
 typedef struct TextureHashEntry {
     char* key;
-    SDL_Texture* value;
+    SDL_Surface* value;
 } TextureHashEntry;
 /**** TODO: функции работы с текстом копируют строку на стек потому что SDL_TTF работает только с 0-терминированными строками
  * хотя ему приходится каждый раз вызывать strlen
@@ -168,7 +192,7 @@ Size guiDrawText(Painter* p, const char *text, int len, Point pos,
                  i32 color) {
     static TextureHashEntry* textureHash = NULL;
 
-    SDL_Texture*textext = shget(textureHash, text);
+    SDL_Surface*textext = shget(textureHash, text);
     if(!textext) {
         static char copy[MAX_STRING_LEN];
         if (len >= MAX_STRING_LEN) ABORT("String too long");
@@ -183,23 +207,23 @@ Size guiDrawText(Painter* p, const char *text, int len, Point pos,
                 255};
         SDL_Color black = {0,0,0,255};
         SDL_Color white = {255,255,255,255};
-        SDL_Surface *bg_surface = TTF_RenderText_Blended(font_outline, copy, black);
+        textext = TTF_RenderText_Blended(font_outline, copy, black);
         SDL_Surface *surfaceMessage =
                 TTF_RenderUTF8_Blended(font, copy, white);
 
         SDL_Rect rrect = {OUTLINE_SIZE, OUTLINE_SIZE, surfaceMessage->w, surfaceMessage->h};
         SDL_SetSurfaceBlendMode(surfaceMessage, SDL_BLENDMODE_BLEND);
-        SDL_BlitSurface(surfaceMessage, NULL, bg_surface, &rrect);
+        SDL_BlitSurface(surfaceMessage, NULL, textext, &rrect);
 
-        textext = SDL_CreateTextureFromSurface
-                        (p->gc, bg_surface);
+//        textext = SDL_CreateTextureFromSurface
+//                        (p->gc, bg_surface);
 
         SDL_FreeSurface(surfaceMessage);
-        SDL_FreeSurface(bg_surface);
+//        SDL_FreeSurface(bg_surface);
         shput(textureHash, text, textext);
     }
 
-    Size res; SDL_QueryTexture(textext, NULL, NULL, &res.w, &res.h);
+    Size res = {textext->w, textext->h};//SDL_QueryTexture(textext, NULL, NULL, &res.w, &res.h);
     SDL_Rect rect = {
         pos.x,
         pos.y,
@@ -207,10 +231,10 @@ Size guiDrawText(Painter* p, const char *text, int len, Point pos,
         res.h
     };
 //    SDL_SetTextureBlendMode(textext, SDL_BLENDMODE_MOD);
-    SDL_RenderCopy(p->gc, textext, 0, &rect);
+    SDL_BlitSurface(textext, 0, SDL_GetWindowSurface(p->window), &rect);
 //    SDL_DestroyTexture(textext);
 //    SDL_FreeSurface(
-///    SDL_BlitSurface(surfaceMessage, 0, p->drawable, &rect);
+///    SDL_BlitSurface(surfaceMessage, 0, SDL_GetWindowSurface(p->window), &rect);
     return res;
 }
 Size guiTextExtents(/*Painter*p,*/const char*text, int len) {
@@ -233,13 +257,14 @@ void guiDrawImageEx(Painter* p, IMAGE* i, int x, int y, Size* size) {
 //    SDL_Texture* t = SDL_CreateTextureFromSurface(p->gc, i);
 //    Size si = IMAGE_SIZE(i);
     SDL_Rect rect = {x, y, size->w, size->h};
-    SDL_RenderCopy(p->gc, i, NULL, &rect);//
-//    SDL_BlitSurface(i, NULL, p->drawable, &rect);
+//    SDL_RenderCopy(p->gc, i, NULL, &rect);//
+//    SDL_BlitSurface(i, NULL, SDL_GetWindowSurface(p->window), &rect);
+    SDL_BlitScaled(i, NULL, SDL_GetWindowSurface(p->window), &rect);
 //    SDL_UpdateWindowSurface( rootWindow );
 }
 Size imageSize(Image* a) {
-    Size s;
-    SDL_QueryTexture(a, NULL, NULL, &s.w, &s.h);
+    Size s = {a->w, a->h};
+    //SDL_QueryTexture(a, NULL, NULL, &s.w, &s.h);
     return s;
 }
 
@@ -247,8 +272,8 @@ void guiDrawImage(Painter* p, IMAGE* i, int x, int y) {
 //    SDL_Texture* t = SDL_CreateTextureFromSurface(p->gc, i);
     Size size = imageSize(i);
     SDL_Rect rect = {x, y, size.w, size.h};
-    SDL_RenderCopy(p->gc, i, NULL, &rect);//
-//    SDL_BlitSurface(i, NULL, p->drawable, &rect);
+//    SDL_RenderCopy(p->gc, i, NULL, &rect);//
+    SDL_BlitSurface(i, NULL, SDL_GetWindowSurface(p->window), &rect);
 //    SDL_UpdateWindowSurface( rootWindow );
 }
 
@@ -300,28 +325,30 @@ void  guiStartDrawingEx(bool show) {
 
     rootWindow = SDL_CreateWindow(
        appName,
-       rootWindowRect.x, rootWindowRect.y, rootWindowRect.w, rootWindowRect.h,
+       100, 100, 400, 400,
 //       0, 0,
        (show?SDL_WINDOW_SHOWN:SDL_WINDOW_HIDDEN) | SDL_WINDOW_RESIZABLE
    );
+    arrpush(windows, rootWindow);
 
-//    SDL_Rect f = {0,0,windowWidth, windowHeight};
-//    SDL_RenderFillRect(renderer, &f);
     rootWindowPainter = guiMakePainter(rootWindow);
 }
 int RedrawEvent;
 int TimerEvent;
+void guiRedrawFromOtherThread(GuiWindow window) {
 
+    SDL_Event e = {.user =
+                   (SDL_UserEvent){ .type = RedrawEvent,
+                                    .windowID = SDL_GetWindowID(window),
+                                    .timestamp = SDL_GetTicks() }};
+    SDL_PushEvent(&e);
+}
 void guiNextEvent(/*bool dontblock*/)
 {
-    FOR_STB_ARRAY(SDL_Renderer**, renderer, renderers) {
-        SDL_RenderPresent(*renderer);
+    FOR_STB_ARRAY(GuiWindow*, window, windows) {
+        SDL_UpdateWindowSurface( *window );
+//        SDL_RenderPresent(*renderer);
     }
-//    if(redraw) {
-//        redraw = false;
-//        event.type = Expose;
-//        return;
-//    }
     int res ;
     if(/*dontblock*/false || redraw) {
         res = SDL_PollEvent(&event);
@@ -341,19 +368,6 @@ void guiNextEvent(/*bool dontblock*/)
         SDL_WaitEvent(&event);
     }
     if(event.type == SDL_WINDOWEVENT) {
-        if(event.window.event == SDL_WINDOWEVENT_RESIZED  || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-            fprintf(stderr,"resizeevent" );
-            rootWindowRect.w = event.window.data1;
-            rootWindowRect.h = event.window.data2;
-        }
-        if(event.window.event == SDL_WINDOWEVENT_MOVED) {
-            fprintf(stderr,"moveevent" );
-            rootWindowRect.x = event.window.data1;
-            rootWindowRect.y = event.window.data2;
-        }
-        if(event.window.event == SDL_WINDOWEVENT_CLOSE) {
-            return;
-        }
         if(event.window.event == SDL_WINDOWEVENT_LEAVE && SDL_GetMouseState(0,0) != 0) {
             SDL_CaptureMouse(SDL_TRUE);
         }
@@ -371,14 +385,15 @@ void guiNextEvent(/*bool dontblock*/)
 // doesn't stack rects for now
 void guiSetClipRect(Painter* p, Rect r) {
     SDL_Rect rect = {r.x, r.y, r.w, r.h};
-    SDL_RenderSetClipRect(p->gc, &rect);
+//    SDL_RenderSetClipRect(p->gc, &rect);
+    SDL_SetClipRect(SDL_GetWindowSurface(p->window), &rect);
 }
 
 void guiUnsetClipRect(Painter* p) {
-//    SDL_RenderPresent(p->drawable);
-    SDL_RenderSetClipRect(p->gc, NULL);
+//    SDL_RenderPresent(SDL_GetWindowSurface(p->window));
+//    SDL_RenderSetClipRect(p->gc, NULL);
+    SDL_SetClipRect(SDL_GetWindowSurface(p->window), NULL);
 }
 void guiMoveWindow(GuiWindow window, int x, int y) {
     SDL_SetWindowPosition(window, x, y);
-    rootWindowRect.pos = (Point){x,y};
 }

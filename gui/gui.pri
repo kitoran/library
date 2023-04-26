@@ -10,12 +10,13 @@ SOURCES +=  \
     $$PWD/gui/toolbuttongroup.c \
     $$PWD/gui/windowlayout.c
 SDL {
-    SOURCES += $$PWD/gui/backends/x/sdlbackend.c
+    SOURCES += \
+    $$PWD/gui/backends/sdlbackend.c
     DEFINES += SDL
 }
 X {
 SOURCES += \
-    $$PWD/gui/backends/x/xbackend.c
+    $$PWD/gui/backends/xbackend.c
     INCLUDEPATH += /usr/include/freetype2/
 }
 HEADERS +=  \

@@ -9,10 +9,20 @@
 #include <stdlib.h>
 
 #include <layoutStack.h>
-
+//enum {
+//    topRight,
+//    center
+//} alignment;
 Point getPos() {
     LayoutVT** layout = (topLayout());
-    return (*layout)->getPos(layout);
+    Point corner = (*layout)->getPos(layout);
+/*    if(alignment == topRight)*/ return corner;
+//    if(alignment == center) {
+//        Size allotted = (*layout)->minimumAllottedSize(layout);
+//        return (Point){corner.x + (allotted.w+s.w + 1)/2,
+//                    corner.y + (allotted.h+s.h + 1)/2};
+//    }
+//    ASSERT(false, "alignment not handled");
 }
 void feedbackSize(Size s) {
     LayoutVT** layout = topLayout();
@@ -156,6 +166,7 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
     Size size = {textWidth + 10,
                 maxDigitHeight + 10};
     Rect rect = {pos.x, pos.y, size.w, size.h};
+//    Rect innerRect = {pos.x+1, pos.y+1, size.w-2, size.h-2};
     guiSetClipRect(p, rect);
     bool res = false;
     
@@ -216,12 +227,6 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
     {
         guiSetForeground(p, 0xff333363);
         guiFillRectangle(p, (Rect){pos, size});
-        if(context.active == id) {
-            guiSetForeground(p, 0xff0000ff);
-        } else {
-            guiSetForeground(p, 0xffffffff);
-        }
-        guiDrawRectangle(p, (Rect){pos, size});
         guiSetForeground(p, 0xffffffff);
         if(context.active == id) {
             guiDrawText(p, context.editedString, context.editedStringLen,
@@ -240,6 +245,12 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
                       pos.x + 5 + overallInk.w, pos.y + 5 + maxDigitHeight);
 
         }
+        if(context.active == id) {
+            guiSetForeground(p, 0xff0000ff);
+        } else {
+            guiSetForeground(p, 0xffffffff);
+        }
+        guiDrawRectangle(p, (Rect){pos, size});
     }
     if(event.type == ButtonPress || event.type == ButtonRelease) {
         int mx = GET_X(event);
@@ -295,12 +306,6 @@ extern const char* appName;
 const char* __attribute__((weak))  appName = "gui application";
 #endif
 
-
-Rect guiGetRect()
-{
-    return rootWindowRect;
-}
-
 void guiRedraw()
 {
     redraw = true;
@@ -341,29 +346,33 @@ bool guiCheckBox(Painter *p, bool *v)
 {
     Point pos = getPos();
     Size size = {10,
-                 10};
+                 guiFontHeight() + 10};
+    Size boxSize = {10,
+                    10};
+    Rect boxRect = {
+        .x = pos.x,
+        .y = pos.y + (size.h-boxSize.h+1)/2,
+        .size = boxSize
+    };
     bool res = false;
     if(event.type == ButtonPress) {
         int mx = GET_X(event);
         int my = GET_Y(event);
-        if(mx >= pos.x && mx <= pos.x + (int)size.w &&
-            my >= pos.y && my <= pos.y + (int)size.h) {
+        if(pointInRect((Point){mx, my}, boxRect)) {
             *v = !*v;
             res = true;
         }
     }
 
     if(*v) {
-        guiDrawLine(p, pos.x, pos.y+size.h,
-                  pos.x+size.w, pos.y);
-        guiDrawLine(p, pos.x, pos.y,
-                  pos.x+size.w, pos.y+size.h);
+        STATIC(Image*, mark, loadImageZT(GUI_RESOURCE_PATH, "check.png"));
+        guiDrawImage(p, mark, boxRect.x, boxRect.y);
     } else {
         guiSetForeground(p, 0xff000000);
-        guiFillRectangle(p, (Rect){pos, size});
+        guiFillRectangle(p, boxRect);
+        guiSetForeground(p, 0xffffffff);
+        guiDrawRectangle(p, boxRect);
     }
-    guiSetForeground(p, 0xffffffff);
-    guiDrawRectangle(p, (Rect){pos, size});
     feedbackSize(size);
     return res;
 }
