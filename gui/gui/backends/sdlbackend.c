@@ -73,13 +73,15 @@ void makeMenu(GuiWindow window) {
 
     HMENU hMenuBar = CreateMenu();
     HMENU hFile = CreateMenu();
-    AppendMenuA(hMenuBar, MF_POPUP, (UINT_PTR)hFile, "File");
+    AppendMenuA(hMenuBar, MF_POPUP, (UINT_PTR)hFile, "&File");
     HMENU hEncoding = CreateMenu();
     AppendMenuA(hFile, MF_POPUP, (UINT_PTR)hEncoding, "Midi encoding");
     AppendMenuA(hEncoding, MF_STRING, COMMAND_REOPEN, "Reopen with different encoding...");
-    AppendMenuA(hEncoding, MF_STRING, COMMAND_CONVERT, "Convert different encoding...");
+    AppendMenuA(hEncoding, MF_STRING, COMMAND_CONVERT, "Convert to different encoding...");
     AppendMenuA(hFile, MF_STRING, COMMAND_IMPORT, "Import MIDI file...");
 
+    HMENU hEdit = CreateMenu();
+    AppendMenuA(hMenuBar, MF_POPUP, (UINT_PTR)hEdit, "&Edit");
 
     SetMenu(hwnd, hMenuBar);
 }
@@ -99,7 +101,7 @@ int guiFontHeight() {
 
 _Bool guiSameWindow(Painter *p, _Bool def) {
     u32 wid = SDL_GetWindowID(p->window);
-    if(event.type >= SDL_USEREVENT) {
+    if(event.type == RedrawEvent) {
         return wid == event.user.windowID;
     }
     switch(event.type) {
@@ -117,11 +119,19 @@ _Bool guiSameWindow(Painter *p, _Bool def) {
         return wid == event.text.windowID;
     case SDL_TEXTEDITING:
         return wid == event.edit.windowID;
+    case SDL_TEXTEDITING_EXT:
+        return wid == event.editExt.windowID;
     case SDL_MOUSEMOTION:
         return wid == event.motion.windowID;
     case SDL_MOUSEBUTTONUP:
     case SDL_MOUSEBUTTONDOWN:
-        return wid == event.edit.windowID;
+        return wid == event.button.windowID;
+    case SDL_MOUSEWHEEL:
+        return wid == event.wheel.windowID;
+    case SDL_FINGERDOWN:
+    case SDL_FINGERUP:
+    case SDL_FINGERMOTION:
+        return wid == event.tfinger.windowID;
     default: return def;
     }
 
@@ -130,7 +140,7 @@ static u32 foreground = 0;
 void guiDrawLine(Painter *a, int b, int c, int d, int e)
 {
     ASSERT(c==e || b==d, "this new backend can only draw vertical and horizontal lines");
-    SDL_Rect r = {b,c,MAX(d-b, 1),MAX(e-c, 1)};
+    SDL_Rect r = {MIN(d,b),MIN(c,e),MAX(abs(d-b), 1),MAX(abs(e-c), 1)};
     SDL_FillRect(SDL_GetWindowSurface(a->window), &r, foreground);
 }
 

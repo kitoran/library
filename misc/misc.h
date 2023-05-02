@@ -26,9 +26,14 @@ typedef short int i16;
 #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
 #define ASSERT(a, msg, ...) if(!(a)) { \
-    fprintf(stderr, "%s: " msg, __PRETTY_FUNCTION__, ##__VA_ARGS__); \
+    fprintf(stderr, "%s: " msg "\n", __PRETTY_FUNCTION__, ##__VA_ARGS__); \
     abort(); \
 }
+#define QUICK_ASSERT(a) if(!(a)) { \
+    fprintf(stderr, "%s: assertion \"%s\" failed\n", __PRETTY_FUNCTION__, #a); \
+    abort(); \
+}
+
 #define ABORT(message) { fprintf(stderr, "%s %s:%d\n function %s", message, __FILE__, __LINE__, __func__); abort(); }
 //#define DEFER_MERGE(a,b) a##b
 //#define DEFER_VARNAME(a) DEFER_MERGE(defer_scopevar_, a)

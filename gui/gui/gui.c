@@ -223,6 +223,33 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
         }
     }
     keyPressBreak:
+    context.editedString[context.editedStringLen] = 0; // TODO: this is a hack
+    if(event.type == ButtonPress || event.type == ButtonRelease) {
+        int mx = GET_X(event);
+        int my = GET_Y(event);
+        if(mx >= pos.x && mx <= pos.x + (int)size.w &&
+            my >= pos.y && my <= pos.y + (int)size.h) {
+            if(context.active != id) {
+                context.editedStringLen = chosesnprintf(symbols, id, context.editedString);
+            }
+            context.active = id;
+
+            int newPosPx, newPos;
+            int partWidth = mx-(pos.x+5);
+            guiGetTextPart(context.editedString, partWidth, &newPosPx, &newPos);
+            int biggerPosPx = guiTextExtents(context.editedString, newPos+1).w;
+            if(biggerPosPx - partWidth < partWidth - newPosPx) newPos++;
+
+//            int newPos = (mx - pos.x - 5)/maxDigitWidth;
+            DEBUG_PRINT(partWidth, "%d");
+            DEBUG_PRINT(newPosPx, "%d");
+            DEBUG_PRINT(biggerPosPx, "%d");
+            DEBUG_PRINT(newPos, "%d");
+            context.pos = MIN(MAX(newPos, 0), context.editedStringLen);
+        } else if(context.active == id) {
+            commit(&res);
+        }
+    }
 
     {
         guiSetForeground(p, 0xff333363);
@@ -252,32 +279,7 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
         }
         guiDrawRectangle(p, (Rect){pos, size});
     }
-    if(event.type == ButtonPress || event.type == ButtonRelease) {
-        int mx = GET_X(event);
-        int my = GET_Y(event);
-        if(mx >= pos.x && mx <= pos.x + (int)size.w &&
-            my >= pos.y && my <= pos.y + (int)size.h) {
-            if(context.active != id) {
-                context.editedStringLen = chosesnprintf(symbols, id, context.editedString);
-            }
-            context.active = id;
 
-            int newPosPx, newPos;
-            int partWidth = mx-(pos.x+5);
-            guiGetTextPart(context.editedString, partWidth, &newPosPx, &newPos);
-            int biggerPosPx = guiTextExtents(context.editedString, newPos+1).w;
-            if(biggerPosPx - partWidth < partWidth - newPosPx) newPos++;
-
-//            int newPos = (mx - pos.x - 5)/maxDigitWidth;
-            DEBUG_PRINT(partWidth, "%d");
-            DEBUG_PRINT(newPosPx, "%d");
-            DEBUG_PRINT(biggerPosPx, "%d");
-            DEBUG_PRINT(newPos, "%d");
-            context.pos = MIN(MAX(newPos, 0), context.editedStringLen);
-        } else if(context.active == id) {
-            commit(&res);
-        }
-    }
     if(event.type == TimerEvent) {
         cursor = !cursor;
     }
