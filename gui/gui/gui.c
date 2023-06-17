@@ -131,7 +131,7 @@ bool guiToolButtonEx(Painter *p, char* imagePath, bool activatable, bool active,
     }
     Size imageSizeResult = (Size){size.h-margins*2, size.w-margins*2};
 //    if(!(event.type == MotionEvent)) {
-            guiSetForeground(p, 0xffff9999);
+            guiSetForeground(p, 0xffffffff);
          if(active)   guiFillRectangle(p, (Rect){pos, size});
         guiDrawImageEx(p, image, pos.x+margins, pos.y+margins, &imageSizeResult);
 //    }

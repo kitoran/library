@@ -208,7 +208,7 @@ Size guiDrawText(Painter* p, const char *text, int len, Point pos,
 //        if (len >= MAX_STRING_LEN) ABORT("String too long");
         memcpy(copy, text, len);
         copy[len] = 0;
-//        if (copy[0] == '\0') return (Size) { 0, 0 };
+        if (copy[0] == '\0') return (Size) { 0, 0 };
 //        (void)len;
 //        SDL_Color sdlcolor = {
 //                (color >> 16)&0xff,
