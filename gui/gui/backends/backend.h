@@ -27,10 +27,10 @@ extern int RedrawEvent;
 
 #define GET_X(a) ((a).type == SDL_MOUSEMOTION?(a).motion.x:\
                   ((a).type == SDL_MOUSEBUTTONUP || (a).type == SDL_MOUSEBUTTONDOWN)?(a).button.x:\
-                  (a).type == SDL_MOUSEWHEEL?(a).wheel.x:(abort(), 0))
+                  (a).type == SDL_MOUSEWHEEL?(a).wheel.x:(myAbort("GET_X"), 0))
 #define GET_Y(a) ((a).type == SDL_MOUSEMOTION?(a).motion.y:\
 ((a).type == SDL_MOUSEBUTTONUP || (a).type == SDL_MOUSEBUTTONDOWN)?(a).button.y:\
-(a).type == SDL_MOUSEWHEEL?(a).wheel.y:(abort(), 0))
+(a).type == SDL_MOUSEWHEEL?(a).wheel.y:(myAbort("GET_Y"), 0))
 #define GET_KEYSYM(a) ((a).key.keysym.sym)
 typedef enum GuiKeySym {
     rightKey = SDLK_RIGHT,

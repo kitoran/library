@@ -30,7 +30,7 @@ static inline int hsvd2bgr(double h, double s, double v)
 //        out |= ((int)(in.v*255)) << 8;
 //        out |= ((int)(in.v*255)) << 8;
 //        out |= ((int)(in.v*255)) << 16;
-        abort();
+        myAbort("color saturation is negative");
         return out;
     }
     hh = in.h;

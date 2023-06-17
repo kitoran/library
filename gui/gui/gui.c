@@ -100,24 +100,40 @@ bool guiButton(Painter *p, char* text, int len)
 bool guiButtonZT(Painter* p, char *text) {
     return guiButton(p, text, (int)strlen(text));
 }
-bool guiToolButton(Painter *p, Image *i) {
-    return guiToolButtonEx(p,i,false, NULL);
+bool guiToolButton(Painter *p, char* imagePath) {
+    return guiToolButtonEx(p,imagePath,false, false, NULL, 0);
 }
-bool guiToolButtonEx(Painter *p, Image *i, bool active, const Size* desirableSize) {
+bool guiToolButtonEx(Painter *p, char* imagePath, bool activatable, bool active, const Size* desirableSizeFull, int margins) {
     if(!guiSameWindow(p, true)) return false;
+
+    static struct {
+        char* key;
+        IMAGE* value;
+    } *map = NULL;
+
+    IMAGE* image;
+    int index = (int)shgeti(map, imagePath);
+    if(index == -1) {
+        image = loadImageZT(imagePath);
+        shput(map, imagePath, image);
+    } else {
+        image = map[index].value;
+    }
+
     volatile Point pos = getPos();
 
-    Size iSize = imageSize(i);
+    Size iSize = imageSize(image);
     Size size;
-    if(desirableSize) {
-        size = *desirableSize;
+    if(desirableSizeFull) {
+        size = *desirableSizeFull;
     } else {
-        size = iSize;
+        size = (Size){iSize.h+margins*2, iSize.w+margins*2};
     }
+    Size imageSizeResult = (Size){size.h-margins*2, size.w-margins*2};
 //    if(!(event.type == MotionEvent)) {
-            guiSetForeground(p, active?0xffff9999:0xff000000);
-            guiFillRectangle(p, (Rect){pos, size});
-        guiDrawImageEx(p, i, pos.x, pos.y, &size);
+            guiSetForeground(p, 0xffff9999);
+         if(active)   guiFillRectangle(p, (Rect){pos, size});
+        guiDrawImageEx(p, image, pos.x+margins, pos.y+margins, &imageSizeResult);
 //    }
     bool res = false;
     if(event.type == ButtonRelease
@@ -135,7 +151,7 @@ bool guiToolButtonEx(Painter *p, Image *i, bool active, const Size* desirableSiz
     return res;
 }
 typedef enum PermittedSymbols {intSymbols, doubleSymbols, allSymbols} PermittedSymbols;
-void commit(bool* res)
+static void commit(bool* res)
 {
     context.active = 0;
     context.editedString[context.editedStringLen] = 0;
@@ -367,7 +383,7 @@ bool guiCheckBox(Painter *p, bool *v)
     }
 
     if(*v) {
-        STATIC(Image*, mark, loadImageZT(GUI_RESOURCE_PATH, "check.png"));
+        STATIC(Image*, mark, loadImageZT(GUI_RESOURCE_PATH "/check.png"));
         guiDrawImage(p, mark, boxRect.x, boxRect.y);
     } else {
         guiSetForeground(p, 0xff000000);
@@ -548,25 +564,30 @@ _Bool guiScrollBar(Painter *p, int length, double* value, double sliderFraction,
     AbstractPoint apos = toAbstractPoint(pos);
     AbstractSize size = {SCROLLBAR_THICKNESS, length};
     _Bool res = false;
-    STATIC(IMAGE*, up, loadImageZT(GUI_RESOURCE_PATH, "upButton.png"));
-    STATIC(IMAGE*, down, loadImageZT(GUI_RESOURCE_PATH, "downButton.png"));
-    STATIC(IMAGE*, left, loadImageZT(GUI_RESOURCE_PATH, "leftButton.png"));
-    STATIC(IMAGE*, right, loadImageZT(GUI_RESOURCE_PATH, "rightButton.png"));
-    Image* less = ho?left:up;
-    Image* more = ho?right:down;
+//    STATIC(IMAGE*, up, loadImageZT(GUI_RESOURCE_PATH, "upButton.png"));
+//    STATIC(IMAGE*, down, loadImageZT(GUI_RESOURCE_PATH, "downButton.png"));
+//    STATIC(IMAGE*, left, loadImageZT(GUI_RESOURCE_PATH, "leftButton.png"));
+//    STATIC(IMAGE*, right, loadImageZT(GUI_RESOURCE_PATH, "rightButton.png"));
+    char* up = GUI_RESOURCE_PATH "/upButton.png";
+    char* down = GUI_RESOURCE_PATH "/downButton.png";
+    char* left = GUI_RESOURCE_PATH "/leftButton.png";
+    char* right = GUI_RESOURCE_PATH "/rightButton.png";
+
+    char* less = ho?left:up;
+    char* more = ho?right:down;
     double maxValue = 1-sliderFraction;
     Size buttonSize = {SCROLLBAR_THICKNESS, SCROLLBAR_THICKNESS};
     {
         ExactLayout l = makeExactLayout(pos);
         pushLayout(&l);
 
-        if(guiToolButtonEx(p, less, false, &buttonSize)) {
+        if(guiToolButtonEx(p, less, false, false, &buttonSize, 0)) {
             res = true;
             *value = MAX(*value - SCROLLBAR_SPEED, 0);
         }
         AbstractPoint moreButtonPos = { apos.across, apos.along+length-SCROLLBAR_THICKNESS };
         l.exactPos = toConcretePoint(moreButtonPos);
-        if(guiToolButtonEx(p, more, false, &buttonSize)) {
+        if(guiToolButtonEx(p, more, false, false, &buttonSize, 0)) {
             res = true;
             *value = MIN(*value + SCROLLBAR_SPEED, maxValue);
         }
@@ -626,42 +647,42 @@ _Bool guiScrollBar(Painter *p, int length, double* value, double sliderFraction,
     return res;
 }
 
-bool standardResourseToolButton(Painter*p, char* name) {
-    static struct {
-        char* key;
-        IMAGE* value;
-    } *map = NULL;
+//bool standardResourseToolButton(Painter*p, char* name, bool active, Size* desirableSize) {
+//    static struct {
+//        char* key;
+//        IMAGE* value;
+//    } *map = NULL;
 
-    IMAGE* image;
-    int index = (int)shgeti(map, name);
-    if(index == -1) {
-        image = loadImageZT(GUI_RESOURCE_PATH, name);
-        shput(map, name, image);
-    } else {
-        image = map[index].value;
-    }
-    return guiToolButton(p, image);
-}
-bool resourseToolButton(Painter*p, const char* name) {
-   return resourseToolButtonEx(p, name, false, NULL);
-}
-bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size* desirableSize) {
-    static struct {
-        char* key;
-        IMAGE* value;
-    } *map = NULL;
+//    IMAGE* image;
+//    int index = (int)shgeti(map, name);
+//    if(index == -1) {
+//        image = loadImageZT(GUI_RESOURCE_PATH, name);
+//        shput(map, name, image);
+//    } else {
+//        image = map[index].value;
+//    }
+//    return guiToolButtonEx(p, image, active, desirableSize);
+//}
+//bool resourseToolButton(Painter*p, const char* name) {
+//   return resourseToolButtonEx(p, name, false, NULL);
+//}
+//bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size* desirableSize) {
+//    static struct {
+//        char* key;
+//        IMAGE* value;
+//    } *map = NULL;
 
-    IMAGE* image;
-    int index = (int)shgeti(map, name);
-//    fprintf(stderr, "%d, index", index);
-    if(index == -1) {
-        image = loadLocalImageZT(name);
-        shput(map, name, image);
-    } else {
-        image = map[index].value;
-    }
-    return guiToolButtonEx(p, image, active, desirableSize);
-}
+//    IMAGE* image;
+//    int index = (int)shgeti(map, name);
+////    fprintf(stderr, "%d, index", index);
+//    if(index == -1) {
+//        image = loadLocalImageZT(name);
+//        shput(map, name, image);
+//    } else {
+//        image = map[index].value;
+//    }
+//    return guiToolButtonEx(p, image, active, desirableSize);
+//}
 
 _Bool pointInRect(Point p, Rect r)
 {

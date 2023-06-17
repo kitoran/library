@@ -72,8 +72,8 @@ bool guiDoubleField(Painter*p, int digits, double* number);
 bool guiButton(Painter *p, char* text, int len);
 //bool guiButtonWindow(Painter *p, char* text, int len);
 bool guiCheckBox(Painter* p, bool* v);
-bool guiToolButton(Painter* p, IMAGE* i);
-bool guiToolButtonEx(Painter* p, IMAGE* i, bool active, const Size* desirableSize);
+bool guiToolButton(Painter *p, char* imagePath) ;
+bool guiToolButtonEx(Painter *p, char* imagePath, bool activatable, bool active, const Size* desirableSizeFull, int margins);
 Size guiDrawText(Painter* p, const char *text, int len,
                  Point pos, i32 color);
 Size guiDrawTextZT(Painter* p, const char *text, Point pos, i32 color);
@@ -89,9 +89,9 @@ bool guiButtonZT(Painter* p, char *text);
 //bool guiHorizontalScrollBar(Painter *p, int length, double* value, double sliderFraction);
 bool guiScrollBar(Painter *p, int length, double* value, double sliderFraction, bool horizontal);
 //bool guiSlider(Painter*, double* v, double start, double end);
-bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size *desirableSize);
-bool resourseToolButton(Painter*p, const char* name);
-bool standardResourseToolButton(Painter*p, char* name);
+//bool resourseToolButtonEx(Painter*p, const char* name, bool active, Size *desirableSize);
+//bool resourseToolButton(Painter*p, const char* name);
+//bool standardResourseToolButton(Painter*p, char* name, bool active, Size *desirableSize);
 
 void guiDrawLine(Painter*, int, int, int, int);
 void guiDrawRectangle(Painter*, Rect r);

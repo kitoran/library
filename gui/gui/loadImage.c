@@ -32,19 +32,19 @@
 extern Display * xdisplay;
 #endif
 // i use strncat completely wrong, completely wrong
-IMAGE *loadImageZT(char* startOfPath, const char *path) {
+IMAGE *loadImageZT(const char *imagePath) {
 
-    char imagePath[PATH_MAX] = {0};
-//    int r;
-//    r+=5;
-//#define stringify2(a) #a
-//#define stringify(a) stringify2(a)
-    strncat(imagePath, startOfPath, PATH_MAX-1);
-    strncat(imagePath, "/", PATH_MAX);
-    strncat(imagePath, path, PATH_MAX-1);
+//    char imagePath[PATH_MAX] = {0};
+////    int r;
+////    r+=5;
+////#define stringify2(a) #a
+////#define stringify(a) stringify2(a)
+//    strncat(imagePath, startOfPath, PATH_MAX-1);
+//    strncat(imagePath, "/", PATH_MAX);
+//    strncat(imagePath, path, PATH_MAX-1);
     int x,y, n;
     unsigned char *data = stbi_load(imagePath, &x, &y, &n, 4);
-    if(!data) abort();
+    ASSERT(data, "couldn't load image %s", imagePath);
     for(int i = 0; i < x*y; i++) {
         char temp;
 //        memcpy(temp, rcdata+i*4, 4);
@@ -92,6 +92,6 @@ void saveImageSomewhereNewWrongChannelsZT(XImage *image, char *name) {
 }
 #endif
 
-IMAGE *loadLocalImageZT(const char *path) {
-    return loadImageZT(MY_PATH, path);
-}
+//IMAGE *loadLocalImageZT(const char *path) {
+//    return loadImageZT(MY_PATH, path);
+//}

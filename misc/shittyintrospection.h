@@ -88,8 +88,8 @@ struct IntrospectedEnumerator {
     typedef enum Name {FOREACH2(FIRST, (__VA_ARGS__))} Name; \
     static const struct IntrospectedEnumerator Name ## Enumerators[NUM_ARGS(__VA_ARGS__)] = {FOREACH2(INTROSPECTED_SIMPLE_ENUMERATOR_COMMA_FIRST, (__VA_ARGS__))}; \
     static const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;
-#define INTROSPECT_ENUM_FILENAMES(Name, ...) \
-    char const*const Name ## Filenames [NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(STRINGIFY_COMMA_SECOND, (__VA_ARGS__))}; \
+#define INTROSPECT_ENUM_FILEPATHS(Name, DIRECTORY_PATH, ...) \
+    char const*const Name ## Filepaths [NUM_ARGS(__VA_ARGS__)/2] = {DIRECTORY_PATH FOREACH2(STRINGIFY_COMMA_SECOND, (__VA_ARGS__))}; \
     typedef enum Name {FOREACH2(FIRST, (__VA_ARGS__))} Name; \
     const Name Name ## Enumerators[NUM_ARGS(__VA_ARGS__)/2] = {FOREACH2(FIRST, (__VA_ARGS__))}; \
     const int Name ## Size = NUM_ARGS(__VA_ARGS__)/2;

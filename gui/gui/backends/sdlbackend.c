@@ -65,10 +65,10 @@ enum {
     COMMAND_CONVERT,
     COMMAND_REOPEN,
 };
-void makeMenu(GuiWindow window) {
+void makeMenu(/*GuiWindow window*/) {
     SDL_SysWMinfo wmInfo;
     SDL_VERSION(&wmInfo.version);
-    SDL_GetWindowWMInfo(window, &wmInfo);
+    SDL_GetWindowWMInfo(rootWindow, &wmInfo);
     HWND hwnd = wmInfo.info.win.window;
 
     HMENU hMenuBar = CreateMenu();
@@ -203,35 +203,48 @@ Size guiDrawText(Painter* p, const char *text, int len, Point pos,
     static TextureHashEntry* textureHash = NULL;
 
     SDL_Surface*textext = shget(textureHash, text);
-    if(!textext) {
+//    if(!textext) {
         static char copy[MAX_STRING_LEN];
-        if (len >= MAX_STRING_LEN) ABORT("String too long");
+//        if (len >= MAX_STRING_LEN) ABORT("String too long");
         memcpy(copy, text, len);
         copy[len] = 0;
-        if (copy[0] == '\0') return (Size) { 0, 0 };
-        (void)len;
-        SDL_Color sdlcolor = {
-                (color >> 16)&0xff,
-                (color >> 8)&0xff,
-                (color >> 0)&0xff,
-                255};
-        SDL_Color black = {0,0,0,255};
-        SDL_Color white = {255,255,255,255};
-        textext = TTF_RenderText_Blended(font_outline, copy, black);
-        SDL_Surface *surfaceMessage =
-                TTF_RenderUTF8_Blended(font, copy, white);
+//        if (copy[0] == '\0') return (Size) { 0, 0 };
+//        (void)len;
+//        SDL_Color sdlcolor = {
+//                (color >> 16)&0xff,
+//                (color >> 8)&0xff,
+//                (color >> 0)&0xff,
+//                255};
+//        SDL_Color black = {0,0,0,255};
+//        SDL_Color white = {255,255,255,255};
+//        textext = TTF_RenderText_Blended(font_outline, copy, black);
+//        SDL_Surface *surfaceMessage =
+//                TTF_RenderUTF8_Blended(font, copy, white);
 
-        SDL_Rect rrect = {OUTLINE_SIZE, OUTLINE_SIZE, surfaceMessage->w, surfaceMessage->h};
-        SDL_SetSurfaceBlendMode(surfaceMessage, SDL_BLENDMODE_BLEND);
-        SDL_BlitSurface(surfaceMessage, NULL, textext, &rrect);
+//        SDL_Rect rrect = {OUTLINE_SIZE, OUTLINE_SIZE, surfaceMessage->w, surfaceMessage->h};
+//        SDL_SetSurfaceBlendMode(surfaceMessage, SDL_BLENDMODE_BLEND);
+//        SDL_BlitSurface(surfaceMessage, NULL, textext, &rrect);
 
-//        textext = SDL_CreateTextureFromSurface
-//                        (p->gc, bg_surface);
+////        textext = SDL_CreateTextureFromSurface
+////                        (p->gc, bg_surface);
 
-        SDL_FreeSurface(surfaceMessage);
-//        SDL_FreeSurface(bg_surface);
-        shput(textureHash, text, textext);
-    }
+//        SDL_FreeSurface(surfaceMessage);
+////        SDL_FreeSurface(bg_surface);
+//        shput(textureHash, text, textext);
+//    }
+
+
+
+
+    SDL_Color sdlcolor = {
+            (color >> 16)&0xff,
+            (color >> 8)&0xff,
+            (color >> 0)&0xff,
+            255};
+    SDL_Color black = {0,0,0,255};
+    SDL_Color white = {255,255,255,255};
+    textext = TTF_RenderText_Blended(font, copy, white);
+
 
     Size res = {textext->w, textext->h};//SDL_QueryTexture(textext, NULL, NULL, &res.w, &res.h);
     SDL_Rect rect = {
@@ -241,6 +254,7 @@ Size guiDrawText(Painter* p, const char *text, int len, Point pos,
         res.h
     };
 //    SDL_SetTextureBlendMode(textext, SDL_BLENDMODE_MOD);
+
     SDL_BlitSurface(textext, 0, SDL_GetWindowSurface(p->window), &rect);
 //    SDL_DestroyTexture(textext);
 //    SDL_FreeSurface(
@@ -309,7 +323,7 @@ static Uint32 timerCallback(Uint32 interval, void *param) {
 void  guiStartDrawingEx(bool show) {
     if (SDL_Init( SDL_INIT_VIDEO ) < 0) {
         fprintf(stderr, "SDL could not initialize! SDL_Error: %s \n", SDL_GetError());
-        abort();
+        ABORT("");
     }
 //    int events = SDL_RegisterEvents(1);
 //    assert(events == SDL_USEREVENT);
@@ -355,6 +369,7 @@ void guiRedrawFromOtherThread(GuiWindow window) {
 }
 void guiNextEvent(/*bool dontblock*/)
 {
+    start:
     FOR_STB_ARRAY(GuiWindow*, window, windows) {
         SDL_UpdateWindowSurface( *window );
 //        SDL_RenderPresent(*renderer);
@@ -391,6 +406,20 @@ void guiNextEvent(/*bool dontblock*/)
         SDL_CaptureMouse(SDL_FALSE);
     }
 
+    if( event.type == SDL_MOUSEMOTION) {
+        static int lasttime = 0, savedxrel = 0, savedyrel = 0;
+        if(event.motion.timestamp - lasttime < 30) {
+            savedxrel += event.motion.xrel;
+            savedyrel += event.motion.yrel;
+            goto start;
+        } else {
+            event.motion.xrel += savedxrel;
+            event.motion.yrel += savedyrel;
+            savedxrel = 0;
+            savedyrel = 0;
+            lasttime = event.motion.timestamp;
+        }
+    }
 }
 // doesn't stack rects for now
 void guiSetClipRect(Painter* p, Rect r) {

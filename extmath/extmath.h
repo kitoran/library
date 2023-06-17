@@ -24,6 +24,7 @@ static inline unsigned int hash(unsigned int x) {
 }
 
 void convergents(double s, int* res, int n);
+#define REM(a, b) (((a)%(b) + (b))%(b))
 #ifdef __cplusplus
 }
 #endif

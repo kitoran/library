@@ -3,14 +3,14 @@
 #include <stdlib.h>
 Point defaultGetPos(LayoutVT** v) {
     fprintf(stderr, "getPos not set");
-    abort();
+    myAbort( "getPos not set");
 }
 void defaultFeedbackSize(LayoutVT** v,Size s) {
     (void)s;
 }
 Size defaultAvailableSize(LayoutVT** v) {
     fprintf(stderr, "availableSize not set");
-    abort();
+    myAbort("availableSize not set");
 }
 static LayoutVT defaultLayoutVt = {
     defaultGetPos,

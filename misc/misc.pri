@@ -1,5 +1,6 @@
 
 SOURCES *= \
+    $$PWD/misc.c \
     $$PWD/newFile.c \
     $$PWD/timeAFunction.c \
 

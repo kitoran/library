@@ -50,7 +50,7 @@ bool guiComboBoxZT(Painter *p, const char * const *elements, int* current)
     }
 
     overallLogMax.w += 10;//no fucking idea why
-    STATIC(IMAGE*, triangle, loadImageZT(GUI_RESOURCE_PATH, "triangle.png"));// = NULL;
+    STATIC(IMAGE*, triangle, loadImageZT(GUI_RESOURCE_PATH "/triangle.png"));// = NULL;
 //    if(triangle ==  NULL) {
 //        triangle = ;
 //    }
