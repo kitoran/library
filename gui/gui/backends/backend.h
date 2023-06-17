@@ -22,6 +22,7 @@ enum {
     KeyPress = SDL_KEYDOWN,
 //    TimerEvent = SDL_USEREVENT,
 };
+
 extern int TimerEvent;
 extern int RedrawEvent;
 

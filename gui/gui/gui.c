@@ -268,7 +268,7 @@ bool guiAbstractField(Painter *p, int textWidth, void* id, PermittedSymbols symb
     }
 
     {
-        guiSetForeground(p, 0xff333363);
+        guiSetForeground(p, 0xff535353);
         guiFillRectangle(p, (Rect){pos, size});
         guiSetForeground(p, 0xffffffff);
         if(context.active == id) {

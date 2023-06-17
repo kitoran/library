@@ -149,10 +149,10 @@ void proccessComboBox() {
             }
         }
         guiHideWindow(listWindow);
-
-        SDL_UserEvent userevent = {TimerEvent, SDL_GetTicks(), 0, 0, 0, 0};
-        SDL_Event event; event.user = userevent;
-        SDL_PushEvent(&event);
+        guiRedraw();
+//        SDL_UserEvent userevent = {TimerEvent, SDL_GetTicks(), 0, 0, 0, 0};
+//        SDL_Event event; event.user = userevent;
+//        SDL_PushEvent(&event);
     }
     if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
         guiHideWindow(listWindow);

@@ -32,6 +32,7 @@ void guiHideWindow(GuiWindow w) {
 void guiRaiseWindow(GuiWindow w) {
     SDL_RaiseWindow(w);
 }
+
 void guiMoveResizeWindow
 (GuiWindow win, int x,int y,int w,int h) {
     SDL_SetWindowSize(win,w,h);//SDL_absMoveResizeWindow(xdisplay,
@@ -49,7 +50,7 @@ GuiWindow guiMakeHiddenPopupWindow() {
     SDL_VERSION(&wmInfo.version);
     SDL_GetWindowWMInfo(listWindow, &wmInfo);
     HWND hwnd = wmInfo.info.win.window;
-    SetWindowLong(hwnd, GWL_EXSTYLE , WS_EX_TOOLWINDOW);
+    SetWindowLong(hwnd, GWL_EXSTYLE , WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE);
     return listWindow;
 }
 GuiWindow guiMakeWindow() {
@@ -60,31 +61,7 @@ GuiWindow guiMakeWindow() {
     arrpush(windows, window);
     return window;
 }
-enum {
-    COMMAND_IMPORT,
-    COMMAND_CONVERT,
-    COMMAND_REOPEN,
-};
-void makeMenu(/*GuiWindow window*/) {
-    SDL_SysWMinfo wmInfo;
-    SDL_VERSION(&wmInfo.version);
-    SDL_GetWindowWMInfo(rootWindow, &wmInfo);
-    HWND hwnd = wmInfo.info.win.window;
 
-    HMENU hMenuBar = CreateMenu();
-    HMENU hFile = CreateMenu();
-    AppendMenuA(hMenuBar, MF_POPUP, (UINT_PTR)hFile, "&File");
-    HMENU hEncoding = CreateMenu();
-    AppendMenuA(hFile, MF_POPUP, (UINT_PTR)hEncoding, "Midi encoding");
-    AppendMenuA(hEncoding, MF_STRING, COMMAND_REOPEN, "Reopen with different encoding...");
-    AppendMenuA(hEncoding, MF_STRING, COMMAND_CONVERT, "Convert to different encoding...");
-    AppendMenuA(hFile, MF_STRING, COMMAND_IMPORT, "Import MIDI file...");
-
-    HMENU hEdit = CreateMenu();
-    AppendMenuA(hMenuBar, MF_POPUP, (UINT_PTR)hEdit, "&Edit");
-
-    SetMenu(hwnd, hMenuBar);
-}
 
 //static SDL_Renderer** renderers = NULL;
 Painter guiMakePainter(GuiWindow w) {
@@ -335,7 +312,7 @@ void  guiStartDrawingEx(bool show) {
 #ifndef _MSC_VER
     font = TTF_OpenFont("/home/n/.fonts/comici.ttf", 24);
 #else
-    font = TTF_OpenFont("C:/src/calibri.ttf", 20);
+    font = TTF_OpenFont("C:/src/calibri.ttf", 17);
 
     font_outline = TTF_OpenFont("C:/src/calibri.ttf", 20);
     TTF_SetFontOutline(font_outline, OUTLINE_SIZE);
