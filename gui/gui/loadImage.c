@@ -11,6 +11,7 @@
 #ifndef _MSC_VER
 #include <linux/limits.h>
 #else
+#include <windows.h>
 #define PATH_MAX _MAX_PATH
 #endif
 
@@ -32,19 +33,8 @@
 extern Display * xdisplay;
 #endif
 // i use strncat completely wrong, completely wrong
-IMAGE *loadImageZT(const char *imagePath) {
-
-//    char imagePath[PATH_MAX] = {0};
-////    int r;
-////    r+=5;
-////#define stringify2(a) #a
-////#define stringify(a) stringify2(a)
-//    strncat(imagePath, startOfPath, PATH_MAX-1);
-//    strncat(imagePath, "/", PATH_MAX);
-//    strncat(imagePath, path, PATH_MAX-1);
-    int x,y, n;
-    unsigned char *data = stbi_load(imagePath, &x, &y, &n, 4);
-    ASSERT(data, "couldn't load image %s", imagePath);
+static IMAGE *common(int x, unsigned char *data, int y)
+{
     for(int i = 0; i < x*y; i++) {
         char temp;
 //        memcpy(temp, rcdata+i*4, 4);
@@ -57,12 +47,45 @@ IMAGE *loadImageZT(const char *imagePath) {
     SDL_bool res = SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
 //    SDL_Texture * texture = SDL_CreateTextureFromSurface(rootWindowPainter.gc, surface);
     fprintf(stderr, "SDL_SetHint returned %d", res);
-//    SDL_FreeSurface(surface);
+
+    return surface;
+}
+
+SDL_Surface * loadImageZT(const char *imagePath) {
+    int x,y, n;
+    unsigned char *data = stbi_load(imagePath, &x, &y, &n, 4);
+    ASSERT(data, "couldn't load image %s", imagePath);
+    SDL_Surface *surface = common(x, data, y);
 #else
     XImage *res = XCreateImage(xdisplay, DefaultVisual(xdisplay, DefaultScreen(xdisplay)), 24,
                      ZPixmap, 0, data, x, y, 32,
                              x*4);
 #endif
+    //IMG_LoadTexture_RW../?
+    return surface;
+}
+SDL_Surface * loadResourceImagePngZT(char* resourceName) {
+    HGLOBAL     res_handle = NULL;
+    HRSRC       res;
+    char *      res_data;
+    DWORD       res_size;
+    // NOTE: providing g_hInstance is important, NULL might not work
+    HMODULE hModule = NULL;
+    GetModuleHandleEx(
+      GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+      (LPCTSTR)loadResourceImagePngZT,
+      &hModule);
+    res = FindResourceA(hModule, resourceName, MAKEINTRESOURCEA(10));
+    res_handle = LoadResource(hModule, res);
+    res_data = (char*)LockResource(res_handle);
+    res_size = SizeofResource(hModule, res);
+
+
+    int x,y, n;
+    unsigned char *data = stbi_load_from_memory   (res_data,res_size, &x, &y, &n, 4);
+    ASSERT(data, "couldn't load image %s", resourceName);
+    SDL_Surface *surface = common(x, data, y);
+
     //IMG_LoadTexture_RW../?
     return surface;
 }

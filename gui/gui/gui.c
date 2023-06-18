@@ -103,7 +103,7 @@ bool guiButtonZT(Painter* p, char *text) {
 bool guiToolButton(Painter *p, char* imagePath) {
     return guiToolButtonEx(p,imagePath,false, false, NULL, 0);
 }
-bool guiToolButtonEx(Painter *p, char* imagePath, bool activatable, bool active, const Size* desirableSizeFull, int margins) {
+bool guiToolButtonEx(Painter *p, char* imageName, bool activatable, bool active, const Size* desirableSizeFull, int margins) {
     if(!guiSameWindow(p, true)) return false;
 
     static struct {
@@ -112,10 +112,10 @@ bool guiToolButtonEx(Painter *p, char* imagePath, bool activatable, bool active,
     } *map = NULL;
 
     IMAGE* image;
-    int index = (int)shgeti(map, imagePath);
+    int index = (int)shgeti(map, imageName);
     if(index == -1) {
-        image = loadImageZT(imagePath);
-        shput(map, imagePath, image);
+        image = loadResourceImagePngZT(imageName);
+        shput(map, imageName, image);
     } else {
         image = map[index].value;
     }
@@ -383,7 +383,7 @@ bool guiCheckBox(Painter *p, bool *v)
     }
 
     if(*v) {
-        STATIC(Image*, mark, loadImageZT(GUI_RESOURCE_PATH "/check.png"));
+        STATIC(Image*, mark, loadResourceImagePngZT("check"));
         guiDrawImage(p, mark, boxRect.x, boxRect.y);
     } else {
         guiSetForeground(p, 0xff000000);
@@ -568,10 +568,10 @@ _Bool guiScrollBar(Painter *p, int length, double* value, double sliderFraction,
 //    STATIC(IMAGE*, down, loadImageZT(GUI_RESOURCE_PATH, "downButton.png"));
 //    STATIC(IMAGE*, left, loadImageZT(GUI_RESOURCE_PATH, "leftButton.png"));
 //    STATIC(IMAGE*, right, loadImageZT(GUI_RESOURCE_PATH, "rightButton.png"));
-    char* up = GUI_RESOURCE_PATH "/upButton.png";
-    char* down = GUI_RESOURCE_PATH "/downButton.png";
-    char* left = GUI_RESOURCE_PATH "/leftButton.png";
-    char* right = GUI_RESOURCE_PATH "/rightButton.png";
+    char* up = "upButton.png";
+    char* down = "downButton.png";
+    char* left = "leftButton.png";
+    char* right = "rightButton.png";
 
     char* less = ho?left:up;
     char* more = ho?right:down;
